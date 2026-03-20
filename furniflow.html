@@ -3,312 +3,635 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FurniFlow - Business Management</title>
+    <title>FurniFlow - Business Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        body { background-color: #0F0F1A; color: #FFFFFF; font-family: system-ui, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0F0F1A; color: #FFFFFF; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1.25rem; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #E94560, #FF6B6B); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: transparent; border: 1px solid #3A3A5C; color: white; }
+        .btn-secondary:hover { border-color: #E94560; color: #E94560; }
+        .btn-success { background: linear-gradient(135deg, #00D9A5, #00B388); color: white; }
+        .input { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .input:focus { outline: none; border-color: #E94560; }
+        .select { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .textarea { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; resize: vertical; }
+        .badge { display: inline-block; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .badge-lead { background: #1E3A8A; color: #93C5FD; }
+        .badge-interested { background: #713F12; color: #FCD34D; }
+        .badge-converted { background: #14532D; color: #86EFAC; }
+        .badge-not-interested { background: #374151; color: #9CA3AF; }
+        .badge-lost { background: #7F1D1D; color: #FCA5A5; }
+        .badge-pending { background: #713F12; color: #FCD34D; }
+        .badge-assigned { background: #1E3A8A; color: #93C5FD; }
+        .badge-accepted { background: #4C1D95; color: #C4B5FD; }
+        .badge-in-progress { background: #9F5809; color: #FDE68A; }
+        .badge-completed { background: #14532D; color: #86EFAC; }
+        .badge-rescheduled { background: #BE185D; color: #FBCFE8; }
+        .badge-overdue { background: #DC2626; color: white; }
+        .sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 16rem; background: #1A1A2E; border-right: 1px solid #3A3A5C; display: flex; flex-direction: column; z-index: 40; }
+        .main-content { margin-left: 16rem; min-height: 100vh; }
+        .header { height: 4rem; background: #1A1A2E; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 0.5rem; color: #9CA3AF; text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover { background: #2A2A44; color: white; }
+        .nav-item.active { background: rgba(233, 69, 96, 0.1); color: #E94560; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { text-align: left; padding: 1rem; font-size: 0.875rem; font-weight: 500; color: #9CA3AF; border-bottom: 1px solid #3A3A5C; }
+        .table td { padding: 1rem; border-bottom: 1px solid #3A3A5C50; }
+        .table tr:hover { background: rgba(42, 42, 68, 0.3); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .modal { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 1rem; width: 100%; max-width: 32rem; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #3A3A5C; display: flex; gap: 0.75rem; justify-content: flex-end; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #9CA3AF; margin-bottom: 0.5rem; }
+        .avatar { width: 2rem; height: 2rem; border-radius: 50%; background: linear-gradient(135deg, #4DA8DA, #00D9A5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; }
+        .logo { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #E94560, #FF6B6B); display: flex; align-items: center; justify-content: center; }
+        .stat-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1.25rem; }
+        .job-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1.25rem; }
+        .job-card:hover { border-color: #E94560; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.875rem; cursor: pointer; }
+        .calendar-day:hover { background: #2A2A44; }
+        .calendar-day.today { background: #E94560; color: white; }
+        .calendar-day.has-event { background: rgba(233, 69, 96, 0.2); color: #E94560; }
+        .notification-dot { position: absolute; top: -0.25rem; right: -0.25rem; width: 1rem; height: 1rem; background: #E94560; border-radius: 50%; font-size: 0.625rem; display: flex; align-items: center; justify-content: center; }
+        @media (max-width: 768px) {
+            .sidebar { width: 4rem; }
+            .main-content { margin-left: 4rem; }
+            .sidebar-text { display: none; }
+            .hide-mobile { display: none; }
+        }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
     <div id="app"></div>
+
     <script>
-const store = {
-    users: [
-        { id: 'user-1', name: 'John Smith', role: 'admin', email: 'john@furniflow.com', active: true },
-        { id: 'user-2', name: 'Sarah Johnson', role: 'sales', email: 'sarah@furniflow.com', active: true },
-        { id: 'user-3', name: 'Mike Wilson', role: 'service_head', email: 'mike@furniflow.com', active: true },
-        { id: 'user-4', name: 'Tom Davis', role: 'field_staff', email: 'tom@furniflow.com', active: true },
-    ],
-    customers: [
-        { id: 'cust-1', name: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', inquiryDate: '2024-03-10', expectedClosingDate: '2024-03-25', status: 'lead', followUpDate: '2024-03-20', createdBy: 'user-2' },
-        { id: 'cust-2', name: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL', product: 'Dining Table - 6 Seater', inquiryDate: '2024-03-08', expectedClosingDate: '2024-03-22', status: 'prospect', followUpDate: '2024-03-19', createdBy: 'user-2' },
-        { id: 'cust-3', name: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', inquiryDate: '2024-03-05', expectedClosingDate: '2024-03-20', status: 'confirmed', followUpDate: null, createdBy: 'user-6' },
-        { id: 'cust-4', name: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', inquiryDate: '2024-03-01', expectedClosingDate: '2024-03-18', status: 'confirmed', followUpDate: null, createdBy: 'user-2' },
-        { id: 'cust-5', name: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL', product: 'Kids Bedroom Set', inquiryDate: '2024-02-28', expectedClosingDate: null, status: 'closed', followUpDate: null, createdBy: 'user-6' },
-    ],
-    jobs: [
-        { id: 'job-1', customerId: 'cust-3', customerName: 'David Thompson', customerPhone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: '2024-03-21', assignedTo: null },
-        { id: 'job-2', customerId: 'cust-4', customerName: 'Lisa Garcia', customerPhone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', type: 'installation', status: 'accepted', source: 'dispatch', scheduledDate: '2024-03-20', assignedTo: 'user-4' },
-        { id: 'job-3', customerId: 'cust-1', customerName: 'Robert Anderson', customerPhone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', type: 'service', status: 'completed', source: 'manual', scheduledDate: '2024-03-18', assignedTo: 'user-5' },
-    ],
-    currentUser: null
-};
+        const store = {
+            users: [
+                { id: 'u1', name: 'John Admin', role: 'admin', email: 'john@furniflow.com', phone: '+1 234 567 8901', active: true, password: 'admin123' },
+                { id: 'u2', name: 'Sarah Sales', role: 'sales', email: 'sarah@furniflow.com', phone: '+1 234 567 8902', active: true, password: 'sales123' },
+                { id: 'u3', name: 'Mike Service', role: 'service_head', email: 'mike@furniflow.com', phone: '+1 234 567 8903', active: true, password: 'service123' },
+                { id: 'u4', name: 'Tom Agent', role: 'field_agent', email: 'tom@furniflow.com', phone: '+1 234 567 8904', active: true, password: 'agent123' },
+                { id: 'u5', name: 'Emily Agent', role: 'field_agent', email: 'emily@furniflow.com', phone: '+1 234 567 8905', active: true, password: 'agent123' },
+            ],
+            leads: [
+                { id: 'l1', customerName: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', productCategory: 'Living Room', leadDate: '2024-03-15', nextFollowUp: '2024-03-20', remarks: 'Interested in leather sofa', status: 'interested', createdBy: 'u2' },
+                { id: 'l2', customerName: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL', productCategory: 'Dining', leadDate: '2024-03-18', nextFollowUp: '2024-03-22', remarks: 'Looking for 6-seater', status: 'lead', createdBy: 'u2' },
+                { id: 'l3', customerName: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', productCategory: 'Bedroom', leadDate: '2024-03-10', nextFollowUp: null, remarks: 'Converted - Payment received', status: 'converted', paymentConfirmed: true, dispatchDate: '2024-03-25', createdBy: 'u2' },
+                { id: 'l4', customerName: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', productCategory: 'Office', leadDate: '2024-03-12', nextFollowUp: '2024-03-19', remarks: 'Not interested in current pricing', status: 'not_interested', createdBy: 'u2' },
+                { id: 'l5', customerName: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL', productCategory: 'Kids', leadDate: '2024-03-08', nextFollowUp: null, remarks: 'Lost to competitor', status: 'lost', createdBy: 'u2' },
+            ],
+            jobs: [
+                { id: 'j1', leadId: 'l3', customerName: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', productCategory: 'Bedroom', jobType: 'delivery', partsRequired: '', notes: '', paymentStatus: 'paid', status: 'assigned', assignedTo: 'u4', createdAt: '2024-03-15', scheduledDate: '2024-03-25', completedAt: null, images: '', remarks: '' },
+                { id: 'j2', leadId: null, customerName: 'ABC Corp', phone: '+1 555 999 9999', address: '100 Business Park, Chicago, IL', productCategory: 'Office', jobType: 'installation', partsRequired: 'Mounting kit', notes: 'New office setup', paymentStatus: 'pending', status: 'created', assignedTo: null, createdAt: '2024-03-18', scheduledDate: '2024-03-22', completedAt: null, images: '', remarks: '' },
+                { id: 'j3', leadId: null, customerName: 'XYZ Home', phone: '+1 555 888 8888', address: '200 Residential Ave, Naperville, IL', productCategory: 'Living Room', jobType: 'service', partsRequired: 'Replacement legs', notes: 'Broken furniture leg', paymentStatus: 'paid', status: 'completed', assignedTo: 'u5', createdAt: '2024-03-10', scheduledDate: '2024-03-15', completedAt: '2024-03-15', images: 'site1.jpg,site2.jpg', remarks: 'Fixed successfully' },
+            ],
+            notifications: [
+                { id: 'n1', userId: 'u2', type: 'info', title: 'Lead Converted', message: 'David Thompson has been converted to a dispatch', read: false, createdAt: '2024-03-15T10:00:00' },
+                { id: 'n2', userId: 'u3', type: 'alert', title: 'New Job Assigned', message: 'New delivery job for David Thompson', read: false, createdAt: '2024-03-15T10:05:00' },
+            ],
+            activityLogs: [],
+            currentUser: null
+        };
 
-let currentPage = 'login';
+        let currentPage = 'login';
+        let showModal = null;
+        let editingItem = null;
+        let dateFilter = new Date().toISOString().split('T')[0];
+        let calendarDate = new Date();
 
-function generateId() {
-    return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-}
+        function generateId() { return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        
+        function isOverdue(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateStr); target.setHours(0,0,0,0);
+            return target < today;
+        }
+        
+        function logActivity(action, details) {
+            store.activityLogs.push({
+                id: generateId(),
+                userId: store.currentUser?.id,
+                action,
+                details,
+                createdAt: new Date().toISOString()
+            });
+        }
 
-function render() {
-    const app = document.getElementById('app');
-    if (!store.currentUser) {
-        app.innerHTML = renderLogin();
-        return;
-    }
-    app.innerHTML = renderLayout(renderPage());
-}
+        function render() {
+            const app = document.getElementById('app');
+            if (!store.currentUser) {
+                app.innerHTML = renderLogin();
+                initFlatpickr();
+                return;
+            }
+            app.innerHTML = renderLayout(renderPage());
+            initFlatpickr();
+        }
 
-function renderLogin() {
-    return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);padding:1rem;">
-        <div style="max-width:28rem;width:100%;">
-            <div style="text-align:center;margin-bottom:2rem;">
-                <div style="width:4rem;height:4rem;margin:0 auto 1rem;background:linear-gradient(135deg,#E94560,#FF6B6B);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">
-                    <svg style="width:2.5rem;height:2.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                </div>
-                <h1 style="font-size:1.875rem;font-weight:700;color:white;margin-bottom:0.5rem;">FurniFlow</h1>
-                <p style="color:#9CA3AF;">Business Management System</p>
-            </div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:1rem;padding:1.5rem;">
-                <h2 style="font-size:1.25rem;font-weight:600;color:white;margin-bottom:0.5rem;">Select Your Role</h2>
-                <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:1.5rem;">Choose a role to access the system</p>
-                <div style="display:grid;gap:0.75rem;">
-                    <button onclick="login('sales')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
-                        <div style="display:flex;align-items:center;gap:1rem;">
-                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
-                            <div><h3 style="font-weight:600;color:white;">Sales</h3><p style="font-size:0.875rem;color:#9CA3AF;">Manage customers & orders</p></div>
-                        </div>
-                    </button>
-                    <button onclick="login('service_head')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
-                        <div style="display:flex;align-items:center;gap:1rem;">
-                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
-                            <div><h3 style="font-weight:600;color:white;">Service Head</h3><p style="font-size:0.875rem;color:#9CA3AF;">Manage jobs & staff</p></div>
-                        </div>
-                    </button>
-                    <button onclick="login('field_staff')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
-                        <div style="display:flex;align-items:center;gap:1rem;">
-                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                            <div><h3 style="font-weight:600;color:white;">Field Staff</h3><p style="font-size:0.875rem;color:#9CA3AF;">Execute jobs</p></div>
-                        </div>
-                    </button>
-                    <button onclick="login('admin')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
-                        <div style="display:flex;align-items:center;gap:1rem;">
-                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
-                            <div><h3 style="font-weight:600;color:white;">Admin</h3><p style="font-size:0.875rem;color:#9CA3AF;">Full system access</p></div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>`;
-}
-
-function login(role) {
-    store.currentUser = store.users.find(u => u.role === role);
-    currentPage = 'dashboard';
-    render();
-}
-
-function logout() {
-    store.currentUser = null;
-    currentPage = 'login';
-    render();
-}
-
-function navigate(page) {
-    currentPage = page;
-    render();
-}
-
-function renderPage() {
-    switch(currentPage) {
-        case 'dashboard': return renderDashboard();
-        case 'sales': return renderSales();
-        case 'service': return renderService();
-        case 'admin': return renderAdmin();
-        default: return renderDashboard();
-    }
-}
-
-function renderLayout(content) {
-    const user = store.currentUser;
-    return `<div style="min-height:100vh;background:#0F0F1A;">
-        <aside style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#1A1A2E;border-right:1px solid #3A3A5C;display:flex;flex-direction:column;">
-            <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <div style="width:2.5rem;height:2.5rem;background:linear-gradient(135deg,#E94560,#FF6B6B);border-radius:0.5rem;display:flex;align-items:center;justify-content:center;">
-                        <svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        function renderLogin() {
+            return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);">
+                <div style="max-width:24rem;width:100%;">
+                    <div style="text-align:center;margin-bottom:2rem;">
+                        <div class="logo" style="margin:0 auto 1rem;"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <h1 style="font-size:1.5rem;font-weight:700;color:white;margin-bottom:0.25rem;">FurniFlow</h1>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Business Management System</p>
                     </div>
-                    <div><h1 style="color:white;font-weight:700;font-size:1.125rem;">FurniFlow</h1><p style="color:#9CA3AF;font-size:0.75rem;">Business Management</p></div>
+                    <div class="card">
+                        <h2 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Sign In</h2>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="loginEmail" class="input" placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="loginPassword" class="input" placeholder="Enter your password">
+                        </div>
+                        <button onclick="handleLogin()" class="btn btn-primary" style="width:100%;">Sign In</button>
+                        <p style="margin-top:1rem;font-size:0.75rem;color:#6B7280;text-align:center;">Demo: sarah@furniflow.com / sales123</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = store.users.find(u => u.email === email && u.password === password && u.active);
+            if (user) {
+                store.currentUser = user;
+                logActivity('Login', 'User logged in');
+                render();
+            } else {
+                alert('Invalid credentials or inactive account');
+            }
+        }
+
+        function logout() {
+            logActivity('Logout', 'User logged out');
+            store.currentUser = null;
+            currentPage = 'login';
+            render();
+        }
+
+        function navigate(page) { currentPage = page; render(); }
+
+        function renderPage() {
+            const pages = { dashboard: renderDashboard, leads: renderLeads, jobs: renderJobs, calendar: renderCalendar, admin: renderAdmin, users: renderUserManagement };
+            return pages[currentPage]?.() || renderDashboard();
+        }
+
+        function renderLayout(content) {
+            const user = store.currentUser;
+            const unreadNotifications = store.notifications.filter(n => n.userId === user.id && !n.read).length;
+            return `<div class="sidebar">
+                <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <div class="logo"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <span class="sidebar-text" style="color:white;font-weight:700;">FurniFlow</span>
+                    </div>
+                </div>
+                <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
+                    ${renderNavItem('dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6')}
+                    ${(user.role === 'sales' || user.role === 'admin') ? renderNavItem('leads', 'Leads', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z') : ''}
+                    ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? renderNavItem('jobs', 'Jobs', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01') : ''}
+                    ${renderNavItem('calendar', 'Calendar', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z')}
+                    ${user.role === 'admin' ? renderNavItem('admin', 'Admin', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z') : ''}
+                    ${user.role === 'admin' ? renderNavItem('users', 'Users', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z') : ''}
+                </nav>
+                <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
+                        <div class="avatar">${user.name.charAt(0)}</div>
+                        <div style="flex:1;min-width:0;" class="sidebar-text">
+                            <p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p>
+                            <p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p>
+                        </div>
+                        <button onclick="logout()" style="padding:0.25rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+                    </div>
                 </div>
             </div>
-            <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
-                <a href="#" onclick="navigate('dashboard')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'dashboard' ? '#E94560' : '#9CA3AF'};text-decoration:none;">
-                    <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    <span style="font-weight:500;">Dashboard</span>
-                </a>
-                ${(user.role === 'sales' || user.role === 'admin') ? `<a href="#" onclick="navigate('sales')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'sales' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span style="font-weight:500;">Customers</span></a>` : ''}
-                ${(user.role === 'service_head' || user.role === 'field_staff' || user.role === 'admin') ? `<a href="#" onclick="navigate('service')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'service' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg><span style="font-weight:500;">Jobs</span></a>` : ''}
-                ${user.role === 'admin' ? `<a href="#" onclick="navigate('admin')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'admin' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg><span style="font-weight:500;">Admin</span></a>` : ''}
-            </nav>
-            <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
-                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
-                    <div style="width:2rem;height:2rem;background:linear-gradient(135deg,#4DA8DA,#00D9A5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.75rem;font-weight:700;color:white;">${user.name.charAt(0)}</span></div>
-                    <div style="flex:1;min-width:0;"><p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p><p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p></div>
-                    <button onclick="logout()" style="padding:0.375rem;color:#9CA3AF;background:none;border:none;cursor:pointer;"><svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+            <div class="main-content">
+                <header class="header">
+                    <h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${currentPage === 'dashboard' ? user.role.replace('_', ' ') + ' Dashboard' : currentPage}</h2>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <button onclick="showNotifications()" style="position:relative;padding:0.5rem;background:none;border:none;color:#9CA3AF;cursor:pointer;">
+                            <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            ${unreadNotifications > 0 ? `<span class="notification-dot">${unreadNotifications}</span>` : ''}
+                        </button>
+                        <span style="color:#9CA3AF;font-size:0.875rem;">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                    </div>
+                </header>
+                <main style="padding:1.5rem;">${content}</main>
+            </div>
+            ${showModal ? renderModal() : ''}`;
+        }
+
+        function renderNavItem(page, label, icon) {
+            const isActive = currentPage === page;
+            return `<a href="#" onclick="navigate('${page}')" class="nav-item ${isActive ? 'active' : ''}">
+                <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"></path></svg>
+                <span class="sidebar-text">${label}</span>
+            </a>`;
+        }
+
+        function renderDashboard() {
+            const user = store.currentUser;
+            const today = new Date().toISOString().split('T')[0];
+            const totalLeads = store.leads.length;
+            const convertedLeads = store.leads.filter(l => l.status === 'converted').length;
+            const pendingFollowUps = store.leads.filter(l => l.nextFollowUp && l.nextFollowUp <= today && !['converted','lost','not_interested'].includes(l.status)).length;
+            const lostLeads = store.leads.filter(l => l.status === 'lost').length;
+            const totalJobs = store.jobs.length;
+            const jobsInProgress = store.jobs.filter(j => j.status === 'in_progress').length;
+            const completedJobs = store.jobs.filter(j => j.status === 'completed').length;
+            const overdueJobs = store.jobs.filter(j => j.scheduledDate && j.scheduledDate < today && j.status !== 'completed').length;
+            let myJobs = user.role === 'field_agent' ? store.jobs.filter(j => j.assignedTo === user.id) : [];
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Welcome back, ${user.name.split(' ')[0]}</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Here's your overview</p></div>
+                ${(user.role === 'sales' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Total Leads</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${totalLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Converted</p><p style="font-size:2rem;font-weight:700;color:#86EFAC;margin-top:0.25rem;">${convertedLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Pending Follow-ups</p><p style="font-size:2rem;font-weight:700;color:${pendingFollowUps > 0 ? '#FCD34D' : 'white'};margin-top:0.25rem;">${pendingFollowUps}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Lost</p><p style="font-size:2rem;font-weight:700;color:#FCA5A5;margin-top:0.25rem;">${lostLeads}</p></div>
+                </div>` : ''}
+                ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Total Jobs</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${user.role === 'admin' ? totalJobs : myJobs.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">In Progress</p><p style="font-size:2rem;font-weight:700;color:#FDE68A;margin-top:0.25rem;">${user.role === 'admin' ? jobsInProgress : myJobs.filter(j => j.status === 'in_progress').length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Completed</p><p style="font-size:2rem;font-weight:700;color:#86EFAC;margin-top:0.25rem;">${user.role === 'admin' ? completedJobs : myJobs.filter(j => j.status === 'completed').length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.875rem;">Overdue</p><p style="font-size:2rem;font-weight:700;color:#DC2626;margin-top:0.25rem;">${user.role === 'admin' ? overdueJobs : myJobs.filter(j => j.scheduledDate < today && j.status !== 'completed').length}</p></div>
+                </div>` : ''}
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+                    ${(user.role === 'sales' || user.role === 'admin') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1.125rem;font-weight:600;color:white;">Follow-ups Due</h3>
+                            <button onclick="navigate('leads')" style="font-size:0.875rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${store.leads.filter(l => l.nextFollowUp && !['converted','lost','not_interested'].includes(l.status)).slice(0,5).map(l => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.75rem;">${l.productCategory}</p></div><span class="badge ${isOverdue(l.nextFollowUp) ? 'badge-overdue' : 'badge-pending'}">${isOverdue(l.nextFollowUp) ? 'Overdue' : formatDate(l.nextFollowUp)}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No pending follow-ups</p>'}
+                        </div>
+                    </div>` : ''}
+                    ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1.125rem;font-weight:600;color:white;">Active Jobs</h3>
+                            <button onclick="navigate('jobs')" style="font-size:0.875rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${store.jobs.filter(j => j.status !== 'completed').slice(0,5).map(j => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.75rem;">${j.jobType} - ${j.productCategory}</p></div><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No active jobs</p>'}
+                        </div>
+                    </div>` : ''}
                 </div>
-            </div>
-        </aside>
-        <div style="margin-left:16rem;">
-            <header style="height:4rem;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:#1A1A2E;border-bottom:1px solid #3A3A5C;"><h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${user.role.replace('_', ' ')} Dashboard</h2></header>
-            <main style="padding:1.5rem;">${content}</main>
-        </div>
-    </div>`;
-}
+            </div>`;
+        }
 
-function renderDashboard() {
-    const stats = { totalCustomers: store.customers.length, pendingJobs: store.jobs.filter(j => ['pending','accepted','scheduled'].includes(j.status)).length, completed: store.jobs.filter(j => j.status === 'completed').length, activeLeads: store.customers.filter(c => c.status === 'lead' || c.status === 'prospect').length };
-    return `<div style="display:grid;gap:1.5rem;">
-        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Welcome back, ${store.currentUser.name.split(' ')[0]}</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Here's what's happening today</p></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Customers</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalCustomers}</p></div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Pending Jobs</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.pendingJobs}</p></div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Completed</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.completed}</p></div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Active Leads</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.activeLeads}</p></div>
-        </div>
-        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
-            <h3 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Recent Jobs</h3>
-            <div style="display:grid;gap:0.75rem;">
-                ${store.jobs.slice(0,5).map(job => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;">
-                    <div style="display:flex;align-items:center;gap:0.75rem;"><div style="width:0.5rem;height:0.5rem;border-radius:50%;background:#E94560;"></div><div><p style="color:white;font-weight:500;">${job.customerName}</p><p style="color:#9CA3AF;font-size:0.875rem;">${job.product}</p></div></div>
-                    <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getStatusStyle(job.status)}">${job.status}</span>
-                </div>`).join('')}
-            </div>
-        </div>
-    </div>`;
-}
+        function renderLeads() {
+            const user = store.currentUser;
+            const filteredLeads = store.leads.filter(l => {
+                if (user.role === 'sales') return l.createdBy === user.id;
+                return true;
+            }).filter(l => dateFilter ? l.leadDate === dateFilter : true);
 
-function getStatusStyle(status) {
-    const styles = { pending: 'background:#713F12;color:#FCD34D', accepted: 'background:#1E3A8A;color:#93C5FD', scheduled: 'background:#4C1D95;color:#C4B5FD', delivered: 'background:#14532D;color:#86EFAC', completed: 'background:#14532D;color:#86EFAC', cancelled: 'background:#374151;color:#9CA3AF' };
-    return styles[status] || 'background:#374151;color:#9CA3AF';
-}
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Leads Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage your sales leads and follow-ups</p></div>
+                    <button onclick="openLeadModal()" class="btn btn-primary">+ Add Lead</button>
+                </div>
+                <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+                    <input type="date" id="leadDateFilter" class="input" style="width:auto;" value="${dateFilter}" onchange="dateFilter=this.value;render()">
+                    <button onclick="dateFilter=null;render()" class="btn btn-secondary">Show All</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <table class="table">
+                        <thead><tr><th>Customer</th><th>Product</th><th>Follow-up</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${filteredLeads.map(l => `<tr>
+                                <td><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.75rem;">${l.phone}</p><p style="color:#6B7280;font-size:0.75rem;">${l.address}</p></td>
+                                <td>${l.productCategory}</td>
+                                <td>${l.nextFollowUp ? `<span class="badge ${isOverdue(l.nextFollowUp) ? 'badge-overdue' : 'badge-pending'}">${isOverdue(l.nextFollowUp) ? 'Overdue' : formatDate(l.nextFollowUp)}</span>` : '-'}</td>
+                                <td><span class="badge badge-${l.status}">${l.status.replace('_', ' ')}</span></td>
+                                <td><div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                                    <button onclick="editLead('${l.id}')" class="btn btn-secondary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Edit</button>
+                                    ${l.status === 'interested' ? `<button onclick="convertLead('${l.id}')" class="btn btn-primary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Convert</button>` : ''}
+                                    ${user.role === 'admin' ? `<button onclick="deleteLead('${l.id}')" style="padding:0.375rem 0.75rem;font-size:0.75rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;">Delete</button>` : ''}
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#9CA3AF;padding:2rem;">No leads found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
 
-function renderSales() {
-    return `<div style="display:grid;gap:1.5rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Customer Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage leads, prospects, and orders</p></div>
-            <button onclick="showAddCustomerModal()" style="padding:0.5rem 1rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.5rem;font-weight:500;border:none;cursor:pointer;">+ Add Customer</button>
-        </div>
-        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;overflow:hidden;">
-            <table style="width:100%;">
-                <thead><tr style="border-bottom:1px solid #3A3A5C;"><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Customer</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Product</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Status</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Follow-up</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Actions</th></tr></thead>
-                <tbody>
-                    ${store.customers.map(c => `<tr style="border-bottom:1px solid #3A3A5C50;">
-                        <td style="padding:1rem;"><p style="color:white;font-weight:500;">${c.name}</p><p style="color:#9CA3AF;font-size:0.875rem;">${c.phone}</p></td>
-                        <td style="padding:1rem;color:white;">${c.product}</td>
-                        <td style="padding:1rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getCustomerStatusStyle(c.status)}">${c.status}</span></td>
-                        <td style="padding:1rem;color:#9CA3AF;">${c.followUpDate || '-'}</td>
-                        <td style="padding:1rem;">
+        function renderJobs() {
+            const user = store.currentUser;
+            const filteredJobs = store.jobs.filter(j => user.role === 'field_agent' ? j.assignedTo === user.id : true);
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Job Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Track and manage service jobs</p></div>
+                    ${user.role === 'service_head' || user.role === 'admin' ? `<button onclick="openJobModal()" class="btn btn-primary">+ Add Job</button>` : ''}
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;">
+                    ${filteredJobs.map(j => `<div class="job-card">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
                             <div style="display:flex;gap:0.5rem;">
-                                <button onclick="convertCustomer('${c.id}')" style="padding:0.375rem 0.75rem;font-size:0.875rem;border:1px solid #3A3A5C;border-radius:0.375rem;color:white;background:transparent;cursor:pointer;">Convert</button>
-                                ${c.status === 'confirmed' ? `<button onclick="createDispatch('${c.id}')" style="padding:0.375rem 0.75rem;font-size:0.875rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.375rem;border:none;cursor:pointer;">Dispatch</button>` : ''}
+                                <span class="badge badge-${j.jobType === 'delivery' ? 'converted' : j.jobType === 'installation' ? 'interested' : 'assigned'}">${j.jobType}</span>
+                                <span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span>
                             </div>
-                        </td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>
-    </div>`;
-}
+                            ${j.scheduledDate && isOverdue(j.scheduledDate) && j.status !== 'completed' ? `<span class="badge badge-overdue">Overdue</span>` : ''}
+                        </div>
+                        <h3 style="color:white;font-weight:600;margin-bottom:0.25rem;">${j.customerName}</h3>
+                        <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:0.5rem;">${j.productCategory} - ${j.jobType}</p>
+                        <p style="color:#6B7280;font-size:0.75rem;margin-bottom:0.5rem;">${j.address}</p>
+                        <p style="color:#9CA3AF;font-size:0.75rem;margin-bottom:0.75rem;">${formatDate(j.scheduledDate)} | ${j.paymentStatus}</p>
+                        ${j.assignedTo ? `<p style="color:#9CA3AF;font-size:0.75rem;margin-bottom:0.75rem;">Assigned: ${store.users.find(u => u.id === j.assignedTo)?.name || 'Unknown'}</p>` : ''}
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            ${user.role === 'service_head' || user.role === 'admin' ? `<button onclick="assignJob('${j.id}')" class="btn btn-secondary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Assign</button><button onclick="rescheduleJob('${j.id}')" class="btn btn-secondary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Reschedule</button>` : ''}
+                            ${user.role === 'field_agent' && j.status === 'assigned' ? `<button onclick="acceptJob('${j.id}')" class="btn btn-primary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Accept</button>` : ''}
+                            ${user.role === 'field_agent' && j.status === 'accepted' ? `<button onclick="startJob('${j.id}')" class="btn btn-primary" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Start</button>` : ''}
+                            ${user.role === 'field_agent' && j.status === 'in_progress' ? `<button onclick="completeJob('${j.id}')" class="btn btn-success" style="padding:0.375rem 0.75rem;font-size:0.75rem;">Complete</button>` : ''}
+                        </div>
+                    </div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:2rem;grid-column:1/-1;">No jobs found</p>'}
+                </div>
+            </div>`;
+        }
 
-function getCustomerStatusStyle(status) {
-    const styles = { lead: 'background:#1E3A8A;color:#93C5FD', prospect: 'background:#713F12;color:#FCD34D', confirmed: 'background:#14532D;color:#86EFAC', closed: 'background:#374151;color:#9CA3AF' };
-    return styles[status];
-}
+        function renderCalendar() {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const events = [];
+            store.leads.forEach(l => { if (l.nextFollowUp) { const d = new Date(l.nextFollowUp); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: l.nextFollowUp, type: 'lead', title: l.customerName }); } });
+            store.jobs.forEach(j => { if (j.scheduledDate) { const d = new Date(j.scheduledDate); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: j.scheduledDate, type: 'job', title: j.customerName }); } });
 
-function renderService() {
-    return `<div style="display:grid;gap:1.5rem;">
-        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Job Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage and track all service jobs</p></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;">
-            ${store.jobs.map(job => `<div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
-                    <div style="display:flex;gap:0.5rem;">
-                        <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getJobTypeStyle(job.type)}">${job.type}</span>
-                        <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getStatusStyle(job.status)}">${job.status}</span>
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Calendar</h1><p style="color:#9CA3AF;margin-top:0.25rem;">View follow-ups and scheduled jobs</p></div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()-1);render()" class="btn btn-secondary">&lt; Prev</button>
+                        <h2 style="color:white;font-weight:600;">${monthNames[month]} ${year}</h2>
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()+1);render()" class="btn btn-secondary">Next &gt;</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.25rem;margin-bottom:1rem;">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div style="text-align:center;font-size:0.75rem;color:#9CA3AF;padding:0.5rem;">${d}</div>`).join('')}</div>
+                    <div class="calendar-grid">
+                        ${Array(firstDay).fill(null).map(() => '<div></div>').join('')}
+                        ${Array(daysInMonth).fill(null).map((_, i) => { const day = i + 1; const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const hasEvent = events.some(e => e.date === dateStr); const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year; return `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" onclick="selectDate('${dateStr}')">${day}</div>`; }).join('')}
                     </div>
                 </div>
-                <h3 style="color:white;font-weight:600;margin-bottom:0.25rem;">${job.customerName}</h3>
-                <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:0.5rem;">${job.product}</p>
-                <p style="color:#9CA3AF;font-size:0.875rem;">${job.address}</p>
-                ${job.status === 'pending' ? `<button onclick="acceptJob('${job.id}')" style="width:100%;margin-top:1rem;padding:0.5rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.5rem;border:none;cursor:pointer;">Accept Job</button>` : ''}
-                ${job.status === 'accepted' ? `<button onclick="updateJobStatus('${job.id}','completed')" style="width:100%;margin-top:1rem;padding:0.5rem;background:linear-gradient(135deg,#00D9A5,#00B388);color:white;border-radius:0.5rem;border:none;cursor:pointer;">Complete Job</button>` : ''}
-            </div>`).join('')}
-        </div>
-    </div>`;
-}
+                <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Events on Selected Date</h3><div id="calendarEvents" style="display:grid;gap:0.5rem;"><p style="color:#9CA3AF;text-align:center;padding:1rem;">Click on a date to see events</p></div></div>
+            </div>`;
+        }
 
-function getJobTypeStyle(type) {
-    const styles = { service: 'background:#1E3A8A;color:#93C5FD', delivery: 'background:#14532D;color:#86EFAC', installation: 'background:#713F12;color:#FCD34D' };
-    return styles[type];
-}
+        function selectDate(dateStr) {
+            const events = [];
+            store.leads.forEach(l => { if (l.nextFollowUp === dateStr) events.push({ type: 'lead', title: l.customerName, detail: 'Follow-up' }); });
+            store.jobs.forEach(j => { if (j.scheduledDate === dateStr) events.push({ type: 'job', title: j.customerName, detail: `${j.jobType} - ${j.status}` }); });
+            const eventsDiv = document.getElementById('calendarEvents');
+            if (events.length > 0) { eventsDiv.innerHTML = events.map(e => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><span class="badge badge-${e.type === 'lead' ? 'interested' : 'assigned'}">${e.type}</span><div><p style="color:white;font-weight:500;">${e.title}</p><p style="color:#9CA3AF;font-size:0.75rem;">${e.detail}</p></div></div>`).join(''); }
+            else { eventsDiv.innerHTML = '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No events on this date</p>'; }
+        }
 
-function renderAdmin() {
-    const stats = { totalCustomers: store.customers.length, totalJobs: store.jobs.length, completed: store.jobs.filter(j => j.status === 'completed').length };
-    return `<div style="display:grid;gap:1.5rem;">
-        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Admin Dashboard</h1><p style="color:#9CA3AF;margin-top:0.25rem;">System overview and management</p></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Customers</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalCustomers}</p></div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Jobs</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalJobs}</p></div>
-            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Completed</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.completed}</p></div>
-        </div>
-        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
-            <h3 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Users</h3>
-            <table style="width:100%;">
-                <thead><tr style="border-bottom:1px solid #3A3A5C;"><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">User</th><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Role</th><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Status</th></tr></thead>
-                <tbody>
-                    ${store.users.map(u => `<tr style="border-bottom:1px solid #3A3A5C50;">
-                        <td style="padding:0.75rem;"><div style="display:flex;align-items:center;gap:0.75rem;"><div style="width:2rem;height:2rem;background:linear-gradient(135deg,#4DA8DA,#00D9A5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.75rem;font-weight:700;color:white;">${u.name.charAt(0)}</span></div><span style="color:white;font-weight:500;">${u.name}</span></div></td>
-                        <td style="padding:0.75rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getRoleStyle(u.role)}">${u.role.replace('_', ' ')}</span></td>
-                        <td style="padding:0.75rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;background:#166534;color:#86EFAC;">Active</span></td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>
-    </div>`;
-}
+        function renderAdmin() {
+            const totalLeads = store.leads.length, convertedLeads = store.leads.filter(l => l.status === 'converted').length, pendingFollowUps = store.leads.filter(l => l.nextFollowUp && !['converted','lost','not_interested'].includes(l.status)).length, lostLeads = store.leads.filter(l => l.status === 'lost').length;
+            const totalJobs = store.jobs.length, jobsInProgress = store.jobs.filter(j => j.status === 'in_progress').length, completedJobs = store.jobs.filter(j => j.status === 'completed').length, overdueJobs = store.jobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && j.status !== 'completed').length;
 
-function getRoleStyle(role) {
-    const styles = { admin: 'background:#991B1B;color:#FCA5A5', sales: 'background:#1E3A8A;color:#93C5FD', service_head: 'background:#713F12;color:#FCD34D', field_staff: 'background:#166534;color:#86EFAC' };
-    return styles[role];
-}
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Admin Dashboard</h1><p style="color:#9CA3AF;margin-top:0.25rem;">System overview and metrics</p></div>
+                <div><h2 style="color:white;font-weight:600;margin-bottom:0.75rem;">Sales Metrics</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Leads</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Converted</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${convertedLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${pendingFollowUps}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Lost</p><p style="font-size:1.5rem;font-weight:700;color:#FCA5A5;">${lostLeads}</p></div>
+                </div></div>
+                <div><h2 style="color:white;font-weight:600;margin-bottom:0.75rem;">Service Metrics</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">In Progress</p><p style="font-size:1.5rem;font-weight:700;color:#FDE68A;">${jobsInProgress}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${completedJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue</p><p style="font-size:1.5rem;font-weight:700;color:#DC2626;">${overdueJobs}</p></div>
+                </div></div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><h3 style="color:white;font-weight:600;">Activity Log</h3></div>
+                    <div style="display:grid;gap:0.5rem;max-height:300px;overflow-y:auto;">
+                        ${store.activityLogs.slice().reverse().slice(0,20).map(log => `<div style="padding:0.5rem;background:#0F0F1A;border-radius:0.25rem;font-size:0.75rem;"><span style="color:#9CA3AF;">${formatDate(log.createdAt)}</span> <span style="color:#E94560;">- ${log.action}</span> <span style="color:#9CA3AF;">- ${log.details}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No activity yet</p>'}
+                    </div>
+                </div>
+            </div>`;
+        }
 
-function showAddCustomerModal() {
-    const name = prompt('Customer Name:');
-    if (!name) return;
-    const phone = prompt('Phone Number:');
-    if (!phone) return;
-    const address = prompt('Address:');
-    if (!address) return;
-    const product = prompt('Product:') || '';
-    store.customers.push({ id: generateId(), name, phone, address, product, inquiryDate: new Date().toISOString().split('T')[0], expectedClosingDate: null, status: 'lead', followUpDate: null, createdBy: store.currentUser.id });
-    render();
-}
+        function renderUserManagement() {
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">User Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage team members and roles</p></div>
+                    <button onclick="openUserModal()" class="btn btn-primary">+ Add User</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden;">
+                    <table class="table">
+                        <thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${store.users.map(u => `<tr>
+                                <td><div style="display:flex;align-items:center;gap:0.75rem;"><div class="avatar">${u.name.charAt(0)}</div><div><p style="color:white;font-weight:500;">${u.name}</p><p style="color:#9CA3AF;font-size:0.75rem;">${u.email}</p></div></div></td>
+                                <td><span class="badge badge-${u.role === 'admin' ? 'lost' : u.role === 'sales' ? 'lead' : u.role === 'service_head' ? 'interested' : 'converted'}">${u.role.replace('_', ' ')}</span></td>
+                                <td>${u.phone}</td>
+                                <td><span class="badge ${u.active ? 'badge-converted' : 'badge-not-interested'}">${u.active ? 'Active' : 'Inactive'}</span></td>
+                                <td><div style="display:flex;gap:0.5rem;"><button onclick="editUser('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;">Edit</button><button onclick="toggleUserStatus('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;">${u.active ? 'Deactivate' : 'Activate'}</button>${u.id !== store.currentUser.id ? `<button onclick="deleteUser('${u.id}')" style="padding:0.25rem 0.5rem;font-size:0.75rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;">Delete</button>` : ''}</div></td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
 
-function convertCustomer(id) {
-    const customer = store.customers.find(c => c.id === id);
-    if (customer) { customer.status = 'confirmed'; render(); }
-}
+        function renderModal() {
+            if (!showModal) return '';
+            let content = '', title = '';
+            switch(showModal) {
+                case 'lead': title = editingItem ? 'Edit Lead' : 'Add New Lead'; content = renderLeadForm(); break;
+                case 'convert': title = 'Convert Lead'; content = renderConvertForm(); break;
+                case 'job': title = editingItem ? 'Edit Job' : 'Add New Job'; content = renderJobForm(); break;
+                case 'assign': title = 'Assign Job'; content = renderAssignForm(); break;
+                case 'complete': title = 'Complete Job'; content = renderCompleteForm(); break;
+                case 'user': title = editingItem ? 'Edit User' : 'Add New User'; content = renderUserForm(); break;
+                default: return '';
+            }
+            return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3 style="color:white;font-weight:600;">${title}</h3><button onclick="closeModal()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:1.25rem;">&times;</button></div><div class="modal-body">${content}</div></div></div>`;
+        }
 
-function createDispatch(id) {
-    const customer = store.customers.find(c => c.id === id);
-    if (customer) {
-        store.jobs.push({ id: generateId(), customerId: customer.id, customerName: customer.name, customerPhone: customer.phone, address: customer.address, product: customer.product, type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0], assignedTo: null });
-        alert('Dispatch created for ' + customer.name);
+        function renderLeadForm() {
+            const l = editingItem ? store.leads.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="leadName" class="input" value="${l.customerName || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" id="leadPhone" class="input" value="${l.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Address *</label><textarea id="leadAddress" class="textarea" rows="2">${l.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Product Category</label><select id="leadProduct" class="select"><option value="Living Room" ${l.productCategory === 'Living Room' ? 'selected' : ''}>Living Room</option><option value="Dining" ${l.productCategory === 'Dining' ? 'selected' : ''}>Dining</option><option value="Bedroom" ${l.productCategory === 'Bedroom' ? 'selected' : ''}>Bedroom</option><option value="Office" ${l.productCategory === 'Office' ? 'selected' : ''}>Office</option><option value="Kids" ${l.productCategory === 'Kids' ? 'selected' : ''}>Kids</option></select></div>
+                <div class="form-group"><label class="form-label">Status</label><select id="leadStatus" class="select" onchange="toggleFollowUpField()"><option value="lead" ${l.status === 'lead' ? 'selected' : ''}>Lead</option><option value="interested" ${l.status === 'interested' ? 'selected' : ''}>Interested</option><option value="converted" ${l.status === 'converted' ? 'selected' : ''}>Converted</option><option value="not_interested" ${l.status === 'not_interested' ? 'selected' : ''}>Not Interested</option><option value="lost" ${l.status === 'lost' ? 'selected' : ''}>Lost</option></select></div>
+                <div class="form-group" id="followUpGroup" style="display:${l.status === 'interested' ? 'block' : 'none'}"><label class="form-label">Next Follow-up Date *</label><input type="date" id="leadFollowUp" class="input" value="${l.nextFollowUp || ''}"></div>
+                <div class="form-group"><label class="form-label">Remarks</label><textarea id="leadRemarks" class="textarea" rows="2">${l.remarks || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveLead()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Lead</button></div>`;
+        }
+
+        function renderConvertForm() {
+            const l = store.leads.find(x => x.id === editingItem);
+            return `<p style="color:#9CA3AF;margin-bottom:1rem;">Convert lead for <strong style="color:white;">${l?.customerName}</strong></p>
+                <div class="form-group"><label class="form-label">Payment Received? *</label><select id="convertPayment" class="select"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                <div class="form-group"><label class="form-label">Dispatch Date *</label><input type="date" id="convertDate" class="input"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmConversion()" class="btn btn-primary">Convert & Create Dispatch</button></div>`;
+        }
+
+        function renderJobForm() {
+            const j = editingItem ? store.jobs.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="jobCustomer" class="input" value="${j.customerName || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="jobPhone" class="input" value="${j.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Address *</label><textarea id="jobAddress" class="textarea" rows="2">${j.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Job Type *</label><select id="jobType" class="select"><option value="delivery" ${j.jobType === 'delivery' ? 'selected' : ''}>Delivery</option><option value="installation" ${j.jobType === 'installation' ? 'selected' : ''}>Installation</option><option value="service" ${j.jobType === 'service' ? 'selected' : ''}>Service/Repair</option></select></div>
+                <div class="form-group"><label class="form-label">Product Category</label><select id="jobProduct" class="select"><option value="Living Room" ${j.productCategory === 'Living Room' ? 'selected' : ''}>Living Room</option><option value="Dining" ${j.productCategory === 'Dining' ? 'selected' : ''}>Dining</option><option value="Bedroom" ${j.productCategory === 'Bedroom' ? 'selected' : ''}>Bedroom</option><option value="Office" ${j.productCategory === 'Office' ? 'selected' : ''}>Office</option><option value="Kids" ${j.productCategory === 'Kids' ? 'selected' : ''}>Kids</option></select></div>
+                <div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="jobScheduled" class="input" value="${j.scheduledDate || ''}"></div>
+                <div class="form-group"><label class="form-label">Payment Status</label><select id="jobPayment" class="select"><option value="paid" ${j.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option><option value="pending" ${j.paymentStatus === 'pending' ? 'selected' : ''}>Pending</option></select></div>
+                <div class="form-group"><label class="form-label">Notes</label><textarea id="jobNotes" class="textarea" rows="2">${j.notes || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveJob()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Job</button></div>`;
+        }
+
+        function renderAssignForm() {
+            const j = store.jobs.find(x => x.id === editingItem);
+            const agents = store.users.filter(u => u.role === 'field_agent' && u.active);
+            return `<p style="color:#9CA3AF;margin-bottom:1rem;">Assign job for <strong style="color:white;">${j?.customerName}</strong></p>
+                <div class="form-group"><label class="form-label">Assign to Field Agent</label><select id="assignAgent" class="select"><option value="">Select Agent</option>${agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
+                <div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="assignDate" class="input" value="${j?.scheduledDate || ''}"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmAssign()" class="btn btn-primary">Assign Job</button></div>`;
+        }
+
+        function renderCompleteForm() { return `<p style="color:#9CA3AF;margin-bottom:1rem;">Complete the job</p><div class="form-group"><label class="form-label">Site Images (URLs, comma separated) *</label><input type="text" id="completeImages" class="input" placeholder="image1.jpg, image2.jpg"></div><div class="form-group"><label class="form-label">Completion Remarks *</label><textarea id="completeRemarks" class="textarea" rows="3" placeholder="Describe the work done..."></textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmComplete()" class="btn btn-success">Mark Completed</button></div>`; }
+
+        function renderUserForm() {
+            const u = editingItem ? store.users.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Name *</label><input type="text" id="userName" class="input" value="${u.name || ''}"></div>
+                <div class="form-group"><label class="form-label">Email *</label><input type="email" id="userEmail" class="input" value="${u.email || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="userPhone" class="input" value="${u.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Role *</label><select id="userRole" class="select"><option value="sales" ${u.role === 'sales' ? 'selected' : ''}>Sales Staff</option><option value="service_head" ${u.role === 'service_head' ? 'selected' : ''}>Service Head</option><option value="field_agent" ${u.role === 'field_agent' ? 'selected' : ''}>Field Agent</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option></select></div>
+                <div class="form-group"><label class="form-label">Password ${editingItem ? '(leave blank to keep)' : '*'}</label><input type="password" id="userPassword" class="input" placeholder="${editingItem ? '••••••••' : ''}"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveUser()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} User</button></div>`;
+        }
+
+        function openLeadModal() { editingItem = null; showModal = 'lead'; render(); }
+        function editLead(id) { editingItem = id; showModal = 'lead'; render(); }
+        function deleteLead(id) { if (confirm('Delete this lead?')) { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', `Deleted lead ${id}`); render(); } }
+        function convertLead(id) { editingItem = id; showModal = 'convert'; render(); }
+        function toggleFollowUpField() { const status = document.getElementById('leadStatus')?.value; const group = document.getElementById('followUpGroup'); if (group) group.style.display = status === 'interested' ? 'block' : 'none'; }
+
+        function saveLead() {
+            const data = { customerName: document.getElementById('leadName').value, phone: document.getElementById('leadPhone').value, address: document.getElementById('leadAddress').value, productCategory: document.getElementById('leadProduct').value, status: document.getElementById('leadStatus').value, nextFollowUp: document.getElementById('leadFollowUp').value || null, remarks: document.getElementById('leadRemarks').value, leadDate: editingItem ? store.leads.find(l => l.id === editingItem).leadDate : new Date().toISOString().split('T')[0], createdBy: editingItem ? store.leads.find(l => l.id === editingItem).createdBy : store.currentUser.id };
+            if (!data.customerName || !data.phone || !data.address) { alert('Please fill required fields'); return; }
+            if (data.status === 'interested' && !data.nextFollowUp) { alert('Follow-up date is required for interested leads'); return; }
+            if (editingItem) { const idx = store.leads.findIndex(l => l.id === editingItem); store.leads[idx] = { ...store.leads[idx], ...data }; logActivity('Update Lead', `Updated lead ${data.customerName}`); }
+            else { store.leads.push({ id: generateId(), ...data }); logActivity('Create Lead', `Created lead for ${data.customerName}`); }
+            closeModal();
+        }
+
+        function confirmConversion() {
+            const payment = document.getElementById('convertPayment').value;
+            const dispatchDate = document.getElementById('convertDate').value;
+            if (!dispatchDate) { alert('Please select dispatch date'); return; }
+            const lead = store.leads.find(l => l.id === editingItem);
+            store.leads.find(l => l.id === editingItem).status = 'converted';
+            store.leads.find(l => l.id === editingItem).paymentConfirmed = payment === 'yes';
+            store.leads.find(l => l.id === editingItem).dispatchDate = dispatchDate;
+            store.jobs.push({ id: generateId(), leadId: editingItem, customerName: lead.customerName, phone: lead.phone, address: lead.address, productCategory: lead.productCategory, jobType: 'delivery', partsRequired: '', notes: '', paymentStatus: payment === 'yes' ? 'paid' : 'pending', status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], scheduledDate: dispatchDate, completedAt: null, images: '', remarks: '' });
+            store.notifications.push({ id: generateId(), userId: store.users.find(u => u.role === 'service_head')?.id, type: 'alert', title: 'New Dispatch Job', message: `New delivery job for ${lead.customerName} on ${dispatchDate}`, read: false, createdAt: new Date().toISOString() });
+            logActivity('Convert Lead', `Converted ${lead.customerName} to dispatch`);
+            closeModal();
+        }
+
+        function openJobModal() { editingItem = null; showModal = 'job'; render(); }
+        function editJob(id) { editingItem = id; showModal = 'job'; render(); }
+
+        function saveJob() {
+            const data = { customerName: document.getElementById('jobCustomer').value, phone: document.getElementById('jobPhone').value, address: document.getElementById('jobAddress').value, jobType: document.getElementById('jobType').value, productCategory: document.getElementById('jobProduct').value, scheduledDate: document.getElementById('jobScheduled').value || null, paymentStatus: document.getElementById('jobPayment').value, notes: document.getElementById('jobNotes').value, partsRequired: '', status: 'created', assignedTo: null, createdAt: editingItem ? store.jobs.find(j => j.id === editingItem).createdAt : new Date().toISOString().split('T')[0], completedAt: null, images: '', remarks: '' };
+            if (!data.customerName || !data.phone || !data.address) { alert('Please fill required fields'); return; }
+            if (editingItem) { const idx = store.jobs.findIndex(j => j.id === editingItem); store.jobs[idx] = { ...store.jobs[idx], ...data }; logActivity('Update Job', `Updated job ${data.customerName}`); }
+            else { store.jobs.push({ id: generateId(), ...data }); logActivity('Create Job', `Created job for ${data.customerName}`); }
+            closeModal();
+        }
+
+        function assignJob(id) { editingItem = id; showModal = 'assign'; render(); }
+        function confirmAssign() {
+            const agentId = document.getElementById('assignAgent').value;
+            const date = document.getElementById('assignDate').value;
+            const job = store.jobs.find(j => j.id === editingItem);
+            if (!agentId) { alert('Please select an agent'); return; }
+            job.assignedTo = agentId;
+            job.status = 'assigned';
+            if (date) job.scheduledDate = date;
+            store.notifications.push({ id: generateId(), userId: agentId, type: 'info', title: 'Job Assigned', message: `New job assigned: ${job.customerName}`, read: false, createdAt: new Date().toISOString() });
+            logActivity('Assign Job', `Assigned job to ${store.users.find(u => u.id === agentId).name}`);
+            closeModal();
+        }
+
+        function rescheduleJob(id) {
+            const newDate = prompt('Enter new scheduled date (YYYY-MM-DD):');
+            if (newDate) {
+                const job = store.jobs.find(j => j.id === id);
+                job.scheduledDate = newDate;
+                job.status = 'rescheduled';
+                logActivity('Reschedule Job', `Rescheduled job to ${newDate}`);
+                render();
+            }
+        }
+
+        function acceptJob(id) { const job = store.jobs.find(j => j.id === id); job.status = 'accepted'; logActivity('Accept Job', `Accepted job for ${job.customerName}`); render(); }
+        function startJob(id) { const job = store.jobs.find(j => j.id === id); job.status = 'in_progress'; logActivity('Start Job', `Started job for ${job.customerName}`); render(); }
+        function completeJob(id) { editingItem = id; showModal = 'complete'; render(); }
+
+        function confirmComplete() {
+            const images = document.getElementById('completeImages').value;
+            const remarks = document.getElementById('completeRemarks').value;
+            if (!images || !remarks) { alert('Please upload images and add remarks'); return; }
+            const job = store.jobs.find(j => j.id === editingItem);
+            job.status = 'completed';
+            job.completedAt = new Date().toISOString().split('T')[0];
+            job.images = images;
+            job.remarks = remarks;
+            if (job.leadId) { store.notifications.push({ id: generateId(), userId: store.leads.find(l => l.id === job.leadId)?.createdBy, type: 'success', title: 'Job Completed', message: `Job for ${job.customerName} completed`, read: false, createdAt: new Date().toISOString() }); }
+            logActivity('Complete Job', `Completed job for ${job.customerName}`);
+            closeModal();
+        }
+
+        function openUserModal() { editingItem = null; showModal = 'user'; render(); }
+        function editUser(id) { editingItem = id; showModal = 'user'; render(); }
+        
+        function saveUser() {
+            const data = { name: document.getElementById('userName').value, email: document.getElementById('userEmail').value, phone: document.getElementById('userPhone').value, role: document.getElementById('userRole').value, active: true };
+            const password = document.getElementById('userPassword').value;
+            if (!data.name || !data.email || !data.phone) { alert('Please fill required fields'); return; }
+            if (!editingItem && !password) { alert('Password is required for new users'); return; }
+            if (editingItem) { const idx = store.users.findIndex(u => u.id === editingItem); store.users[idx] = { ...store.users[idx], ...data }; if (password) store.users[idx].password = password; logActivity('Update User', `Updated user ${data.name}`); }
+            else { store.users.push({ id: generateId(), ...data, password: password || 'changeme' }); logActivity('Create User', `Created user ${data.name}`); }
+            closeModal();
+        }
+
+        function toggleUserStatus(id) { const user = store.users.find(u => u.id === id); user.active = !user.active; logActivity('Toggle Status', `User ${user.name} ${user.active ? 'activated' : 'deactivated'}`); render(); }
+        function deleteUser(id) { if (confirm('Delete this user?')) { const user = store.users.find(u => u.id === id); store.users = store.users.filter(u => u.id !== id); logActivity('Delete User', `Deleted user ${user.name}`); render(); } }
+        function closeModal() { showModal = null; editingItem = null; render(); }
+        function showNotifications() { const notifs = store.notifications.filter(n => n.userId === store.currentUser.id); notifs.forEach(n => n.read = true); alert(notifs.length > 0 ? notifs.map(n => `${n.title}: ${n.message}`).join('\n') : 'No notifications'); render(); }
+        function initFlatpickr() { setTimeout(() => { document.querySelectorAll('input[type="date"]').forEach(el => { if (!el._flatpickr) { el.flatpickr({ dateFormat: 'Y-m-d' }); } }); }, 100); }
+
         render();
-    }
-}
-
-function acceptJob(id) {
-    const job = store.jobs.find(j => j.id === id);
-    if (job) { job.status = 'accepted'; render(); }
-}
-
-function updateJobStatus(id, status) {
-    const job = store.jobs.find(j => j.id === id);
-    if (job) { job.status = status; render(); }
-}
-
-render();
     </script>
 </body>
 </html>
