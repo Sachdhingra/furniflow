@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FurniFlow - Business Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #1A1A2E;
-            --secondary: #16213E;
             --accent: #E94560;
             --success: #00D9A5;
             --warning: #FFB830;
@@ -21,144 +19,101 @@
             --text-secondary: #A0A0B8;
             --border: #3A3A5C;
         }
-        * { box-sizing: border-box; }
         body {
-            font-family: 'DM Sans', sans-serif;
             background-color: var(--background);
             color: var(--text-primary);
         }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--background); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes modal {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .animate-modal { animation: modal 0.2s ease-out forwards; }
-        .table-row-hover:hover { background-color: rgba(42, 42, 68, 0.5); }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app"></div>
-
     <script>
-        // Data Store
         const store = {
             users: [
-                { id: 'user-1', name: 'John Smith', role: 'admin', email: 'john@furniflow.com', phone: '+1 234 567 8901', active: true },
-                { id: 'user-2', name: 'Sarah Johnson', role: 'sales', email: 'sarah@furniflow.com', phone: '+1 234 567 8902', active: true },
-                { id: 'user-3', name: 'Mike Wilson', role: 'service_head', email: 'mike@furniflow.com', phone: '+1 234 567 8903', active: true },
-                { id: 'user-4', name: 'Tom Davis', role: 'field_staff', email: 'tom@furniflow.com', phone: '+1 234 567 8904', active: true },
-                { id: 'user-5', name: 'Emily Brown', role: 'field_staff', email: 'emily@furniflow.com', phone: '+1 234 567 8905', active: true },
-                { id: 'user-6', name: 'Chris Lee', role: 'sales', email: 'chris@furniflow.com', phone: '+1 234 567 8906', active: true },
+                { id: 'user-1', name: 'John Smith', role: 'admin', email: 'john@furniflow.com', active: true },
+                { id: 'user-2', name: 'Sarah Johnson', role: 'sales', email: 'sarah@furniflow.com', active: true },
+                { id: 'user-3', name: 'Mike Wilson', role: 'service_head', email: 'mike@furniflow.com', active: true },
+                { id: 'user-4', name: 'Tom Davis', role: 'field_staff', email: 'tom@furniflow.com', active: true },
             ],
             customers: [
-                { id: 'cust-1', name: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL 62701', product: 'Modern Sofa Set', inquiryDate: '2024-03-10', expectedClosingDate: '2024-03-25', notes: 'Interested in white leather options', status: 'lead', followUpDate: '2024-03-20', createdBy: 'user-2' },
-                { id: 'cust-2', name: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL 60601', product: 'Dining Table - 6 Seater', inquiryDate: '2024-03-08', expectedClosingDate: '2024-03-22', notes: 'Prefers oak wood finish', status: 'prospect', followUpDate: '2024-03-19', createdBy: 'user-2' },
-                { id: 'cust-3', name: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL 60540', product: 'Bedroom Furniture Set', inquiryDate: '2024-03-05', expectedClosingDate: '2024-03-20', notes: 'Executive style bedroom set requested', status: 'confirmed', followUpDate: null, createdBy: 'user-6' },
-                { id: 'cust-4', name: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL 60505', product: 'Office Desk & Chair', inquiryDate: '2024-03-01', expectedClosingDate: '2024-03-18', notes: 'Home office setup', status: 'confirmed', followUpDate: null, createdBy: 'user-2' },
-                { id: 'cust-5', name: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL 60431', product: 'Kids Bedroom Set', inquiryDate: '2024-02-28', expectedClosingDate: null, notes: 'Looking for eco-friendly options', status: 'closed', followUpDate: null, createdBy: 'user-6' },
+                { id: 'cust-1', name: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', inquiryDate: '2024-03-10', expectedClosingDate: '2024-03-25', status: 'lead', followUpDate: '2024-03-20', createdBy: 'user-2' },
+                { id: 'cust-2', name: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL', product: 'Dining Table - 6 Seater', inquiryDate: '2024-03-08', expectedClosingDate: '2024-03-22', status: 'prospect', followUpDate: '2024-03-19', createdBy: 'user-2' },
+                { id: 'cust-3', name: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', inquiryDate: '2024-03-05', expectedClosingDate: '2024-03-20', status: 'confirmed', followUpDate: null, createdBy: 'user-6' },
+                { id: 'cust-4', name: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', inquiryDate: '2024-03-01', expectedClosingDate: '2024-03-18', status: 'confirmed', followUpDate: null, createdBy: 'user-2' },
+                { id: 'cust-5', name: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL', product: 'Kids Bedroom Set', inquiryDate: '2024-02-28', expectedClosingDate: null, status: 'closed', followUpDate: null, createdBy: 'user-6' },
             ],
             jobs: [
-                { id: 'job-1', customerId: 'cust-3', customerName: 'David Thompson', customerPhone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL 60540', product: 'Bedroom Furniture Set', type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: '2024-03-21', assignedTo: null, rescheduleReason: null, images: [], remarks: '', completedAt: null, createdBy: 'user-6' },
-                { id: 'job-2', customerId: 'cust-4', customerName: 'Lisa Garcia', customerPhone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL 60505', product: 'Office Desk & Chair', type: 'installation', status: 'accepted', source: 'dispatch', scheduledDate: '2024-03-20', assignedTo: 'user-4', rescheduleReason: null, images: [], remarks: '', completedAt: null, createdBy: 'user-2' },
-                { id: 'job-3', customerId: 'cust-1', customerName: 'Robert Anderson', customerPhone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL 62701', product: 'Modern Sofa Set', type: 'service', status: 'completed', source: 'manual', scheduledDate: '2024-03-18', assignedTo: 'user-5', rescheduleReason: null, images: ['site-image-1.jpg', 'site-image-2.jpg'], remarks: 'Full setup completed. Customer satisfied.', completedAt: '2024-03-18T14:30:00', createdBy: 'user-3' },
-                { id: 'job-4', customerId: 'cust-2', customerName: 'Jennifer Martinez', customerPhone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL 60601', product: 'Dining Table - 6 Seater', type: 'service', status: 'scheduled', source: 'manual', scheduledDate: '2024-03-22', assignedTo: 'user-4', rescheduleReason: null, images: [], remarks: '', completedAt: null, createdBy: 'user-3' },
-                { id: 'job-5', customerId: 'cust-5', customerName: 'Michael Chen', customerPhone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL 60431', product: 'Kids Bedroom Set', type: 'delivery', status: 'delivered', source: 'dispatch', scheduledDate: '2024-03-15', assignedTo: 'user-5', rescheduleReason: null, images: [], remarks: '', completedAt: null, createdBy: 'user-6' },
+                { id: 'job-1', customerId: 'cust-3', customerName: 'David Thompson', customerPhone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: '2024-03-21', assignedTo: null },
+                { id: 'job-2', customerId: 'cust-4', customerName: 'Lisa Garcia', customerPhone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', type: 'installation', status: 'accepted', source: 'dispatch', scheduledDate: '2024-03-20', assignedTo: 'user-4' },
+                { id: 'job-3', customerId: 'cust-1', customerName: 'Robert Anderson', customerPhone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', type: 'service', status: 'completed', source: 'manual', scheduledDate: '2024-03-18', assignedTo: 'user-5' },
             ],
-            notifications: [
-                { id: 'notif-1', userId: 'user-2', type: 'success', title: 'Job Completed', message: "Installation at Robert Anderson's place is complete", read: false, createdAt: '2024-03-18T14:30:00' },
-                { id: 'notif-2', userId: 'user-2', type: 'info', title: 'Job Scheduled', message: 'Delivery for David Thompson scheduled for Mar 21', read: false, createdAt: '2024-03-16T10:00:00' },
-                { id: 'notif-3', userId: 'user-3', type: 'alert', title: 'New Dispatch Request', message: 'New delivery request from Sales for David Thompson', read: true, createdAt: '2024-03-15T09:00:00' },
-            ],
+            notifications: [],
             currentUser: null
         };
 
-        // Generate ID
+        let currentPage = 'login';
+        let showModal = null;
+
         function generateId() {
             return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
 
-        // App State
-        let currentPage = 'login';
-        let showModal = null;
-        let editingCustomer = null;
-        let editingJob = null;
-
-        // Render Functions
         function render() {
             const app = document.getElementById('app');
-            
             if (!store.currentUser) {
                 app.innerHTML = renderLogin();
                 return;
             }
-
-            let content = '';
-            switch(currentPage) {
-                case 'dashboard':
-                    content = renderDashboard();
-                    break;
-                case 'sales':
-                    content = renderSales();
-                    break;
-                case 'service':
-                    content = renderService();
-                    break;
-                case 'admin':
-                    content = renderAdmin();
-                    break;
-                default:
-                    content = renderDashboard();
-            }
-
-            app.innerHTML = renderLayout(content);
-            attachEventListeners();
+            app.innerHTML = renderLayout(renderPage());
         }
 
         function renderLogin() {
             return `
-                <div class="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-4">
-                    <div class="absolute inset-0 overflow-hidden">
-                        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E94560]/10 rounded-full blur-3xl"></div>
-                        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#4DA8DA]/10 rounded-full blur-3xl"></div>
-                    </div>
-                    <div class="relative z-10 w-full max-w-md">
-                        <div class="text-center mb-8 animate-fadeIn">
-                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#E94560] to-[#FF6B6B] flex items-center justify-center">
-                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
+                <div class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);">
+                    <div class="w-full max-w-md">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                             </div>
                             <h1 class="text-3xl font-bold text-white mb-2">FurniFlow</h1>
-                            <p class="text-[#A0A0B8]">Business Management System</p>
+                            <p class="text-gray-400">Business Management System</p>
                         </div>
-                        <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-2xl p-6 shadow-2xl animate-fadeIn stagger-1">
+                        <div class="rounded-2xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
                             <h2 class="text-xl font-semibold text-white mb-2">Select Your Role</h2>
-                            <p class="text-[#A0A0B8] text-sm mb-6">Choose a role to access the system</p>
+                            <p class="text-gray-400 text-sm mb-6">Choose a role to access the system</p>
                             <div class="space-y-3">
-                                ${['sales', 'service_head', 'field_staff', 'admin'].map(role => `
-                                    <button onclick="login('${role}')" class="w-full p-4 rounded-xl border border-[#3A3A5C] hover:border-[#E94560]/50 hover:bg-[#2A2A44] transition-all duration-200 text-left">
-                                        <div class="flex items-start gap-4">
-                                            <div class="p-2 rounded-lg bg-[#2A2A44]">
-                                                <svg class="w-6 h-6 text-[#A0A0B8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <h3 class="font-semibold text-white">${role === 'service_head' ? 'Service Head' : role === 'field_staff' ? 'Field Staff' : role.charAt(0).toUpperCase() + role.slice(1)}</h3>
-                                                <p class="text-sm text-[#A0A0B8] mt-0.5">${role === 'sales' ? 'Manage customers, leads, and create dispatch requests' : role === 'service_head' ? 'Manage jobs, assign staff, oversee operations' : role === 'field_staff' ? 'Execute jobs, update status, complete installations' : 'Full system access, user management, reports'}</p>
-                                            </div>
+                                <button onclick="login('sales')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         </div>
-                                    </button>
-                                `).join('')}
+                                        <div><h3 class="font-semibold text-white">Sales</h3><p class="text-sm text-gray-400">Manage customers & orders</p></div>
+                                    </div>
+                                </button>
+                                <button onclick="login('service_head')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        </div>
+                                        <div><h3 class="font-semibold text-white">Service Head</h3><p class="text-sm text-gray-400">Manage jobs & staff</p></div>
+                                    </div>
+                                </button>
+                                <button onclick="login('field_staff')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                        <div><h3 class="font-semibold text-white">Field Staff</h3><p class="text-sm text-gray-400">Execute jobs</p></div>
+                                    </div>
+                                </button>
+                                <button onclick="login('admin')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                        </div>
+                                        <div><h3 class="font-semibold text-white">Admin</h3><p class="text-sm text-gray-400">Full system access</p></div>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -178,243 +133,130 @@
             render();
         }
 
-        function renderLayout(content) {
-            const user = store.currentUser;
-            const notifications = store.notifications.filter(n => n.userId === user.id && !n.read);
-            
-            return `
-                <div class="min-h-screen bg-[#0F0F1A]">
-                    <aside class="fixed left-0 top-0 h-full bg-[#1A1A2E] border-r border-[#3A3A5C] w-[280px] flex flex-col z-40">
-                        <div class="p-4 border-b border-[#3A3A5C]">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E94560] to-[#FF6B6B] flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h1 class="text-white font-bold text-lg">FurniFlow</h1>
-                                    <p class="text-xs text-[#A0A0B8]">Business Management</p>
-                                </div>
-                            </div>
-                        </div>
-                        <nav class="flex-1 p-3 space-y-1">
-                            ${renderNavItem('/', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6')}
-                            ${(user.role === 'sales' || user.role === 'admin') ? renderNavItem('/sales', 'Customers', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z') : ''}
-                            ${(user.role === 'service_head' || user.role === 'field_staff' || user.role === 'admin') ? renderNavItem('/service', 'Jobs', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01') : ''}
-                            ${user.role === 'admin' ? renderNavItem('/admin', 'Admin', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z') : ''}
-                        </nav>
-                        <div class="p-3 border-t border-[#3A3A5C]">
-                            <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0F0F1A]">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4DA8DA] to-[#00D9A5] flex items-center justify-center">
-                                    <span class="text-xs font-bold text-white">${user.name.charAt(0)}</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-white truncate">${user.name}</p>
-                                    <p class="text-xs text-[#A0A0B8] capitalize">${user.role.replace('_', ' ')}</p>
-                                </div>
-                                <button onclick="logout()" class="p-1.5 text-[#A0A0B8] hover:text-[#E94560] transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </aside>
-                    <div class="ml-[280px]">
-                        <header class="h-16 bg-[#1A1A2E] border-b border-[#3A3A5C] px-6 flex items-center justify-between">
-                            <h2 class="text-white text-lg font-semibold capitalize">${user.role.replace('_', ' ')} Dashboard</h2>
-                            <div class="flex items-center gap-4">
-                                <div class="relative">
-                                    <button onclick="toggleNotifications()" class="relative p-2 text-[#A0A0B8] hover:text-white hover:bg-[#2A2A44] rounded-lg transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                                        </svg>
-                                        ${notifications.length > 0 ? `<span class="absolute -top-1 -right-1 w-5 h-5 bg-[#E94560] text-white text-xs rounded-full flex items-center justify-center">${notifications.length}</span>` : ''}
-                                    </button>
-                                </div>
-                            </div>
-                        </header>
-                        <main class="p-6">${content}</main>
-                    </div>
-                </div>
-                ${showModal ? renderModal() : ''}
-            `;
-        }
-
-        function renderNavItem(href, label, icon) {
-            const isActive = currentPage === href;
-            return `
-                <a href="#" onclick="navigate('${href}')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-gradient-to-r from-[#E94560]/20 to-transparent text-[#E94560] border-l-2 border-[#E94560]' : 'text-[#A0A0B8] hover:bg-[#2A2A44] hover:text-white'}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"></path>
-                    </svg>
-                    <span class="font-medium">${label}</span>
-                </a>
-            `;
-        }
-
         function navigate(page) {
             currentPage = page;
             render();
         }
 
-        function toggleNotifications() {
-            alert('Notifications panel - check console for notifications');
-            console.log('Notifications:', store.notifications.filter(n => n.userId === store.currentUser.id));
+        function renderPage() {
+            switch(currentPage) {
+                case 'dashboard': return renderDashboard();
+                case 'sales': return renderSales();
+                case 'service': return renderService();
+                case 'admin': return renderAdmin();
+                default: return renderDashboard();
+            }
+        }
+
+        function renderLayout(content) {
+            const user = store.currentUser;
+            return `
+                <div class="min-h-screen" style="background-color: #0F0F1A;">
+                    <aside class="fixed left-0 top-0 h-full w-[260px] flex flex-col" style="background-color: #1A1A2E; border-right: 1px solid #3A3A5C;">
+                        <div class="p-4" style="border-bottom: 1px solid #3A3A5C;">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                </div>
+                                <div><h1 class="text-white font-bold text-lg">FurniFlow</h1><p class="text-xs text-gray-400">Business Management</p></div>
+                            </div>
+                        </div>
+                        <nav class="flex-1 p-3 space-y-1">
+                            <a href="#" onclick="navigate('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'dashboard' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="font-medium">Dashboard</span>
+                            </a>
+                            ${(user.role === 'sales' || user.role === 'admin') ? `
+                            <a href="#" onclick="navigate('sales')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'sales' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="font-medium">Customers</span>
+                            </a>
+                            ` : ''}
+                            ${(user.role === 'service_head' || user.role === 'field_staff' || user.role === 'admin') ? `
+                            <a href="#" onclick="navigate('service')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'service' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                <span class="font-medium">Jobs</span>
+                            </a>
+                            ` : ''}
+                            ${user.role === 'admin' ? `
+                            <a href="#" onclick="navigate('admin')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'admin' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                                <span class="font-medium">Admin</span>
+                            </a>
+                            ` : ''}
+                        </nav>
+                        <div class="p-3" style="border-top: 1px solid #3A3A5C;">
+                            <div class="flex items-center gap-3 p-2 rounded-lg" style="background-color: #0F0F1A;">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4DA8DA 0%, #00D9A5 100%);">
+                                    <span class="text-xs font-bold text-white">${user.name.charAt(0)}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-white truncate">${user.name}</p>
+                                    <p class="text-xs text-gray-400 capitalize">${user.role.replace('_', ' ')}</p>
+                                </div>
+                                <button onclick="logout()" class="p-1.5 text-gray-400 hover:text-[#E94560]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+                    <div class="ml-[260px]">
+                        <header class="h-16 px-6 flex items-center justify-between" style="background-color: #1A1A2E; border-bottom: 1px solid #3A3A5C;">
+                            <h2 class="text-white text-lg font-semibold capitalize">${user.role.replace('_', ' ')} Dashboard</h2>
+                        </header>
+                        <main class="p-6">${content}</main>
+                    </div>
+                </div>
+            `;
         }
 
         function renderDashboard() {
-            const stats = {
-                totalCustomers: store.customers.length,
-                pendingJobs: store.jobs.filter(j => ['pending', 'accepted', 'scheduled'].includes(j.status)).length,
-                completedToday: store.jobs.filter(j => j.status === 'completed').length,
-                activeLeads: store.customers.filter(c => c.status === 'lead' || c.status === 'prospect').length,
-            };
-
-            const recentJobs = store.jobs.slice(0, 5);
-
+            const stats = { totalCustomers: store.customers.length, pendingJobs: store.jobs.filter(j => ['pending','accepted','scheduled'].includes(j.status)).length, completed: store.jobs.filter(j => j.status === 'completed').length, activeLeads: store.customers.filter(c => c.status === 'lead' || c.status === 'prospect').length };
             return `
                 <div class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Welcome back, ${store.currentUser.name.split(' ')[0]}</h1>
-                            <p class="text-[#A0A0B8] mt-1">Here's what's happening today</p>
-                        </div>
-                    </div>
+                    <div><h1 class="text-2xl font-bold text-white">Welcome back, ${store.currentUser.name.split(' ')[0]}</h1><p class="text-gray-400 mt-1">Here's what's happening today</p></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        ${renderStatCard('Total Customers', stats.totalCustomers, '#4DA8DA', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z')}
-                        ${renderStatCard('Pending Jobs', stats.pendingJobs, '#FFB830', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z')}
-                        ${renderStatCard('Completed', stats.completedToday, '#00D9A5', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z')}
-                        ${renderStatCard('Active Leads', stats.activeLeads, '#E94560', 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6')}
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Customers</p><p class="text-3xl font-bold text-white mt-1">${stats.totalCustomers}</p></div>
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Pending Jobs</p><p class="text-3xl font-bold text-white mt-1">${stats.pendingJobs}</p></div>
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Completed</p><p class="text-3xl font-bold text-white mt-1">${stats.completed}</p></div>
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Active Leads</p><p class="text-3xl font-bold text-white mt-1">${stats.activeLeads}</p></div>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-white mb-4">Recent Jobs</h3>
-                            <div class="space-y-3">
-                                ${recentJobs.map(job => `
-                                    <div class="flex items-center justify-between p-3 rounded-lg bg-[#0F0F1A]">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-2 h-2 rounded-full bg-[#E94560]"></div>
-                                            <div>
-                                                <p class="text-white font-medium">${job.customerName}</p>
-                                                <p class="text-sm text-[#A0A0B8]">${job.product}</p>
-                                            </div>
-                                        </div>
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status.replace('_', ' ')}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ${(store.currentUser.role === 'sales' || store.currentUser.role === 'admin') ? `
-                            <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl p-6">
-                                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-[#FFB830] animate-pulse"></span>
-                                    Follow-ups Due
-                                </h3>
-                                <div class="space-y-3">
-                                    ${store.customers.filter(c => c.followUpDate && c.status !== 'closed').map(c => `
-                                        <div class="flex items-center justify-between p-3 rounded-lg bg-[#0F0F1A]">
-                                            <div>
-                                                <p class="text-white font-medium">${c.name}</p>
-                                                <p class="text-sm text-[#A0A0B8]">${c.phone}</p>
-                                            </div>
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[#FFB830]/20 text-[#FFB830]">${c.followUpDate}</span>
-                                        </div>
-                                    `).join('')}
-                                    ${store.customers.filter(c => c.followUpDate && c.status !== 'closed').length === 0 ? '<p class="text-[#A0A0B8] text-center py-4">No follow-ups due</p>' : ''}
+                    <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
+                        <h3 class="text-lg font-semibold text-white mb-4">Recent Jobs</h3>
+                        <div class="space-y-3">
+                            ${store.jobs.slice(0,5).map(job => `
+                                <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: #0F0F1A;">
+                                    <div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background-color: #E94560;"></div><div><p class="text-white font-medium">${job.customerName}</p><p class="text-sm text-gray-400">${job.product}</p></div></div>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status}</span>
                                 </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderStatCard(label, value, color, icon) {
-            return `
-                <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl p-6 animate-fadeIn">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-[#A0A0B8] text-sm">${label}</p>
-                            <p class="text-3xl font-bold text-white mt-1 font-mono">${value}</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: ${color}20">
-                            <svg class="w-6 h-6" style="color: ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"></path>
-                            </svg>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
             `;
-        }
-
-        function getStatusClass(status) {
-            const classes = {
-                pending: 'bg-[#FFB830]/20 text-[#FFB830]',
-                accepted: 'bg-[#4DA8DA]/20 text-[#4DA8DA]',
-                scheduled: 'bg-[#2A2A44] text-white',
-                out_for_delivery: 'bg-gradient-to-r from-[#E94560]/20 to-[#FF6B6B]/20 text-[#E94560]',
-                delivered: 'bg-[#00D9A5]/20 text-[#00D9A5]',
-                completed: 'bg-[#00D9A5]/20 text-[#00D9A5]',
-                cancelled: 'bg-[#6B7280]/20 text-[#6B7280]',
-            };
-            return classes[status] || 'bg-[#2A2A44] text-white';
         }
 
         function renderSales() {
             return `
                 <div class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Customer Management</h1>
-                            <p class="text-[#A0A0B8] mt-1">Manage leads, prospects, and orders</p>
-                        </div>
-                        <button onclick="showModal='addCustomer'" class="px-4 py-2 bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                Add Customer
-                            </span>
-                        </button>
+                        <div><h1 class="text-2xl font-bold text-white">Customer Management</h1><p class="text-gray-400 mt-1">Manage leads, prospects, and orders</p></div>
+                        <button onclick="showAddCustomerModal()" class="px-4 py-2 text-white rounded-lg font-medium" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">+ Add Customer</button>
                     </div>
-                    <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl overflow-hidden">
+                    <div class="rounded-xl overflow-hidden" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
                         <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-[#3A3A5C]">
-                                    <th class="text-left p-4 text-sm font-medium text-[#A0A0B8]">Customer</th>
-                                    <th class="text-left p-4 text-sm font-medium text-[#A0A0B8]">Product</th>
-                                    <th class="text-left p-4 text-sm font-medium text-[#A0A0B8]">Status</th>
-                                    <th class="text-left p-4 text-sm font-medium text-[#A0A0B8]">Follow-up</th>
-                                    <th class="text-left p-4 text-sm font-medium text-[#A0A0B8]">Actions</th>
-                                </tr>
-                            </thead>
+                            <thead><tr style="border-bottom: 1px solid #3A3A5C;"><th class="text-left p-4 text-sm font-medium text-gray-400">Customer</th><th class="text-left p-4 text-sm font-medium text-gray-400">Product</th><th class="text-left p-4 text-sm font-medium text-gray-400">Status</th><th class="text-left p-4 text-sm font-medium text-gray-400">Follow-up</th><th class="text-left p-4 text-sm font-medium text-gray-400">Actions</th></tr></thead>
                             <tbody>
-                                ${store.customers.map((c, idx) => `
-                                    <tr class="border-b border-[#3A3A5C]/50 table-row-hover" style="animation-delay: ${idx * 0.05}s">
-                                        <td class="p-4">
-                                            <div>
-                                                <p class="text-white font-medium">${c.name}</p>
-                                                <p class="text-sm text-[#A0A0B8]">${c.phone}</p>
-                                                <p class="text-xs text-[#6B6B80] mt-1">${c.address}</p>
-                                            </div>
-                                        </td>
-                                        <td class="p-4">
-                                            <p class="text-white">${c.product}</p>
-                                            ${c.expectedClosingDate ? `<p class="text-xs text-[#A0A0B8]">Expected: ${c.expectedClosingDate}</p>` : ''}
-                                        </td>
-                                        <td class="p-4">
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getCustomerStatusClass(c.status)}">${c.status}</span>
-                                        </td>
-                                        <td class="p-4">
-                                            ${c.followUpDate ? `<span class="${new Date(c.followUpDate) <= new Date() ? 'text-[#FFB830]' : 'text-[#A0A0B8]'}">${c.followUpDate}</span>` : '<span class="text-[#6B6B80]">-</span>'}
-                                        </td>
+                                ${store.customers.map(c => `
+                                    <tr style="border-bottom: 1px solid #3A3A5C50;">
+                                        <td class="p-4"><p class="text-white font-medium">${c.name}</p><p class="text-sm text-gray-400">${c.phone}</p></td>
+                                        <td class="p-4"><p class="text-white">${c.product}</p></td>
+                                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${getCustomerStatusClass(c.status)}">${c.status}</span></td>
+                                        <td class="p-4 text-gray-400">${c.followUpDate || '-'}</td>
                                         <td class="p-4">
                                             <div class="flex gap-2">
-                                                <button onclick="editCustomer('${c.id}')" class="px-3 py-1.5 text-sm text-[#A0A0B8] hover:text-white hover:bg-[#2A2A44] rounded-lg transition-colors">Edit</button>
-                                                ${c.status !== 'confirmed' && c.status !== 'closed' ? `<button onclick="convertCustomer('${c.id}')" class="px-3 py-1.5 text-sm border border-[#3A3A5C] text-white hover:border-[#E94560] hover:text-[#E94560] rounded-lg transition-colors">Convert</button>` : ''}
-                                                ${c.status === 'confirmed' ? `<button onclick="createDispatch('${c.id}')" class="px-3 py-1.5 text-sm bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg hover:opacity-90">Dispatch</button>` : ''}
+                                                <button onclick="convertCustomer('${c.id}')" class="px-3 py-1.5 text-sm border rounded-lg text-white hover:border-[#E94560]" style="border-color: #3A3A5C;">Convert</button>
+                                                ${c.status === 'confirmed' ? `<button onclick="createDispatch('${c.id}')" class="px-3 py-1.5 text-sm text-white rounded-lg" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">Dispatch</button>` : ''}
                                             </div>
                                         </td>
                                     </tr>
@@ -426,81 +268,24 @@
             `;
         }
 
-        function getCustomerStatusClass(status) {
-            const classes = {
-                lead: 'bg-[#4DA8DA]/20 text-[#4DA8DA]',
-                prospect: 'bg-[#FFB830]/20 text-[#FFB830]',
-                confirmed: 'bg-[#00D9A5]/20 text-[#00D9A5]',
-                closed: 'bg-[#2A2A44] text-white',
-            };
-            return classes[status];
-        }
-
         function renderService() {
             return `
                 <div class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Job Management</h1>
-                            <p class="text-[#A0A0B8] mt-1">Manage and track all service jobs</p>
-                        </div>
-                        ${store.currentUser.role === 'service_head' ? `
-                            <button onclick="showModal='addJob'" class="px-4 py-2 bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Add Job
-                                </span>
-                            </button>
-                        ` : ''}
-                    </div>
+                    <div><h1 class="text-2xl font-bold text-white">Job Management</h1><p class="text-gray-400 mt-1">Manage and track all service jobs</p></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${store.jobs.map((job, idx) => `
-                            <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl p-6 animate-fadeIn hover:border-[#E94560] transition-colors" style="animation-delay: ${idx * 0.05}s">
+                        ${store.jobs.map(job => `
+                            <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
                                 <div class="flex items-start justify-between mb-3">
                                     <div class="flex gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getJobTypeClass(job.type)}">${job.type}</span>
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status.replace('_', ' ')}</span>
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status}</span>
                                     </div>
-                                    <span class="text-xs text-[#6B6B80] font-mono">#${job.id.slice(-4)}</span>
                                 </div>
                                 <h3 class="text-white font-semibold mb-1">${job.customerName}</h3>
-                                <p class="text-sm text-[#A0A0B8] mb-2">${job.product}</p>
-                                <div class="space-y-1 text-sm text-[#A0A0B8]">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                        </svg>
-                                        ${job.customerPhone}
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        </svg>
-                                        <span class="truncate">${job.address}</span>
-                                    </div>
-                                    ${job.scheduledDate ? `
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            ${job.scheduledDate}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                ${job.assignedTo ? `
-                                    <div class="mt-3 pt-3 border-t border-[#3A3A5C]">
-                                        <p class="text-xs text-[#6B6B80]">Assigned to</p>
-                                        <p class="text-sm text-white">${store.users.find(u => u.id === job.assignedTo)?.name || 'Unknown'}</p>
-                                    </div>
-                                ` : ''}
-                                ${store.currentUser.role === 'service_head' && job.status === 'pending' ? `
-                                    <button onclick="acceptJob('${job.id}')" class="w-full mt-4 px-4 py-2 bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg hover:opacity-90">Accept Job</button>
-                                ` : ''}
-                                ${job.status === 'delivered' ? `
-                                    <button onclick="completeJob('${job.id}')" class="w-full mt-4 px-4 py-2 bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg hover:opacity-90">Complete Installation</button>
-                                ` : ''}
+                                <p class="text-sm text-gray-400 mb-2">${job.product}</p>
+                                <p class="text-sm text-gray-400">${job.address}</p>
+                                ${job.status === 'pending' ? `<button onclick="acceptJob('${job.id}')" class="w-full mt-4 px-4 py-2 text-white rounded-lg" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">Accept Job</button>` : ''}
+                                ${job.status === 'accepted' ? `<button onclick="updateJobStatus('${job.id}', 'completed')" class="w-full mt-4 px-4 py-2 text-white rounded-lg" style="background: linear-gradient(135deg, #00D9A5 0%, #00B388 100%);">Complete Job</button>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -508,64 +293,26 @@
             `;
         }
 
-        function getJobTypeClass(type) {
-            const classes = {
-                service: 'bg-[#4DA8DA]/20 text-[#4DA8DA]',
-                delivery: 'bg-[#00D9A5]/20 text-[#00D9A5]',
-                installation: 'bg-[#FFB830]/20 text-[#FFB830]',
-            };
-            return classes[type];
-        }
-
         function renderAdmin() {
-            const stats = {
-                totalCustomers: store.customers.length,
-                totalJobs: store.jobs.length,
-                completedJobs: store.jobs.filter(j => j.status === 'completed').length,
-                pendingJobs: store.jobs.filter(j => ['pending', 'accepted', 'scheduled'].includes(j.status)).length,
-            };
-
+            const stats = { totalCustomers: store.customers.length, totalJobs: store.jobs.length, completed: store.jobs.filter(j => j.status === 'completed').length };
             return `
                 <div class="space-y-6">
-                    <div>
-                        <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
-                        <p class="text-[#A0A0B8] mt-1">System overview and management</p>
+                    <div><h1 class="text-2xl font-bold text-white">Admin Dashboard</h1><p class="text-gray-400 mt-1">System overview and management</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Customers</p><p class="text-3xl font-bold text-white mt-1">${stats.totalCustomers}</p></div>
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Jobs</p><p class="text-3xl font-bold text-white mt-1">${stats.totalJobs}</p></div>
+                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Completed</p><p class="text-3xl font-bold text-white mt-1">${stats.completed}</p></div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        ${renderStatCard('Total Customers', stats.totalCustomers, '#4DA8DA', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z')}
-                        ${renderStatCard('Total Jobs', stats.totalJobs, '#E94560', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2')}
-                        ${renderStatCard('Pending Jobs', stats.pendingJobs, '#FFB830', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z')}
-                        ${renderStatCard('Completed', stats.completedJobs, '#00D9A5', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z')}
-                    </div>
-                    <div class="bg-[#1E1E32] border border-[#3A3A5C] rounded-xl p-6">
-                        <h3 class="text-lg font-semibold text-white mb-4">User Management</h3>
+                    <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
+                        <h3 class="text-lg font-semibold text-white mb-4">Users</h3>
                         <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-[#3A3A5C]">
-                                    <th class="text-left p-3 text-sm font-medium text-[#A0A0B8]">User</th>
-                                    <th class="text-left p-3 text-sm font-medium text-[#A0A0B8]">Role</th>
-                                    <th class="text-left p-3 text-sm font-medium text-[#A0A0B8]">Email</th>
-                                    <th class="text-left p-3 text-sm font-medium text-[#A0A0B8]">Status</th>
-                                </tr>
-                            </thead>
+                            <thead><tr style="border-bottom: 1px solid #3A3A5C;"><th class="text-left p-3 text-sm font-medium text-gray-400">User</th><th class="text-left p-3 text-sm font-medium text-gray-400">Role</th><th class="text-left p-3 text-sm font-medium text-gray-400">Status</th></tr></thead>
                             <tbody>
                                 ${store.users.map(u => `
-                                    <tr class="border-b border-[#3A3A5C]/50 table-row-hover">
-                                        <td class="p-3">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4DA8DA] to-[#00D9A5] flex items-center justify-center">
-                                                    <span class="text-xs font-bold text-white">${u.name.charAt(0)}</span>
-                                                </div>
-                                                <span class="text-white font-medium">${u.name}</span>
-                                            </div>
-                                        </td>
-                                        <td class="p-3">
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getRoleClass(u.role)}">${u.role.replace('_', ' ')}</span>
-                                        </td>
-                                        <td class="p-3 text-[#A0A0B8]">${u.email}</td>
-                                        <td class="p-3">
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${u.active ? 'bg-[#00D9A5]/20 text-[#00D9A5]' : 'bg-[#E94560]/20 text-[#E94560]'}">${u.active ? 'Active' : 'Inactive'}</span>
-                                        </td>
+                                    <tr style="border-bottom: 1px solid #3A3A5C50;">
+                                        <td class="p-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4DA8DA 0%, #00D9A5 100%);"><span class="text-xs font-bold text-white">${u.name.charAt(0)}</span></div><span class="text-white font-medium">${u.name}</span></div></td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${getRoleClass(u.role)}">${u.role.replace('_', ' ')}</span></td>
+                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 text-green-400">Active</span></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -575,125 +322,47 @@
             `;
         }
 
+        function getStatusClass(status) {
+            const classes = { pending: 'bg-yellow-900 text-yellow-400', accepted: 'bg-blue-900 text-blue-400', scheduled: 'bg-purple-900 text-purple-400', delivered: 'bg-green-900 text-green-400', completed: 'bg-green-900 text-green-400', cancelled: 'bg-gray-700 text-gray-400' };
+            return classes[status] || 'bg-gray-700 text-gray-400';
+        }
+
+        function getCustomerStatusClass(status) {
+            const classes = { lead: 'bg-blue-900 text-blue-400', prospect: 'bg-yellow-900 text-yellow-400', confirmed: 'bg-green-900 text-green-400', closed: 'bg-gray-700 text-gray-400' };
+            return classes[status];
+        }
+
+        function getJobTypeClass(type) {
+            const classes = { service: 'bg-blue-900 text-blue-400', delivery: 'bg-green-900 text-green-400', installation: 'bg-yellow-900 text-yellow-400' };
+            return classes[type];
+        }
+
         function getRoleClass(role) {
-            const classes = {
-                admin: 'bg-[#E94560]/20 text-[#E94560]',
-                sales: 'bg-[#4DA8DA]/20 text-[#4DA8DA]',
-                service_head: 'bg-[#FFB830]/20 text-[#FFB830]',
-                field_staff: 'bg-[#00D9A5]/20 text-[#00D9A5]',
-            };
+            const classes = { admin: 'bg-red-900 text-red-400', sales: 'bg-blue-900 text-blue-400', service_head: 'bg-yellow-900 text-yellow-400', field_staff: 'bg-green-900 text-green-400' };
             return classes[role];
         }
 
-        function renderModal() {
-            if (showModal === 'addCustomer') {
-                return `
-                    <div class="fixed inset-0 z-50 flex items-center justify-center">
-                        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="showModal=null;render()"></div>
-                        <div class="relative w-full max-w-lg mx-4 bg-[#1E1E32] border border-[#3A3A5C] rounded-xl shadow-2xl animate-modal">
-                            <div class="flex items-center justify-between px-6 py-4 border-b border-[#3A3A5C]">
-                                <h2 class="text-xl font-semibold text-white">Add New Customer</h2>
-                                <button onclick="showModal=null;render()" class="p-1 text-[#A0A0B8] hover:text-white">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <input id="custName" type="text" placeholder="Customer Name *" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#E94560]">
-                                    <input id="custPhone" type="text" placeholder="Phone Number *" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#E94560]">
-                                </div>
-                                <input id="custAddress" type="text" placeholder="Address *" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#E94560]">
-                                <input id="custProduct" type="text" placeholder="Product Interested/Purchased" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#E94560]">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <input id="custExpectedDate" type="date" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E94560]">
-                                    <input id="custFollowUp" type="date" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E94560]">
-                                </div>
-                                <select id="custStatus" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E94560]">
-                                    <option value="lead">Lead</option>
-                                    <option value="prospect">Prospect</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                                <textarea id="custNotes" placeholder="Notes" rows="3" class="w-full bg-[#0F0F1A] border border-[#3A3A5C] rounded-lg px-4 py-3 text-white placeholder-[#6B6B80] focus:outline-none focus:border-[#E94560] resize-none"></textarea>
-                                <div class="flex gap-3 pt-4">
-                                    <button onclick="showModal=null;render()" class="flex-1 px-4 py-2 border border-[#3A3A5C] text-white rounded-lg hover:border-[#E94560] hover:text-[#E94560] transition-colors">Cancel</button>
-                                    <button onclick="saveCustomer()" class="flex-1 px-4 py-2 bg-gradient-to-r from-[#E94560] to-[#FF6B6B] text-white rounded-lg hover:opacity-90">Add Customer</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            return '';
-        }
-
-        function saveCustomer() {
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const address = document.getElementById('custAddress').value;
-            
-            if (!name || !phone || !address) {
-                alert('Please fill in required fields');
-                return;
-            }
-
-            store.customers.push({
-                id: generateId(),
-                name: name,
-                phone: phone,
-                address: address,
-                product: document.getElementById('custProduct').value,
-                inquiryDate: new Date().toISOString().split('T')[0],
-                expectedClosingDate: document.getElementById('custExpectedDate').value || null,
-                notes: document.getElementById('custNotes').value,
-                status: document.getElementById('custStatus').value,
-                followUpDate: document.getElementById('custFollowUp').value || null,
-                createdBy: store.currentUser.id
-            });
-
-            showModal = null;
+        function showAddCustomerModal() {
+            const name = prompt('Customer Name:');
+            if (!name) return;
+            const phone = prompt('Phone Number:');
+            if (!phone) return;
+            const address = prompt('Address:');
+            if (!address) return;
+            const product = prompt('Product:') || '';
+            store.customers.push({ id: generateId(), name, phone, address, product, inquiryDate: new Date().toISOString().split('T')[0], expectedClosingDate: null, status: 'lead', followUpDate: null, createdBy: store.currentUser.id });
             render();
-        }
-
-        function editCustomer(id) {
-            const customer = store.customers.find(c => c.id === id);
-            if (customer) {
-                alert('Edit customer: ' + customer.name);
-            }
         }
 
         function convertCustomer(id) {
             const customer = store.customers.find(c => c.id === id);
-            if (customer) {
-                customer.status = 'confirmed';
-                customer.followUpDate = null;
-                render();
-            }
+            if (customer) { customer.status = 'confirmed'; render(); }
         }
 
         function createDispatch(id) {
             const customer = store.customers.find(c => c.id === id);
             if (customer) {
-                store.jobs.push({
-                    id: generateId(),
-                    customerId: customer.id,
-                    customerName: customer.name,
-                    customerPhone: customer.phone,
-                    address: customer.address,
-                    product: customer.product,
-                    type: 'delivery',
-                    status: 'pending',
-                    source: 'dispatch',
-                    scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    assignedTo: null,
-                    rescheduleReason: null,
-                    images: [],
-                    remarks: '',
-                    completedAt: null,
-                    createdBy: store.currentUser.id
-                });
+                store.jobs.push({ id: generateId(), customerId: customer.id, customerName: customer.name, customerPhone: customer.phone, address: customer.address, product: customer.product, type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0], assignedTo: null });
                 alert('Dispatch created for ' + customer.name);
                 render();
             }
@@ -701,27 +370,14 @@
 
         function acceptJob(id) {
             const job = store.jobs.find(j => j.id === id);
-            if (job) {
-                job.status = 'accepted';
-                render();
-            }
+            if (job) { job.status = 'accepted'; render(); }
         }
 
-        function completeJob(id) {
+        function updateJobStatus(id, status) {
             const job = store.jobs.find(j => j.id === id);
-            if (job) {
-                job.status = 'completed';
-                job.completedAt = new Date().toISOString();
-                job.remarks = 'Completed via mobile interface';
-                render();
-            }
+            if (job) { job.status = status; render(); }
         }
 
-        function attachEventListeners() {
-            // Event listeners are handled via onclick attributes
-        }
-
-        // Initialize
         render();
     </script>
 </body>
