@@ -1,87 +1,74 @@
-# Active Context: Next.js Starter Template
+# Active Context: FurniFlow - Furniture Business Management Application
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**Project Status**: ✅ Complete
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+The FurniFlow business management application has been built with all requested features. It's a Next.js 16 application with TypeScript, Tailwind CSS 4, and uses in-memory state management for demonstration purposes.
 
 ## Recently Completed
 
-- [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
+- [x] Built FurniFlow business management application for furniture company
+- [x] Implemented role-based authentication (Admin, Sales, Service Head, Field Staff)
+- [x] Created Sales Team module with customer management, lead conversion, dispatch creation
+- [x] Created Service Team module with job management, status workflow, completion tracking
+- [x] Created Admin module with dashboard, user management, and reports
+- [x] Implemented notifications system for cross-team communication
+- [x] Built follow-up reminders and alerts
+- [x] Added dark theme UI with custom design system
+- [x] Passed lint and typecheck, built successfully
 
 ## Current Structure
 
 | File/Directory | Purpose | Status |
 |----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
-| `.kilocode/` | AI context & recipes | ✅ Ready |
+| `src/app/page.tsx` | Main dashboard | ✅ Complete |
+| `src/app/login/page.tsx` | Login with role selection | ✅ Complete |
+| `src/app/sales/page.tsx` | Sales customer management | ✅ Complete |
+| `src/app/service/page.tsx` | Service job management | ✅ Complete |
+| `src/app/admin/page.tsx` | Admin dashboard & reports | ✅ Complete |
+| `src/components/ui/` | Reusable UI components | ✅ Complete |
+| `src/components/layout/` | App layout, sidebar, header | ✅ Complete |
+| `src/contexts/` | Auth and Data providers | ✅ Complete |
+| `src/types/` | TypeScript type definitions | ✅ Complete |
+| `src/lib/data.ts` | Mock data | ✅ Complete |
+| `SPEC.md` | Full specification | ✅ Complete |
 
-## Current Focus
+## User Roles & Permissions
 
-The template is ready. Next steps depend on user requirements:
-
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+| Role | Access |
+|------|--------|
+| Admin | Dashboard, Users, Reports |
+| Sales | Customers, Leads, Dispatch Creation |
+| Service Head | Job Management, Staff Assignment |
+| Field Staff | Job Execution, Status Updates |
 
 ## Quick Start Guide
 
-### To add a new page:
+### Run the application:
 
-Create a file at `src/app/[route]/page.tsx`:
-```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
+```bash
+bun dev
 ```
 
-### To add components:
+### Access points:
 
-Create `src/components/` directory and add components:
-```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
-```
+- `/login` - Select role to login (demo mode)
+- `/` - Dashboard (role-dependent content)
+- `/sales` - Customer management (Sales/Admin)
+- `/service` - Job management (Service/Admin)
+- `/admin` - Admin panel (Admin only)
 
-### To add a database:
+### Key Features:
 
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
-
-## Available Recipes
-
-| Recipe | File | Use Case |
-|--------|------|----------|
-| Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
-
-## Pending Improvements
-
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+1. **Sales Team**: Add customers, set follow-ups, convert leads to orders, create dispatch requests
+2. **Service Team**: Accept jobs, reschedule, assign staff, update status, complete with images
+3. **Notifications**: Real-time alerts between teams
+4. **Admin**: View stats, manage users, generate reports
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| Latest | Built complete FurniFlow furniture business management application |
