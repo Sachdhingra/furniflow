@@ -6,379 +6,309 @@
     <title>FurniFlow - Business Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #1A1A2E;
-            --accent: #E94560;
-            --success: #00D9A5;
-            --warning: #FFB830;
-            --info: #4DA8DA;
-            --background: #0F0F1A;
-            --surface: #1E1E32;
-            --surface-light: #2A2A44;
-            --text-primary: #FFFFFF;
-            --text-secondary: #A0A0B8;
-            --border: #3A3A5C;
-        }
-        body {
-            background-color: var(--background);
-            color: var(--text-primary);
-        }
+        body { background-color: #0F0F1A; color: #FFFFFF; font-family: system-ui, sans-serif; }
     </style>
 </head>
 <body class="min-h-screen">
     <div id="app"></div>
     <script>
-        const store = {
-            users: [
-                { id: 'user-1', name: 'John Smith', role: 'admin', email: 'john@furniflow.com', active: true },
-                { id: 'user-2', name: 'Sarah Johnson', role: 'sales', email: 'sarah@furniflow.com', active: true },
-                { id: 'user-3', name: 'Mike Wilson', role: 'service_head', email: 'mike@furniflow.com', active: true },
-                { id: 'user-4', name: 'Tom Davis', role: 'field_staff', email: 'tom@furniflow.com', active: true },
-            ],
-            customers: [
-                { id: 'cust-1', name: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', inquiryDate: '2024-03-10', expectedClosingDate: '2024-03-25', status: 'lead', followUpDate: '2024-03-20', createdBy: 'user-2' },
-                { id: 'cust-2', name: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL', product: 'Dining Table - 6 Seater', inquiryDate: '2024-03-08', expectedClosingDate: '2024-03-22', status: 'prospect', followUpDate: '2024-03-19', createdBy: 'user-2' },
-                { id: 'cust-3', name: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', inquiryDate: '2024-03-05', expectedClosingDate: '2024-03-20', status: 'confirmed', followUpDate: null, createdBy: 'user-6' },
-                { id: 'cust-4', name: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', inquiryDate: '2024-03-01', expectedClosingDate: '2024-03-18', status: 'confirmed', followUpDate: null, createdBy: 'user-2' },
-                { id: 'cust-5', name: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL', product: 'Kids Bedroom Set', inquiryDate: '2024-02-28', expectedClosingDate: null, status: 'closed', followUpDate: null, createdBy: 'user-6' },
-            ],
-            jobs: [
-                { id: 'job-1', customerId: 'cust-3', customerName: 'David Thompson', customerPhone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: '2024-03-21', assignedTo: null },
-                { id: 'job-2', customerId: 'cust-4', customerName: 'Lisa Garcia', customerPhone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', type: 'installation', status: 'accepted', source: 'dispatch', scheduledDate: '2024-03-20', assignedTo: 'user-4' },
-                { id: 'job-3', customerId: 'cust-1', customerName: 'Robert Anderson', customerPhone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', type: 'service', status: 'completed', source: 'manual', scheduledDate: '2024-03-18', assignedTo: 'user-5' },
-            ],
-            notifications: [],
-            currentUser: null
-        };
+const store = {
+    users: [
+        { id: 'user-1', name: 'John Smith', role: 'admin', email: 'john@furniflow.com', active: true },
+        { id: 'user-2', name: 'Sarah Johnson', role: 'sales', email: 'sarah@furniflow.com', active: true },
+        { id: 'user-3', name: 'Mike Wilson', role: 'service_head', email: 'mike@furniflow.com', active: true },
+        { id: 'user-4', name: 'Tom Davis', role: 'field_staff', email: 'tom@furniflow.com', active: true },
+    ],
+    customers: [
+        { id: 'cust-1', name: 'Robert Anderson', phone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', inquiryDate: '2024-03-10', expectedClosingDate: '2024-03-25', status: 'lead', followUpDate: '2024-03-20', createdBy: 'user-2' },
+        { id: 'cust-2', name: 'Jennifer Martinez', phone: '+1 555 234 5678', address: '456 Maple Ave, Chicago, IL', product: 'Dining Table - 6 Seater', inquiryDate: '2024-03-08', expectedClosingDate: '2024-03-22', status: 'prospect', followUpDate: '2024-03-19', createdBy: 'user-2' },
+        { id: 'cust-3', name: 'David Thompson', phone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', inquiryDate: '2024-03-05', expectedClosingDate: '2024-03-20', status: 'confirmed', followUpDate: null, createdBy: 'user-6' },
+        { id: 'cust-4', name: 'Lisa Garcia', phone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', inquiryDate: '2024-03-01', expectedClosingDate: '2024-03-18', status: 'confirmed', followUpDate: null, createdBy: 'user-2' },
+        { id: 'cust-5', name: 'Michael Chen', phone: '+1 555 567 8901', address: '654 Cedar Lane, Joliet, IL', product: 'Kids Bedroom Set', inquiryDate: '2024-02-28', expectedClosingDate: null, status: 'closed', followUpDate: null, createdBy: 'user-6' },
+    ],
+    jobs: [
+        { id: 'job-1', customerId: 'cust-3', customerName: 'David Thompson', customerPhone: '+1 555 345 6789', address: '789 Pine Road, Naperville, IL', product: 'Bedroom Furniture Set', type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: '2024-03-21', assignedTo: null },
+        { id: 'job-2', customerId: 'cust-4', customerName: 'Lisa Garcia', customerPhone: '+1 555 456 7890', address: '321 Elm Street, Aurora, IL', product: 'Office Desk & Chair', type: 'installation', status: 'accepted', source: 'dispatch', scheduledDate: '2024-03-20', assignedTo: 'user-4' },
+        { id: 'job-3', customerId: 'cust-1', customerName: 'Robert Anderson', customerPhone: '+1 555 123 4567', address: '123 Oak Street, Springfield, IL', product: 'Modern Sofa Set', type: 'service', status: 'completed', source: 'manual', scheduledDate: '2024-03-18', assignedTo: 'user-5' },
+    ],
+    currentUser: null
+};
 
-        let currentPage = 'login';
-        let showModal = null;
+let currentPage = 'login';
 
-        function generateId() {
-            return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-        }
+function generateId() {
+    return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
 
-        function render() {
-            const app = document.getElementById('app');
-            if (!store.currentUser) {
-                app.innerHTML = renderLogin();
-                return;
-            }
-            app.innerHTML = renderLayout(renderPage());
-        }
+function render() {
+    const app = document.getElementById('app');
+    if (!store.currentUser) {
+        app.innerHTML = renderLogin();
+        return;
+    }
+    app.innerHTML = renderLayout(renderPage());
+}
 
-        function renderLogin() {
-            return `
-                <div class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 100%);">
-                    <div class="w-full max-w-md">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">
-                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                            </div>
-                            <h1 class="text-3xl font-bold text-white mb-2">FurniFlow</h1>
-                            <p class="text-gray-400">Business Management System</p>
+function renderLogin() {
+    return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);padding:1rem;">
+        <div style="max-width:28rem;width:100%;">
+            <div style="text-align:center;margin-bottom:2rem;">
+                <div style="width:4rem;height:4rem;margin:0 auto 1rem;background:linear-gradient(135deg,#E94560,#FF6B6B);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">
+                    <svg style="width:2.5rem;height:2.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <h1 style="font-size:1.875rem;font-weight:700;color:white;margin-bottom:0.5rem;">FurniFlow</h1>
+                <p style="color:#9CA3AF;">Business Management System</p>
+            </div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:1rem;padding:1.5rem;">
+                <h2 style="font-size:1.25rem;font-weight:600;color:white;margin-bottom:0.5rem;">Select Your Role</h2>
+                <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:1.5rem;">Choose a role to access the system</p>
+                <div style="display:grid;gap:0.75rem;">
+                    <button onclick="login('sales')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+                            <div><h3 style="font-weight:600;color:white;">Sales</h3><p style="font-size:0.875rem;color:#9CA3AF;">Manage customers & orders</p></div>
                         </div>
-                        <div class="rounded-2xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
-                            <h2 class="text-xl font-semibold text-white mb-2">Select Your Role</h2>
-                            <p class="text-gray-400 text-sm mb-6">Choose a role to access the system</p>
-                            <div class="space-y-3">
-                                <button onclick="login('sales')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
-                                    <div class="flex items-center gap-4">
-                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                        </div>
-                                        <div><h3 class="font-semibold text-white">Sales</h3><p class="text-sm text-gray-400">Manage customers & orders</p></div>
-                                    </div>
-                                </button>
-                                <button onclick="login('service_head')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
-                                    <div class="flex items-center gap-4">
-                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                        </div>
-                                        <div><h3 class="font-semibold text-white">Service Head</h3><p class="text-sm text-gray-400">Manage jobs & staff</p></div>
-                                    </div>
-                                </button>
-                                <button onclick="login('field_staff')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
-                                    <div class="flex items-center gap-4">
-                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                                        </div>
-                                        <div><h3 class="font-semibold text-white">Field Staff</h3><p class="text-sm text-gray-400">Execute jobs</p></div>
-                                    </div>
-                                </button>
-                                <button onclick="login('admin')" class="w-full p-4 rounded-xl border hover:bg-gray-800 text-left" style="border-color: #3A3A5C;">
-                                    <div class="flex items-center gap-4">
-                                        <div class="p-2 rounded-lg" style="background-color: #2A2A44;">
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                        </div>
-                                        <div><h3 class="font-semibold text-white">Admin</h3><p class="text-sm text-gray-400">Full system access</p></div>
-                                    </div>
-                                </button>
-                            </div>
+                    </button>
+                    <button onclick="login('service_head')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
+                            <div><h3 style="font-weight:600;color:white;">Service Head</h3><p style="font-size:0.875rem;color:#9CA3AF;">Manage jobs & staff</p></div>
                         </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function login(role) {
-            store.currentUser = store.users.find(u => u.role === role);
-            currentPage = 'dashboard';
-            render();
-        }
-
-        function logout() {
-            store.currentUser = null;
-            currentPage = 'login';
-            render();
-        }
-
-        function navigate(page) {
-            currentPage = page;
-            render();
-        }
-
-        function renderPage() {
-            switch(currentPage) {
-                case 'dashboard': return renderDashboard();
-                case 'sales': return renderSales();
-                case 'service': return renderService();
-                case 'admin': return renderAdmin();
-                default: return renderDashboard();
-            }
-        }
-
-        function renderLayout(content) {
-            const user = store.currentUser;
-            return `
-                <div class="min-h-screen" style="background-color: #0F0F1A;">
-                    <aside class="fixed left-0 top-0 h-full w-[260px] flex flex-col" style="background-color: #1A1A2E; border-right: 1px solid #3A3A5C;">
-                        <div class="p-4" style="border-bottom: 1px solid #3A3A5C;">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                </div>
-                                <div><h1 class="text-white font-bold text-lg">FurniFlow</h1><p class="text-xs text-gray-400">Business Management</p></div>
-                            </div>
+                    </button>
+                    <button onclick="login('field_staff')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+                            <div><h3 style="font-weight:600;color:white;">Field Staff</h3><p style="font-size:0.875rem;color:#9CA3AF;">Execute jobs</p></div>
                         </div>
-                        <nav class="flex-1 p-3 space-y-1">
-                            <a href="#" onclick="navigate('dashboard')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'dashboard' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                                <span class="font-medium">Dashboard</span>
-                            </a>
-                            ${(user.role === 'sales' || user.role === 'admin') ? `
-                            <a href="#" onclick="navigate('sales')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'sales' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <span class="font-medium">Customers</span>
-                            </a>
-                            ` : ''}
-                            ${(user.role === 'service_head' || user.role === 'field_staff' || user.role === 'admin') ? `
-                            <a href="#" onclick="navigate('service')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'service' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                                <span class="font-medium">Jobs</span>
-                            </a>
-                            ` : ''}
-                            ${user.role === 'admin' ? `
-                            <a href="#" onclick="navigate('admin')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg ${currentPage === 'admin' ? 'text-[#E94560]' : 'text-gray-400 hover:text-white hover:bg-gray-800'}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                                <span class="font-medium">Admin</span>
-                            </a>
-                            ` : ''}
-                        </nav>
-                        <div class="p-3" style="border-top: 1px solid #3A3A5C;">
-                            <div class="flex items-center gap-3 p-2 rounded-lg" style="background-color: #0F0F1A;">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4DA8DA 0%, #00D9A5 100%);">
-                                    <span class="text-xs font-bold text-white">${user.name.charAt(0)}</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-white truncate">${user.name}</p>
-                                    <p class="text-xs text-gray-400 capitalize">${user.role.replace('_', ' ')}</p>
-                                </div>
-                                <button onclick="logout()" class="p-1.5 text-gray-400 hover:text-[#E94560]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                                </button>
-                            </div>
+                    </button>
+                    <button onclick="login('admin')" style="width:100%;padding:1rem;border:1px solid #3A3A5C;border-radius:0.75rem;background:transparent;color:white;text-align:left;cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <div style="padding:0.5rem;background:#2A2A44;border-radius:0.5rem;"><svg style="width:1.5rem;height:1.5rem;color:#9CA3AF;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                            <div><h3 style="font-weight:600;color:white;">Admin</h3><p style="font-size:0.875rem;color:#9CA3AF;">Full system access</p></div>
                         </div>
-                    </aside>
-                    <div class="ml-[260px]">
-                        <header class="h-16 px-6 flex items-center justify-between" style="background-color: #1A1A2E; border-bottom: 1px solid #3A3A5C;">
-                            <h2 class="text-white text-lg font-semibold capitalize">${user.role.replace('_', ' ')} Dashboard</h2>
-                        </header>
-                        <main class="p-6">${content}</main>
-                    </div>
+                    </button>
                 </div>
-            `;
-        }
+            </div>
+        </div>
+    </div>`;
+}
 
-        function renderDashboard() {
-            const stats = { totalCustomers: store.customers.length, pendingJobs: store.jobs.filter(j => ['pending','accepted','scheduled'].includes(j.status)).length, completed: store.jobs.filter(j => j.status === 'completed').length, activeLeads: store.customers.filter(c => c.status === 'lead' || c.status === 'prospect').length };
-            return `
-                <div class="space-y-6">
-                    <div><h1 class="text-2xl font-bold text-white">Welcome back, ${store.currentUser.name.split(' ')[0]}</h1><p class="text-gray-400 mt-1">Here's what's happening today</p></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Customers</p><p class="text-3xl font-bold text-white mt-1">${stats.totalCustomers}</p></div>
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Pending Jobs</p><p class="text-3xl font-bold text-white mt-1">${stats.pendingJobs}</p></div>
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Completed</p><p class="text-3xl font-bold text-white mt-1">${stats.completed}</p></div>
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Active Leads</p><p class="text-3xl font-bold text-white mt-1">${stats.activeLeads}</p></div>
+function login(role) {
+    store.currentUser = store.users.find(u => u.role === role);
+    currentPage = 'dashboard';
+    render();
+}
+
+function logout() {
+    store.currentUser = null;
+    currentPage = 'login';
+    render();
+}
+
+function navigate(page) {
+    currentPage = page;
+    render();
+}
+
+function renderPage() {
+    switch(currentPage) {
+        case 'dashboard': return renderDashboard();
+        case 'sales': return renderSales();
+        case 'service': return renderService();
+        case 'admin': return renderAdmin();
+        default: return renderDashboard();
+    }
+}
+
+function renderLayout(content) {
+    const user = store.currentUser;
+    return `<div style="min-height:100vh;background:#0F0F1A;">
+        <aside style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#1A1A2E;border-right:1px solid #3A3A5C;display:flex;flex-direction:column;">
+            <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <div style="width:2.5rem;height:2.5rem;background:linear-gradient(135deg,#E94560,#FF6B6B);border-radius:0.5rem;display:flex;align-items:center;justify-content:center;">
+                        <svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     </div>
-                    <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
-                        <h3 class="text-lg font-semibold text-white mb-4">Recent Jobs</h3>
-                        <div class="space-y-3">
-                            ${store.jobs.slice(0,5).map(job => `
-                                <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: #0F0F1A;">
-                                    <div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full" style="background-color: #E94560;"></div><div><p class="text-white font-medium">${job.customerName}</p><p class="text-sm text-gray-400">${job.product}</p></div></div>
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
+                    <div><h1 style="color:white;font-weight:700;font-size:1.125rem;">FurniFlow</h1><p style="color:#9CA3AF;font-size:0.75rem;">Business Management</p></div>
                 </div>
-            `;
-        }
-
-        function renderSales() {
-            return `
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div><h1 class="text-2xl font-bold text-white">Customer Management</h1><p class="text-gray-400 mt-1">Manage leads, prospects, and orders</p></div>
-                        <button onclick="showAddCustomerModal()" class="px-4 py-2 text-white rounded-lg font-medium" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">+ Add Customer</button>
-                    </div>
-                    <div class="rounded-xl overflow-hidden" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
-                        <table class="w-full">
-                            <thead><tr style="border-bottom: 1px solid #3A3A5C;"><th class="text-left p-4 text-sm font-medium text-gray-400">Customer</th><th class="text-left p-4 text-sm font-medium text-gray-400">Product</th><th class="text-left p-4 text-sm font-medium text-gray-400">Status</th><th class="text-left p-4 text-sm font-medium text-gray-400">Follow-up</th><th class="text-left p-4 text-sm font-medium text-gray-400">Actions</th></tr></thead>
-                            <tbody>
-                                ${store.customers.map(c => `
-                                    <tr style="border-bottom: 1px solid #3A3A5C50;">
-                                        <td class="p-4"><p class="text-white font-medium">${c.name}</p><p class="text-sm text-gray-400">${c.phone}</p></td>
-                                        <td class="p-4"><p class="text-white">${c.product}</p></td>
-                                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${getCustomerStatusClass(c.status)}">${c.status}</span></td>
-                                        <td class="p-4 text-gray-400">${c.followUpDate || '-'}</td>
-                                        <td class="p-4">
-                                            <div class="flex gap-2">
-                                                <button onclick="convertCustomer('${c.id}')" class="px-3 py-1.5 text-sm border rounded-lg text-white hover:border-[#E94560]" style="border-color: #3A3A5C;">Convert</button>
-                                                ${c.status === 'confirmed' ? `<button onclick="createDispatch('${c.id}')" class="px-3 py-1.5 text-sm text-white rounded-lg" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">Dispatch</button>` : ''}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
+                <a href="#" onclick="navigate('dashboard')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'dashboard' ? '#E94560' : '#9CA3AF'};text-decoration:none;">
+                    <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span style="font-weight:500;">Dashboard</span>
+                </a>
+                ${(user.role === 'sales' || user.role === 'admin') ? `<a href="#" onclick="navigate('sales')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'sales' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg><span style="font-weight:500;">Customers</span></a>` : ''}
+                ${(user.role === 'service_head' || user.role === 'field_staff' || user.role === 'admin') ? `<a href="#" onclick="navigate('service')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'service' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg><span style="font-weight:500;">Jobs</span></a>` : ''}
+                ${user.role === 'admin' ? `<a href="#" onclick="navigate('admin')" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;color:${currentPage === 'admin' ? '#E94560' : '#9CA3AF'};text-decoration:none;"><svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg><span style="font-weight:500;">Admin</span></a>` : ''}
+            </nav>
+            <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
+                <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
+                    <div style="width:2rem;height:2rem;background:linear-gradient(135deg,#4DA8DA,#00D9A5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.75rem;font-weight:700;color:white;">${user.name.charAt(0)}</span></div>
+                    <div style="flex:1;min-width:0;"><p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p><p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p></div>
+                    <button onclick="logout()" style="padding:0.375rem;color:#9CA3AF;background:none;border:none;cursor:pointer;"><svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
                 </div>
-            `;
-        }
+            </div>
+        </aside>
+        <div style="margin-left:16rem;">
+            <header style="height:4rem;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;background:#1A1A2E;border-bottom:1px solid #3A3A5C;"><h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${user.role.replace('_', ' ')} Dashboard</h2></header>
+            <main style="padding:1.5rem;">${content}</main>
+        </div>
+    </div>`;
+}
 
-        function renderService() {
-            return `
-                <div class="space-y-6">
-                    <div><h1 class="text-2xl font-bold text-white">Job Management</h1><p class="text-gray-400 mt-1">Manage and track all service jobs</p></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${store.jobs.map(job => `
-                            <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="flex gap-2">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getJobTypeClass(job.type)}">${job.type}</span>
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(job.status)}">${job.status}</span>
-                                    </div>
-                                </div>
-                                <h3 class="text-white font-semibold mb-1">${job.customerName}</h3>
-                                <p class="text-sm text-gray-400 mb-2">${job.product}</p>
-                                <p class="text-sm text-gray-400">${job.address}</p>
-                                ${job.status === 'pending' ? `<button onclick="acceptJob('${job.id}')" class="w-full mt-4 px-4 py-2 text-white rounded-lg" style="background: linear-gradient(135deg, #E94560 0%, #FF6B6B 100%);">Accept Job</button>` : ''}
-                                ${job.status === 'accepted' ? `<button onclick="updateJobStatus('${job.id}', 'completed')" class="w-full mt-4 px-4 py-2 text-white rounded-lg" style="background: linear-gradient(135deg, #00D9A5 0%, #00B388 100%);">Complete Job</button>` : ''}
+function renderDashboard() {
+    const stats = { totalCustomers: store.customers.length, pendingJobs: store.jobs.filter(j => ['pending','accepted','scheduled'].includes(j.status)).length, completed: store.jobs.filter(j => j.status === 'completed').length, activeLeads: store.customers.filter(c => c.status === 'lead' || c.status === 'prospect').length };
+    return `<div style="display:grid;gap:1.5rem;">
+        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Welcome back, ${store.currentUser.name.split(' ')[0]}</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Here's what's happening today</p></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Customers</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalCustomers}</p></div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Pending Jobs</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.pendingJobs}</p></div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Completed</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.completed}</p></div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Active Leads</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.activeLeads}</p></div>
+        </div>
+        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
+            <h3 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Recent Jobs</h3>
+            <div style="display:grid;gap:0.75rem;">
+                ${store.jobs.slice(0,5).map(job => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;"><div style="width:0.5rem;height:0.5rem;border-radius:50%;background:#E94560;"></div><div><p style="color:white;font-weight:500;">${job.customerName}</p><p style="color:#9CA3AF;font-size:0.875rem;">${job.product}</p></div></div>
+                    <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getStatusStyle(job.status)}">${job.status}</span>
+                </div>`).join('')}
+            </div>
+        </div>
+    </div>`;
+}
+
+function getStatusStyle(status) {
+    const styles = { pending: 'background:#713F12;color:#FCD34D', accepted: 'background:#1E3A8A;color:#93C5FD', scheduled: 'background:#4C1D95;color:#C4B5FD', delivered: 'background:#14532D;color:#86EFAC', completed: 'background:#14532D;color:#86EFAC', cancelled: 'background:#374151;color:#9CA3AF' };
+    return styles[status] || 'background:#374151;color:#9CA3AF';
+}
+
+function renderSales() {
+    return `<div style="display:grid;gap:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Customer Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage leads, prospects, and orders</p></div>
+            <button onclick="showAddCustomerModal()" style="padding:0.5rem 1rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.5rem;font-weight:500;border:none;cursor:pointer;">+ Add Customer</button>
+        </div>
+        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;overflow:hidden;">
+            <table style="width:100%;">
+                <thead><tr style="border-bottom:1px solid #3A3A5C;"><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Customer</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Product</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Status</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Follow-up</th><th style="text-align:left;padding:1rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Actions</th></tr></thead>
+                <tbody>
+                    ${store.customers.map(c => `<tr style="border-bottom:1px solid #3A3A5C50;">
+                        <td style="padding:1rem;"><p style="color:white;font-weight:500;">${c.name}</p><p style="color:#9CA3AF;font-size:0.875rem;">${c.phone}</p></td>
+                        <td style="padding:1rem;color:white;">${c.product}</td>
+                        <td style="padding:1rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getCustomerStatusStyle(c.status)}">${c.status}</span></td>
+                        <td style="padding:1rem;color:#9CA3AF;">${c.followUpDate || '-'}</td>
+                        <td style="padding:1rem;">
+                            <div style="display:flex;gap:0.5rem;">
+                                <button onclick="convertCustomer('${c.id}')" style="padding:0.375rem 0.75rem;font-size:0.875rem;border:1px solid #3A3A5C;border-radius:0.375rem;color:white;background:transparent;cursor:pointer;">Convert</button>
+                                ${c.status === 'confirmed' ? `<button onclick="createDispatch('${c.id}')" style="padding:0.375rem 0.75rem;font-size:0.875rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.375rem;border:none;cursor:pointer;">Dispatch</button>` : ''}
                             </div>
-                        `).join('')}
+                        </td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+function getCustomerStatusStyle(status) {
+    const styles = { lead: 'background:#1E3A8A;color:#93C5FD', prospect: 'background:#713F12;color:#FCD34D', confirmed: 'background:#14532D;color:#86EFAC', closed: 'background:#374151;color:#9CA3AF' };
+    return styles[status];
+}
+
+function renderService() {
+    return `<div style="display:grid;gap:1.5rem;">
+        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Job Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage and track all service jobs</p></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;">
+            ${store.jobs.map(job => `<div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
+                    <div style="display:flex;gap:0.5rem;">
+                        <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getJobTypeStyle(job.type)}">${job.type}</span>
+                        <span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getStatusStyle(job.status)}">${job.status}</span>
                     </div>
                 </div>
-            `;
-        }
+                <h3 style="color:white;font-weight:600;margin-bottom:0.25rem;">${job.customerName}</h3>
+                <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:0.5rem;">${job.product}</p>
+                <p style="color:#9CA3AF;font-size:0.875rem;">${job.address}</p>
+                ${job.status === 'pending' ? `<button onclick="acceptJob('${job.id}')" style="width:100%;margin-top:1rem;padding:0.5rem;background:linear-gradient(135deg,#E94560,#FF6B6B);color:white;border-radius:0.5rem;border:none;cursor:pointer;">Accept Job</button>` : ''}
+                ${job.status === 'accepted' ? `<button onclick="updateJobStatus('${job.id}','completed')" style="width:100%;margin-top:1rem;padding:0.5rem;background:linear-gradient(135deg,#00D9A5,#00B388);color:white;border-radius:0.5rem;border:none;cursor:pointer;">Complete Job</button>` : ''}
+            </div>`).join('')}
+        </div>
+    </div>`;
+}
 
-        function renderAdmin() {
-            const stats = { totalCustomers: store.customers.length, totalJobs: store.jobs.length, completed: store.jobs.filter(j => j.status === 'completed').length };
-            return `
-                <div class="space-y-6">
-                    <div><h1 class="text-2xl font-bold text-white">Admin Dashboard</h1><p class="text-gray-400 mt-1">System overview and management</p></div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Customers</p><p class="text-3xl font-bold text-white mt-1">${stats.totalCustomers}</p></div>
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Total Jobs</p><p class="text-3xl font-bold text-white mt-1">${stats.totalJobs}</p></div>
-                        <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;"><p class="text-gray-400 text-sm">Completed</p><p class="text-3xl font-bold text-white mt-1">${stats.completed}</p></div>
-                    </div>
-                    <div class="rounded-xl p-6" style="background-color: #1E1E32; border: 1px solid #3A3A5C;">
-                        <h3 class="text-lg font-semibold text-white mb-4">Users</h3>
-                        <table class="w-full">
-                            <thead><tr style="border-bottom: 1px solid #3A3A5C;"><th class="text-left p-3 text-sm font-medium text-gray-400">User</th><th class="text-left p-3 text-sm font-medium text-gray-400">Role</th><th class="text-left p-3 text-sm font-medium text-gray-400">Status</th></tr></thead>
-                            <tbody>
-                                ${store.users.map(u => `
-                                    <tr style="border-bottom: 1px solid #3A3A5C50;">
-                                        <td class="p-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4DA8DA 0%, #00D9A5 100%);"><span class="text-xs font-bold text-white">${u.name.charAt(0)}</span></div><span class="text-white font-medium">${u.name}</span></div></td>
-                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${getRoleClass(u.role)}">${u.role.replace('_', ' ')}</span></td>
-                                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 text-green-400">Active</span></td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        }
+function getJobTypeStyle(type) {
+    const styles = { service: 'background:#1E3A8A;color:#93C5FD', delivery: 'background:#14532D;color:#86EFAC', installation: 'background:#713F12;color:#FCD34D' };
+    return styles[type];
+}
 
-        function getStatusClass(status) {
-            const classes = { pending: 'bg-yellow-900 text-yellow-400', accepted: 'bg-blue-900 text-blue-400', scheduled: 'bg-purple-900 text-purple-400', delivered: 'bg-green-900 text-green-400', completed: 'bg-green-900 text-green-400', cancelled: 'bg-gray-700 text-gray-400' };
-            return classes[status] || 'bg-gray-700 text-gray-400';
-        }
+function renderAdmin() {
+    const stats = { totalCustomers: store.customers.length, totalJobs: store.jobs.length, completed: store.jobs.filter(j => j.status === 'completed').length };
+    return `<div style="display:grid;gap:1.5rem;">
+        <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Admin Dashboard</h1><p style="color:#9CA3AF;margin-top:0.25rem;">System overview and management</p></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Customers</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalCustomers}</p></div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Total Jobs</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.totalJobs}</p></div>
+            <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;"><p style="color:#9CA3AF;font-size:0.875rem;">Completed</p><p style="font-size:2rem;font-weight:700;color:white;margin-top:0.25rem;">${stats.completed}</p></div>
+        </div>
+        <div style="background:#1E1E32;border:1px solid #3A3A5C;border-radius:0.75rem;padding:1.5rem;">
+            <h3 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Users</h3>
+            <table style="width:100%;">
+                <thead><tr style="border-bottom:1px solid #3A3A5C;"><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">User</th><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Role</th><th style="text-align:left;padding:0.75rem;font-size:0.875rem;font-weight:500;color:#9CA3AF;">Status</th></tr></thead>
+                <tbody>
+                    ${store.users.map(u => `<tr style="border-bottom:1px solid #3A3A5C50;">
+                        <td style="padding:0.75rem;"><div style="display:flex;align-items:center;gap:0.75rem;"><div style="width:2rem;height:2rem;background:linear-gradient(135deg,#4DA8DA,#00D9A5);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-size:0.75rem;font-weight:700;color:white;">${u.name.charAt(0)}</span></div><span style="color:white;font-weight:500;">${u.name}</span></div></td>
+                        <td style="padding:0.75rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;${getRoleStyle(u.role)}">${u.role.replace('_', ' ')}</span></td>
+                        <td style="padding:0.75rem;"><span style="padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:500;background:#166534;color:#86EFAC;">Active</span></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+}
 
-        function getCustomerStatusClass(status) {
-            const classes = { lead: 'bg-blue-900 text-blue-400', prospect: 'bg-yellow-900 text-yellow-400', confirmed: 'bg-green-900 text-green-400', closed: 'bg-gray-700 text-gray-400' };
-            return classes[status];
-        }
+function getRoleStyle(role) {
+    const styles = { admin: 'background:#991B1B;color:#FCA5A5', sales: 'background:#1E3A8A;color:#93C5FD', service_head: 'background:#713F12;color:#FCD34D', field_staff: 'background:#166534;color:#86EFAC' };
+    return styles[role];
+}
 
-        function getJobTypeClass(type) {
-            const classes = { service: 'bg-blue-900 text-blue-400', delivery: 'bg-green-900 text-green-400', installation: 'bg-yellow-900 text-yellow-400' };
-            return classes[type];
-        }
+function showAddCustomerModal() {
+    const name = prompt('Customer Name:');
+    if (!name) return;
+    const phone = prompt('Phone Number:');
+    if (!phone) return;
+    const address = prompt('Address:');
+    if (!address) return;
+    const product = prompt('Product:') || '';
+    store.customers.push({ id: generateId(), name, phone, address, product, inquiryDate: new Date().toISOString().split('T')[0], expectedClosingDate: null, status: 'lead', followUpDate: null, createdBy: store.currentUser.id });
+    render();
+}
 
-        function getRoleClass(role) {
-            const classes = { admin: 'bg-red-900 text-red-400', sales: 'bg-blue-900 text-blue-400', service_head: 'bg-yellow-900 text-yellow-400', field_staff: 'bg-green-900 text-green-400' };
-            return classes[role];
-        }
+function convertCustomer(id) {
+    const customer = store.customers.find(c => c.id === id);
+    if (customer) { customer.status = 'confirmed'; render(); }
+}
 
-        function showAddCustomerModal() {
-            const name = prompt('Customer Name:');
-            if (!name) return;
-            const phone = prompt('Phone Number:');
-            if (!phone) return;
-            const address = prompt('Address:');
-            if (!address) return;
-            const product = prompt('Product:') || '';
-            store.customers.push({ id: generateId(), name, phone, address, product, inquiryDate: new Date().toISOString().split('T')[0], expectedClosingDate: null, status: 'lead', followUpDate: null, createdBy: store.currentUser.id });
-            render();
-        }
-
-        function convertCustomer(id) {
-            const customer = store.customers.find(c => c.id === id);
-            if (customer) { customer.status = 'confirmed'; render(); }
-        }
-
-        function createDispatch(id) {
-            const customer = store.customers.find(c => c.id === id);
-            if (customer) {
-                store.jobs.push({ id: generateId(), customerId: customer.id, customerName: customer.name, customerPhone: customer.phone, address: customer.address, product: customer.product, type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0], assignedTo: null });
-                alert('Dispatch created for ' + customer.name);
-                render();
-            }
-        }
-
-        function acceptJob(id) {
-            const job = store.jobs.find(j => j.id === id);
-            if (job) { job.status = 'accepted'; render(); }
-        }
-
-        function updateJobStatus(id, status) {
-            const job = store.jobs.find(j => j.id === id);
-            if (job) { job.status = status; render(); }
-        }
-
+function createDispatch(id) {
+    const customer = store.customers.find(c => c.id === id);
+    if (customer) {
+        store.jobs.push({ id: generateId(), customerId: customer.id, customerName: customer.name, customerPhone: customer.phone, address: customer.address, product: customer.product, type: 'delivery', status: 'pending', source: 'dispatch', scheduledDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0], assignedTo: null });
+        alert('Dispatch created for ' + customer.name);
         render();
+    }
+}
+
+function acceptJob(id) {
+    const job = store.jobs.find(j => j.id === id);
+    if (job) { job.status = 'accepted'; render(); }
+}
+
+function updateJobStatus(id, status) {
+    const job = store.jobs.find(j => j.id === id);
+    if (job) { job.status = status; render(); }
+}
+
+render();
     </script>
 </body>
 </html>
