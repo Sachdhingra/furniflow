@@ -1,0 +1,120 @@
+                    <button class="tab-btn ${serviceTab === 'completed' ? 'active' : ''}" onclick="serviceTab='completed';render()">Completed</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(totalRevenue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${store.services.filter(s => s.status === 'pending').length}</p></div>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Value</th><th>Request Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${store.services.filter(s => serviceTab === 'all' || serviceTab === s.status).map(s => `<tr>
+                            <td><p style="color:white;font-weight:500;">${s.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${s.phone}</p></td>
+                            <td><span class="badge badge-${s.serviceType.toLowerCase()}">${s.serviceType}</span></td>
+                            <td style="color:#60A5FA;font-weight:600;">${formatCurrency(s.serviceValue)}</td>
+                            <td>${formatDate(s.requestDate)}</td>
+                            <td><span class="badge badge-${s.status === 'completed' ? 'completed' : 'pending'}">${s.status}</span></td>
+                            <td><div style="display:flex;gap:0.375rem;">
+                                <button onclick="editService('${s.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                ${s.status === 'pending' ? `<button onclick="completeService('${s.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:2rem;">No services</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderClaims() {
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Claims</h1><p style="color:#9CA3AF;">Parts claim management</p></div>
+                    <button onclick="openClaimModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Claim</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Phone</th><th>Booking Date</th><th>Part No.</th><th>Reason</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${store.claims.map(c => { const service = getServiceById(c.serviceId); return `<tr>
+                            <td><p style="color:white;font-weight:500;">${c.customerName}</p></td>
+                            <td>${c.phone}</td>
+                            <td>${formatDate(c.bookingDate)}</td>
+                            <td style="color:#60A5FA;font-weight:600;">${c.partNumber}</td>
+                            <td>${c.reason}</td>
+                            <td>${c.dueDate ? `<span class="badge ${isOverdue15Days(c.dueDate) ? 'badge-overdue15' : isOverdue(c.dueDate) ? 'badge-overdue' : 'badge-pending'}">${formatDate(c.dueDate)}</span>` : '-'}</td>
+                            <td><span class="badge badge-${c.status === 'completed' ? 'completed' : c.status === 'approved' ? 'approved' : 'pending'}">${c.status}</span></td>
+                            <td><div style="display:flex;gap:0.375rem;">
+                                ${c.status === 'pending' ? `<button onclick="updateClaimStatus('${c.id}', 'approved')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Approve</button>` : ''}
+                                ${c.status === 'approved' ? `<button onclick="updateClaimStatus('${c.id}', 'completed')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`; }).join('') || '<tr><td colspan="8" style="text-align:center;color:#9CA3AF;padding:2rem;">No claims</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderJobs() {
+            const user = store.currentUser;
+            let filteredJobs = store.jobs.filter(j => { 
+                if (user.role === 'field_agent') return j.assignedTo === user.id; 
+                return true; 
+            });
+            
+            if (jobFilter === 'today') filteredJobs = filteredJobs.filter(j => j.scheduledDate === new Date().toISOString().split('T')[0]);
+            else if (jobFilter === 'upcoming') filteredJobs = filteredJobs.filter(j => j.scheduledDate && !isOverdue(j.scheduledDate) && j.scheduledDate > new Date().toISOString().split('T')[0]);
+            else if (jobFilter === 'overdue') filteredJobs = filteredJobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && !['completed','incomplete'].includes(j.status));
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Jobs</h1><p style="color:#9CA3AF;">Service job management</p></div>
+                    ${(user.role === 'service_head' || user.role === 'admin') ? `<button onclick="openJobModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Job</button>` : ''}
+                </div>
+                
+                <div class="filter-bar">
+                    <button class="tab-btn ${jobFilter === 'all' ? 'active' : ''}" onclick="jobFilter='all';render()">All</button>
+                    <button class="tab-btn ${jobFilter === 'today' ? 'active' : ''}" onclick="jobFilter='today';render()">Today's Jobs</button>
+                    <button class="tab-btn ${jobFilter === 'upcoming' ? 'active' : ''}" onclick="jobFilter='upcoming';render()">Upcoming</button>
+                    <button class="tab-btn ${jobFilter === 'overdue' ? 'active' : ''}" onclick="jobFilter='overdue';render()">Overdue</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Assigned</th><th>Actions</th></tr></thead>
+                        <tbody>${filteredJobs.map(j => `<tr>
+                            <td><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${j.phone}</p>${j.status !== 'completed' && j.status !== 'incomplete' ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.address)}" target="_blank" class="map-link" style="margin-top:0.25rem;"><i class="fas fa-map-marker-alt"></i> Map</a>` : ''}</td>
+                            <td><span class="badge badge-${j.jobType === 'delivery' ? 'converted' : j.jobType === 'installation' ? 'interested' : 'assigned'}">${j.jobType}</span></td>
+                            <td>${j.scheduledDate ? `<span class="badge ${isOverdue(j.scheduledDate) && !['completed','incomplete'].includes(j.status) ? 'badge-overdue' : ''}">${formatDate(j.scheduledDate)}</span>` : '-'}</td>
+                            <td><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></td>
+                            <td>${j.assignedTo ? store.users.find(u => u.id === j.assignedTo)?.name : '-'}</td>
+                            <td><div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+                                ${(user.role === 'service_head' || user.role === 'admin') && !j.assignedTo ? `<button onclick="assignJob('${j.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Assign</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'assigned' ? `<button onclick="acceptJob('${j.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Accept & Start</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'accepted' ? `<button onclick="startTravel('${j.id}')" class="btn btn-warning" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Start Travel</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'in_progress' ? `<button onclick="reachedLocation('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Reached</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'reached' ? `<button onclick="completeJob('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:2rem;">No jobs</td></tr>'}</tbody></table>
+                </div>
+                
+                ${filteredJobs.filter(j => !['completed','incomplete','created'].includes(j.status)).map(j => `<div class="card" style="margin-top:1rem;"><h4 style="color:white;font-weight:600;margin-bottom:0.75rem;">${j.customerName} - Timeline</h4><div class="timeline"><div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Created</p><p style="color:white;">${formatDateTime(j.createdAt)}</p></div>${j.acceptedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Accepted/Started</p><p style="color:#00D9A5;">${formatDateTime(j.acceptedAt)}</p></div>` : ''}${j.travelStartAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Travel Started</p><p style="color:#FBBF24;">${formatDateTime(j.travelStartAt)}</p></div>` : ''}${j.reachedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Reached</p><p style="color:#00D9A5;">${formatDateTime(j.reachedAt)}</p></div>` : ''}${j.completedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="color:#86EFAC;">${formatDateTime(j.completedAt)}</p></div>` : ''}</div></div>`).join('')}</div>`;
+        }
+
+        function renderSiteVisits() {
+            const user = store.currentUser;
+            const today = new Date().toISOString().split('T')[0];
+            const myTrips = store.trips.filter(t => t.userId === user.id);
+            const activeTrip = myTrips.find(t => t.status === 'active');
+            
+            let filteredVisits = store.siteVisits.filter(sv => { 
+                if (user.role === 'site_agent') return sv.createdBy === user.id; 
+                return true; 
+            });
+            if (dateFilter) filteredVisits = filteredVisits.filter(sv => sv.visitDate === dateFilter);
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Site Visits</h1><p style="color:#9CA3AF;">Field visit management</p></div>
+                    <div style="display:flex;gap:0.5rem;">
+                        ${!activeTrip ? `<button onclick="startTrip()" class="btn btn-primary"><i class="fas fa-play"></i> Start Trip</button>` : `<button onclick="endTrip()" class="btn btn-danger"><i class="fas fa-stop"></i> End Trip</button>`}
+                    </div>
+                </div>
+                
+                ${activeTrip ? `<div class="trip-card active"><div style="display:flex;align-items:center;justify-content:space-between;"><div><p style="color:#00D9A5;font-weight:600;">Trip Active</p><p style="color:#9CA3AF;font-size:0.75rem;">Started: ${activeTrip.startTime}</p></div><div class="gps-active"><span class="gps-pulse"></span> GPS Tracking</div></div></div>` : ''}
+                
+                <div class="filter-bar">
+                    <input type="date" id="visitDateFilter" class="input" style="width:auto;" value="${dateFilter}" onchange="dateFilter=this.value;render()">
+                    <button onclick="dateFilter=null;render()" class="btn btn-secondary">Clear</button>
+                </div>

@@ -1,0 +1,234 @@
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                    <button onclick="exportData('sales')" class="btn btn-primary"><i class="fas fa-download"></i> Export Sales CSV</button>
+                    <button onclick="exportData('service')" class="btn btn-primary"><i class="fas fa-download"></i> Export Service CSV</button>
+                    <button onclick="document.getElementById('importFile').click()" class="btn btn-secondary"><i class="fas fa-upload"></i> Import CSV</button>
+                    <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importData(this)">
+                </div></div>`;
+        }
+
+        function exportData(type) {
+            let csv = '';
+            if (type === 'sales') {
+                csv = 'ID,Customer,Phone,Product,Value,Date,Status\n';
+                store.leads.forEach(l => csv += `${l.id},${l.customerName},${l.phone},${l.productCategory},${l.leadValue},${l.leadDate},${l.status}\n`);
+            } else if (type === 'service') {
+                csv = 'ID,Customer,Phone,Type,Value,Request Date,Status\n';
+                store.services.forEach(s => csv += `${s.id},${s.customerName},${s.phone},${s.serviceType},${s.serviceValue},${s.requestDate},${s.status}\n`);
+            }
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_data.csv`;
+            a.click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                alert(`Import functionality ready. ${lines.length} rows detected.`);
+            };
+            reader.readAsText(file);
+        }
+
+        function renderUserManagement() { return `<div style="display:grid;gap:1.5rem;"><div style="display:flex;align-items:center;justify-content:space-between;"><h1 style="font-size:1.5rem;font-weight:700;color:white;">Users</h1><button onclick="openUserModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add User</button></div><div class="card" style="padding:0;"><table class="table"><thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>${store.users.map(u => `<tr><td><div style="display:flex;align-items:center;gap:0.75rem;"><div class="avatar">${u.name.charAt(0)}</div><div><p style="color:white;font-weight:500;">${u.name}</p><p style="color:#9CA3AF;font-size:0.7rem;">${u.email}</p></div></div></td><td><span class="badge badge-${u.role === 'admin' ? 'lost' : u.role === 'sales' ? 'lead' : u.role === 'service_head' ? 'interested' : u.role === 'field_agent' ? 'assigned' : 'site'}">${u.role.replace('_', ' ')}</span></td><td>${u.phone}</td><td><span class="badge ${u.active ? 'badge-active' : 'badge-pending'}">${u.active ? 'Active' : 'Inactive'}</span></td><td><div style="display:flex;gap:0.375rem;"><button onclick="editUser('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button><button onclick="toggleUserStatus('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">${u.active ? 'Deact' : 'Act'}</button>${u.id !== store.currentUser.id ? `<button onclick="deleteUser('${u.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}</div></td></tr>`).join('')}</tbody></table></div></div>`; }
+
+        function renderModal() { if (!showModal) return ''; let content = '', title = ''; switch(showModal) { case 'lead': title = editingItem ? 'Edit Lead' : 'Add Lead'; content = renderLeadForm(); break; case 'convert': title = 'Convert Lead'; content = renderConvertForm(); break; case 'service': title = editingItem ? 'Edit Service' : 'Add Service'; content = renderServiceForm(); break; case 'claim': title = 'Add Claim'; content = renderClaimForm(); break; case 'job': title = 'Add Job'; content = renderJobForm(); break; case 'assign': title = 'Assign Job'; content = renderAssignForm(); break; case 'completeJob': title = 'Complete Job'; content = renderCompleteJobForm(); break; case 'siteVisit': title = editingItem ? 'Edit Visit' : 'Add Visit'; content = renderSiteVisitForm(); break; case 'user': title = editingItem ? 'Edit User' : 'Add User'; content = renderUserForm(); break; } return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3 style="color:white;font-weight:600;">${title}</h3><button onclick="closeModal()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:1.25rem;">&times;</button></div><div class="modal-body">${content}</div></div></div>`; }
+
+        function renderLeadForm() { const l = editingItem ? store.leads.find(x => x.id === editingItem) : {}; const isLocked = l.locked; const duplicate = !editingItem ? checkDuplicatePhone(document.getElementById('leadPhone')?.value || '') : null; return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label><input type="text" id="leadName" class="input ${isLocked ? 'locked-field' : ''}" value="${l.customerName || ''}" ${isLocked ? 'disabled' : ''}></div><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="leadPhone" class="input ${isLocked ? 'locked-field' : ''}" value="${l.phone || ''}" ${isLocked ? 'disabled' : ''} onchange="checkDuplicate(this.value)">${isLocked ? '<p style="color:#9CA3AF;font-size:0.7rem;margin-top:0.25rem;"><i class="fas fa-lock"></i> Locked</p>' : ''}</div></div><div class="form-group"><label class="form-label">Address</label><textarea id="leadAddress" class="textarea" rows="2">${l.address || ''}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Product Category</label><select id="leadProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${l.productCategory === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Lead Value (INR)</label><input type="number" id="leadValue" class="input" value="${l.leadValue || ''}"></div></div><div class="form-group"><label class="form-label">Status</label><select id="leadStatus" class="select" onchange="toggleFollowUpField()"><option value="lead" ${l.status === 'lead' ? 'selected' : ''}>Lead</option><option value="interested" ${l.status === 'interested' ? 'selected' : ''}>Interested</option><option value="converted" ${l.status === 'converted' ? 'selected' : ''}>Converted</option><option value="not_interested" ${l.status === 'not_interested' ? 'selected' : ''}>Not Interested</option><option value="lost" ${l.status === 'lost' ? 'selected' : ''}>Lost</option></select></div><div class="form-group" id="followUpGroup" style="display:${l.status === 'interested' ? 'block' : 'none'}"><label class="form-label">Follow-up Date <span class="required-indicator">*</span></label><input type="date" id="leadFollowUp" class="input" value="${l.nextFollowUp || ''}"></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="leadRemarks" class="textarea" rows="2">${l.remarks || ''}</textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveLead()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Lead</button></div>`; }
+
+        function checkDuplicate(phone) { const dup = checkDuplicatePhone(phone); if (dup) { duplicateWarning = `Warning: Phone ${phone} already exists for lead "${dup.customerName}". Click Save anyway to override.`; render(); } else { duplicateWarning = null; } }
+
+        function renderConvertForm() { const l = store.leads.find(x => x.id === editingItem); return `<p style="color:#9CA3AF;margin-bottom:1rem;">Convert: <strong style="color:white;">${l?.customerName}</strong> (${formatCurrency(l?.leadValue)})</p><div class="form-group"><label class="form-label">Payment Received?</label><select id="convertPayment" class="select"><option value="yes">Yes</option><option value="no">No</option></select></div><div class="form-group"><label class="form-label">Dispatch Date <span class="required-indicator">*</span></label><input type="date" id="convertDate" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmConversion()" class="btn btn-primary">Convert</button></div>`; }
+
+        function renderServiceForm() { return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label><input type="text" id="serviceCustomer" class="input"></div><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="servicePhone" class="input"></div></div><div class="form-group"><label class="form-label">Address</label><textarea id="serviceAddress" class="textarea" rows="2"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Service Type <span class="required-indicator">*</span></label><select id="serviceType" class="select" onchange="toggleServiceValue()"><option value="Paid">Paid</option><option value="FOC">FOC (Free)</option></select></div><div class="form-group" id="serviceValueGroup"><label class="form-label">Value (INR)</label><input type="number" id="serviceValue" class="input"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Request Date</label><input type="date" id="serviceRequestDate" class="input" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><label class="form-label">Attend Date</label><input type="date" id="serviceAttendDate" class="input"></div></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="serviceRemarks" class="textarea" rows="2"></textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveService()" class="btn btn-primary">Create Service</button></div>`; }
+
+        function renderClaimForm() { const services = store.services.filter(s => s.status !== 'completed'); return `<div class="form-group"><label class="form-label">Service <span class="required-indicator">*</span></label><select id="claimService" class="select" onchange="loadClaimServiceDetails()">${services.map(s => `<option value="${s.id}">${s.customerName}</option>`).join('')}</select></div><div class="form-row"><div class="form-group"><label class="form-label">Customer Name</label><input type="text" id="claimCustomer" class="input" readonly></div><div class="form-group"><label class="form-label">Phone</label><input type="text" id="claimPhone" class="input" readonly></div></div><div class="form-row"><div class="form-group"><label class="form-label">Booking Date</label><input type="date" id="claimBookingDate" class="input"></div><div class="form-group"><label class="form-label">Part Number <span class="required-indicator">*</span></label><input type="text" id="claimPart" class="input"></div></div><div class="form-group"><label class="form-label">Reason <span class="required-indicator">*</span></label><textarea id="claimReason" class="textarea" rows="2"></textarea></div><div class="form-group"><label class="form-label">Due Date</label><input type="date" id="claimDueDate" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveClaim()" class="btn btn-primary">Create Claim</button></div>`; }
+
+        function loadClaimServiceDetails() { const sid = document.getElementById('claimService').value; const s = getServiceById(sid); if (s) { document.getElementById('claimCustomer').value = s.customerName; document.getElementById('claimPhone').value = s.phone; document.getElementById('claimBookingDate').value = s.requestDate; } }
+
+        function renderJobForm() { return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="jobCustomer" class="input"></div><div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="jobPhone" class="input"></div></div><div class="form-group"><label class="form-label">Address *</label><textarea id="jobAddress" class="textarea" rows="2"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Job Type</label><select id="jobType" class="select"><option value="delivery">Delivery</option><option value="installation">Installation</option><option value="service">Service/Repair</option></select></div><div class="form-group"><label class="form-label">Product</label><select id="jobProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('')}</select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="jobScheduled" class="input"></div><div class="form-group"><label class="form-label">Payment Status</label><select id="jobPayment" class="select"><option value="paid">Paid</option><option value="pending">Pending</option></select></div></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveJob()" class="btn btn-primary">Create Job</button></div>`; }
+
+        function renderAssignForm() { const j = store.jobs.find(x => x.id === editingItem); const agents = store.users.filter(u => u.role === 'field_agent' && u.active); return `<p style="color:#9CA3AF;margin-bottom:1rem;">Assign: <strong style="color:white;">${j?.customerName}</strong></p><div class="form-group"><label class="form-label">Assign to</label><select id="assignAgent" class="select"><option value="">Select Agent</option>${agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="assignDate" class="input" value="${j?.scheduledDate || ''}"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmAssign()" class="btn btn-primary">Assign</button></div>`; }
+
+        function renderCompleteJobForm() { return `<div class="form-group"><label class="form-label">Completion Status <span class="required-indicator">*</span></label><select id="completionStatus" class="select" onchange="toggleIncompleteReason()"><option value="completed">Completed</option><option value="incomplete">Incomplete</option></select></div><div class="form-group" id="incompleteReasonGroup" style="display:none;"><label class="form-label">Reason for Incomplete <span class="required-indicator">*</span></label><textarea id="incompleteReason" class="textarea" rows="3"></textarea></div><div class="form-group"><label class="form-label">Site Images (URLs) <span class="required-indicator">*</span></label><input type="text" id="completeImages" class="input" placeholder="image1.jpg, image2.jpg"><p style="color:#EF4444;font-size:0.7rem;margin-top:0.25rem;">* Image upload is mandatory</p></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="completeRemarks" class="textarea" rows="3"></textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmCompleteJob()" class="btn btn-success">Submit</button></div>`; }
+
+        function toggleIncompleteReason() { const status = document.getElementById('completionStatus').value; document.getElementById('incompleteReasonGroup').style.display = status === 'incomplete' ? 'block' : 'none'; }
+
+        function renderSiteVisitForm() { const sv = editingItem ? store.siteVisits.find(x => x.id === editingItem) : {}; const isLocked = sv.locked; return `<div class="form-row"><div class="form-group"><label class="form-label">Customer/Site Name <span class="required-indicator">*</span></label><input type="text" id="siteCustomer" class="input ${isLocked ? 'locked-field' : ''}" value="${sv.customerName || ''}" ${isLocked ? 'disabled' : ''}></div><div class="form-group"><label class="form-label">Phone</label><input type="tel" id="sitePhone" class="input ${isLocked ? 'locked-field' : ''}" value="${sv.phone || ''}" ${isLocked ? 'disabled' : ''}></div></div><div class="form-group"><label class="form-label">Address</label><textarea id="siteAddress" class="textarea" rows="2">${sv.address || ''}</textarea></div><div class="form-group" style="display:flex;gap:0.5rem;align-items:center;"><button type="button" onclick="captureGPS()" class="btn btn-secondary"><i class="fas fa-map-marker-alt"></i> Capture GPS</button><span id="gpsStatus" style="color:#9CA3AF;font-size:0.75rem;"></span></div><div class="form-row"><div class="form-group"><label class="form-label">Visit Type</label><select id="siteType" class="select">${VISIT_TYPES.map(t => `<option value="${t}" ${sv.visitType === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Visit Time</label><input type="time" id="siteTime" class="input" value="${sv.visitTime || new Date().toTimeString().slice(0,5)}"></div></div><div class="form-group"><label class="form-label">Payment</label><input type="number" id="sitePayment" class="input" value="${sv.payment || ''}"></div><div class="form-group"><label class="form-label">Photos (URLs) <span class="required-indicator">*</span></label><input type="text" id="sitePhotos" class="input" value="${sv.photos || ''}" placeholder="photo1.jpg, photo2.jpg"></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="siteRemarks" class="textarea" rows="2">${sv.remarks || ''}</textarea></div><input type="hidden" id="siteGpsLat" value="${sv.gpsLat || ''}"><input type="hidden" id="siteGpsLng" value="${sv.gpsLng || ''}"><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveSiteVisit()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Visit</button></div>`; }
+
+        function captureGPS() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { document.getElementById('siteGpsLat').value = pos.coords.latitude; document.getElementById('siteGpsLng').value = pos.coords.longitude; document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-check-circle" style="color:#00D9A5;"></i> GPS Captured'; }, () => { alert('GPS capture failed'); }); } else { alert('GPS not supported'); } }
+
+        function renderUserForm() { const u = editingItem ? store.users.find(x => x.id === editingItem) : {}; return `<div class="form-row"><div class="form-group"><label class="form-label">Name <span class="required-indicator">*</span></label><input type="text" id="userName" class="input" value="${u.name || ''}"></div><div class="form-group"><label class="form-label">Email <span class="required-indicator">*</span></label><input type="email" id="userEmail" class="input" value="${u.email || ''}"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="userPhone" class="input" value="${u.phone || ''}"></div><div class="form-group"><label class="form-label">Role <span class="required-indicator">*</span></label><select id="userRole" class="select"><option value="sales" ${u.role === 'sales' ? 'selected' : ''}>Sales Staff</option><option value="service_head" ${u.role === 'service_head' ? 'selected' : ''}>Service Head</option><option value="field_agent" ${u.role === 'field_agent' ? 'selected' : ''}>Field Agent</option><option value="site_agent" ${u.role === 'site_agent' ? 'selected' : ''}>Site Agent</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option></select></div></div><div class="form-group"><label class="form-label">Password ${editingItem ? '(blank to keep)' : '*'}</label><input type="password" id="userPassword" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveUser()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} User</button></div>`; }
+
+        function toggleFollowUpField() { const status = document.getElementById('leadStatus')?.value; const group = document.getElementById('followUpGroup'); if (group) group.style.display = status === 'interested' ? 'block' : 'none'; }
+        function toggleServiceValue() { const type = document.getElementById('serviceType').value; document.getElementById('serviceValueGroup').style.display = type === 'Paid' ? 'block' : 'none'; }
+
+        // LEAD FUNCTIONS
+        function openLeadModal() { editingItem = null; showModal = 'lead'; duplicateWarning = null; render(); }
+        function editLead(id) { editingItem = id; showModal = 'lead'; duplicateWarning = null; render(); }
+        function deleteLead(id) { if (confirm('Delete?')) { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', id); render(); } }
+        function convertLead(id) { editingItem = id; showModal = 'convert'; render(); }
+
+        function saveLead() {
+            const name = document.getElementById('leadName').value.trim();
+            const phone = document.getElementById('leadPhone').value.trim();
+            const address = document.getElementById('leadAddress').value.trim();
+            if (!name || !phone || !address) { alert('Fill required fields'); return; }
+            const status = document.getElementById('leadStatus').value;
+            const nextFollowUp = document.getElementById('leadFollowUp').value || null;
+            if (status === 'interested' && !nextFollowUp) { alert('Follow-up date required'); return; }
+            
+            const isNew = !editingItem;
+            const data = { customerName: name, phone, address, productCategory: document.getElementById('leadProduct').value, leadValue: parseInt(document.getElementById('leadValue').value) || 0, status, nextFollowUp, remarks: document.getElementById('leadRemarks').value, leadDate: isNew ? new Date().toISOString().split('T')[0] : store.leads.find(l => l.id === editingItem).leadDate, createdBy: isNew ? store.currentUser.id : store.leads.find(l => l.id === editingItem).createdBy, isSiteLead: isNew ? store.currentUser.role === 'site_agent' : store.leads.find(l => l.id === editingItem).isSiteLead, locked: true };
+            if (editingItem) { store.leads[store.leads.findIndex(l => l.id === editingItem)] = { ...store.leads.find(l => l.id === editingItem), ...data }; logActivity('Update Lead', name); }
+            else { store.leads.push({ id: generateId(), ...data }); logActivity('Create Lead', name); }
+            duplicateWarning = null;
+            closeModal();
+        }
+
+        function confirmConversion() {
+            const payment = document.getElementById('convertPayment').value;
+            const dispatchDate = document.getElementById('convertDate').value;
+            if (!dispatchDate) { alert('Select date'); return; }
+            const lead = store.leads.find(l => l.id === editingItem);
+            store.leads.find(l => l.id === editingItem).status = 'converted';
+            store.leads.find(l => l.id === editingItem).paymentConfirmed = payment === 'yes';
+            store.leads.find(l => l.id === editingItem).dispatchDate = dispatchDate;
+            store.jobs.push({ id: generateId(), leadId: editingItem, customerName: lead.customerName, phone: lead.phone, address: lead.address, productCategory: lead.productCategory, jobType: 'delivery', paymentStatus: payment === 'yes' ? 'paid' : 'pending', status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], scheduledDate: dispatchDate, acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false });
+            createNotification('all_service', 'alert', 'New Job', `Job for ${lead.customerName}`);
+            logActivity('Convert Lead', lead.customerName);
+            closeModal();
+        }
+
+        // SERVICE FUNCTIONS
+        function openServiceModal() { editingItem = null; showModal = 'service'; render(); }
+        function editService(id) { editingItem = id; showModal = 'service'; render(); }
+        function saveService() {
+            const data = { customerName: document.getElementById('serviceCustomer').value, phone: document.getElementById('servicePhone').value, address: document.getElementById('serviceAddress').value, serviceType: document.getElementById('serviceType').value, serviceValue: document.getElementById('serviceType').value === 'FOC' ? 0 : parseInt(document.getElementById('serviceValue').value) || 0, requestDate: document.getElementById('serviceRequestDate').value, attendDate: document.getElementById('serviceAttendDate').value || null, remarks: document.getElementById('serviceRemarks').value, status: 'pending', createdBy: store.currentUser.id };
+            if (!data.customerName || !data.phone) { alert('Fill required'); return; }
+            store.services.push({ id: generateId(), ...data });
+            logActivity('Create Service', data.customerName);
+            closeModal();
+        }
+        function completeService(id) { const s = store.services.find(x => x.id === id); s.status = 'completed'; s.attendDate = new Date().toISOString().split('T')[0]; logActivity('Complete Service', s.customerName); render(); }
+
+        // CLAIMS
+        function openClaimModal() { editingItem = null; showModal = 'claim'; render(); }
+        function saveClaim() {
+            store.claims.push({ id: generateId(), serviceId: document.getElementById('claimService').value, customerName: document.getElementById('claimCustomer').value, phone: document.getElementById('claimPhone').value, bookingDate: document.getElementById('claimBookingDate').value, partNumber: document.getElementById('claimPart').value, reason: document.getElementById('claimReason').value, dueDate: document.getElementById('claimDueDate').value || null, status: 'pending', createdBy: store.currentUser.id });
+            logActivity('Create Claim', document.getElementById('claimPart').value);
+            closeModal();
+        }
+        function updateClaimStatus(id, status) { const c = store.claims.find(x => x.id === id); c.status = status; logActivity('Update Claim', `${c.partNumber} -> ${status}`); render(); }
+
+        // JOBS
+        function openJobModal() { editingItem = null; showModal = 'job'; render(); }
+        function assignJob(id) { editingItem = id; showModal = 'assign'; render(); }
+        function saveJob() {
+            store.jobs.push({ id: generateId(), customerName: document.getElementById('jobCustomer').value, phone: document.getElementById('jobPhone').value, address: document.getElementById('jobAddress').value, jobType: document.getElementById('jobType').value, productCategory: document.getElementById('jobProduct').value, scheduledDate: document.getElementById('jobScheduled').value || null, paymentStatus: document.getElementById('jobPayment').value, status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false });
+            logActivity('Create Job', document.getElementById('jobCustomer').value);
+            closeModal();
+        }
+        function confirmAssign() { const job = store.jobs.find(j => j.id === editingItem); job.assignedTo = document.getElementById('assignAgent').value; job.status = 'assigned'; if (document.getElementById('assignDate').value) job.scheduledDate = document.getElementById('assignDate').value; createNotification(job.assignedTo, 'info', 'Job Assigned', job.customerName); logActivity('Assign Job', job.customerName); closeModal(); }
+        
+        function acceptJob(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'accepted';
+            job.acceptedAt = new Date().toISOString();
+            job.travelStartAt = new Date().toISOString();
+            job.gpsTracking = true;
+            logActivity('Accept & Start', job.customerName);
+            render();
+        }
+        
+        function startTravel(id) { const job = store.jobs.find(j => j.id === id); job.status = 'in_progress'; job.travelStartAt = new Date().toISOString(); logActivity('Start Travel', job.customerName); render(); }
+        function reachedLocation(id) { const job = store.jobs.find(j => j.id === id); job.status = 'reached'; job.reachedAt = new Date().toISOString(); createNotification('all_service', 'alert', 'Location Reached', `${job.customerName} location reached by field agent`); logActivity('Reached Location', job.customerName); render(); }
+        function completeJob(id) { editingItem = id; showModal = 'completeJob'; render(); }
+        
+        function confirmCompleteJob() {
+            const status = document.getElementById('completionStatus').value;
+            const images = document.getElementById('completeImages').value;
+            const remarks = document.getElementById('completeRemarks').value;
+            const incompleteReason = document.getElementById('incompleteReason').value;
+            
+            if (!images) { alert('Image upload is mandatory for job completion'); return; }
+            if (status === 'incomplete' && !incompleteReason) { alert('Please provide reason for incomplete'); return; }
+            
+            const job = store.jobs.find(j => j.id === editingItem);
+            job.status = status;
+            job.completedAt = new Date().toISOString();
+            job.images = images;
+            job.remarks = remarks;
+            job.incompleteReason = incompleteReason || '';
+            job.gpsTracking = false;
+            
+            logActivity(status === 'completed' ? 'Complete Job' : 'Incomplete Job', job.customerName);
+            closeModal();
+        }
+
+        // SITE VISITS
+        function startTrip() {
+            store.trips.push({ id: generateId(), userId: store.currentUser.id, date: new Date().toISOString().split('T')[0], startTime: new Date().toTimeString().slice(0,5), endTime: null, totalDistance: 0, status: 'active', visits: [] });
+            logActivity('Start Trip', 'New trip started');
+            render();
+        }
+        
+        function endTrip() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            if (trip) { trip.status = 'completed'; trip.endTime = new Date().toTimeString().slice(0,5); }
+            logActivity('End Trip', 'Trip ended');
+            render();
+        }
+        
+        function openSiteVisitModal() { editingItem = null; showModal = 'siteVisit'; render(); }
+        function editSiteVisit(id) { editingItem = id; showModal = 'siteVisit'; render(); }
+        
+        function saveSiteVisit() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            const data = { tripId: trip?.id, customerName: document.getElementById('siteCustomer').value, phone: document.getElementById('sitePhone').value, address: document.getElementById('siteAddress').value, visitDate: new Date().toISOString().split('T')[0], visitTime: document.getElementById('siteTime').value, visitType: document.getElementById('siteType').value, payment: parseInt(document.getElementById('sitePayment').value) || 0, photos: document.getElementById('sitePhotos').value, remarks: document.getElementById('siteRemarks').value, gpsLat: document.getElementById('siteGpsLat').value, gpsLng: document.getElementById('siteGpsLng').value, createdBy: store.currentUser.id, locked: false };
+            if (!data.customerName) { alert('Customer name required'); return; }
+            if (!data.photos) { alert('Photos are mandatory'); return; }
+            
+            if (editingItem) { store.siteVisits[store.siteVisits.findIndex(sv => sv.id === editingItem)] = { ...store.siteVisits.find(sv => sv.id === editingItem), ...data }; }
+            else { store.siteVisits.push({ id: generateId(), ...data }); if (trip) trip.visits.push(store.siteVisits[store.siteVisits.length-1].id); }
+            logActivity('Site Visit', data.customerName);
+            closeModal();
+        }
+        
+        function convertToLead(id) {
+            const sv = store.siteVisits.find(x => x.id === id);
+            const lead = { id: generateId(), customerName: sv.customerName, phone: sv.phone, address: sv.address, productCategory: 'Others', leadValue: 0, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: null, remarks: `Converted from site visit: ${sv.remarks}`, status: 'lead', createdBy: store.currentUser.id, isSiteLead: true, locked: true };
+            store.leads.push(lead);
+            sv.locked = true;
+            logActivity('Convert to Lead', sv.customerName);
+            alert('Site visit converted to lead!');
+            render();
+        }
+
+        // USERS
+        function openUserModal() { editingItem = null; showModal = 'user'; render(); }
+        function editUser(id) { editingItem = id; showModal = 'user'; render(); }
+        function saveUser() {
+            const data = { name: document.getElementById('userName').value, email: document.getElementById('userEmail').value, phone: document.getElementById('userPhone').value, role: document.getElementById('userRole').value, active: true };
+            const password = document.getElementById('userPassword').value;
+            if (!data.name || !data.email || !data.phone) { alert('Fill required'); return; }
+            if (!editingItem && !password) { alert('Password required'); return; }
+            if (editingItem) { store.users[store.users.findIndex(u => u.id === editingItem)] = { ...store.users.find(u => u.id === editingItem), ...data, password: password || store.users.find(u => u.id === editingItem).password }; }
+            else { store.users.push({ id: generateId(), ...data, password: password || 'changeme' }); }
+            closeModal();
+        }
+        function toggleUserStatus(id) { const user = store.users.find(u => u.id === id); user.active = !user.active; render(); }
+        function deleteUser(id) { if (confirm('Delete user?')) { store.users = store.users.filter(u => u.id !== id); render(); } }
+
+        function closeModal() { showModal = null; editingItem = null; secondaryItem = null; render(); }
+        function showNotifications() { const notifs = getAllNotifications(); notifs.forEach(n => n.read = true); alert(notifs.length > 0 ? notifs.map(n => `${n.title}: ${n.message}`).join('\n\n') : 'No notifications'); render(); }
+        function initFlatpickr() { setTimeout(() => { document.querySelectorAll('input[type="date"]').forEach(el => { if (!el._flatpickr) { el.flatpickr({ dateFormat: 'Y-m-d' }); } }); }, 100); }
+
+        render();
+    </script>
+</body>
+</html>

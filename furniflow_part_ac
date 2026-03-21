@@ -1,0 +1,120 @@
+        }
+
+        function saveOffline(type, data) {
+            offlineData.push({ type, data, timestamp: new Date().toISOString() });
+            localStorage.setItem('furniflow_offline', JSON.stringify(offlineData));
+        }
+
+        function loadOfflineData() {
+            const saved = localStorage.getItem('furniflow_offline');
+            if (saved) offlineData = JSON.parse(saved);
+        }
+
+        function render() {
+            loadOfflineData();
+            const app = document.getElementById('app');
+            if (!store.currentUser) { app.innerHTML = renderLogin(); initFlatpickr(); return; }
+            
+            const flashNotif = showFlashAlert ? store.notifications.find(n => n.isFlash && !n.read && (n.userId === 'all' || n.userId === 'all_' + store.currentUser.role)) : null;
+            app.innerHTML = (flashNotif ? `<div class="flash-alert" onclick="dismissFlash()"><i class="fas fa-bell"></i> ${flashNotif.message}</div>` : '') + renderLayout(renderPage());
+            initFlatpickr();
+            if (flashNotif) { flashNotif.read = true; setTimeout(() => { showFlashAlert = false; render(); }, 10000); }
+        }
+
+        function dismissFlash() { showFlashAlert = false; render(); }
+
+        function renderLogin() {
+            return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);">
+                <div style="max-width:24rem;width:100%;">
+                    <div style="text-align:center;margin-bottom:2rem;">
+                        <div class="logo" style="margin:0 auto 1rem;"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <h1 style="font-size:1.5rem;font-weight:700;color:white;margin-bottom:0.25rem;">FurniFlow</h1>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Business Management System v3</p>
+                    </div>
+                    <div class="card">
+                        <h2 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Sign In</h2>
+                        <div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="input" placeholder="Enter your email"></div>
+                        <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="input" placeholder="Enter your password"></div>
+                        <button onclick="handleLogin()" class="btn btn-primary" style="width:100%;">Sign In</button>
+                        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #3A3A5C;font-size:0.65rem;color:#9CA3AF;text-align:center;line-height:1.8;">
+                            Admin: john@admin123 | Sales: sarah@sales123<br>Service: mike@service123 | Field: tom@agent123<br>Site: raj@site123
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = store.users.find(u => u.email === email && u.password === password && u.active);
+            if (user) { store.currentUser = user; syncOfflineData(); logActivity('Login', 'User logged in'); currentPage = 'dashboard'; render(); }
+            else { alert('Invalid credentials or inactive account'); }
+        }
+
+        function logout() { logActivity('Logout', 'User logged out'); store.currentUser = null; currentPage = 'login'; render(); }
+        function navigate(page) { currentPage = page; render(); }
+
+        function renderPage() {
+            const pages = { 
+                dashboard: renderDashboard, 
+                leads: renderLeads, 
+                services: renderServices,
+                claims: renderClaims,
+                jobs: renderJobs,
+                siteVisits: renderSiteVisits,
+                calendar: renderCalendar, 
+                admin: renderAdmin, 
+                users: renderUserManagement,
+                reports: renderReports
+            };
+            return pages[currentPage]?.() || renderDashboard();
+        }
+
+        function renderLayout() {
+            const user = store.currentUser;
+            const unreadNotifications = getAllNotifications().filter(n => !n.read).length;
+            return `<div class="sidebar">
+                <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <div class="logo"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <span class="sidebar-text" style="color:white;font-weight:700;">FurniFlow</span>
+                    </div>
+                </div>
+                <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
+                    ${renderNavItem('dashboard', 'Dashboard', 'fa-home')}
+                    ${(user.role === 'sales' || user.role === 'admin') ? renderNavItem('leads', 'Leads', 'fa-users') : ''}
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('services', 'Services', 'fa-tools') : ''}
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('claims', 'Claims', 'fa-boxes') : ''}
+                    ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? renderNavItem('jobs', 'Jobs', 'fa-briefcase') : ''}
+                    ${(user.role === 'site_agent' || user.role === 'admin') ? renderNavItem('siteVisits', 'Site Visits', 'fa-map-marker-alt') : ''}
+                    ${renderNavItem('calendar', 'Calendar', 'fa-calendar')}
+                    ${user.role === 'admin' ? renderNavItem('reports', 'Reports', 'fa-chart-pie') : ''}
+                    ${user.role === 'admin' ? renderNavItem('admin', 'Admin', 'fa-chart-bar') : ''}
+                    ${user.role === 'admin' ? renderNavItem('users', 'Users', 'fa-user-cog') : ''}
+                </nav>
+                <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
+                        <div class="avatar">${user.name.charAt(0)}</div>
+                        <div style="flex:1;min-width:0;" class="sidebar-text">
+                            <p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p>
+                            <p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p>
+                        </div>
+                        <button onclick="logout()" style="padding:0.25rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <header class="header">
+                    <h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${currentPage === 'dashboard' ? user.role.replace('_', ' ') + ' Dashboard' : currentPage}</h2>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <button onclick="showNotifications()" style="position:relative;padding:0.5rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><i class="fas fa-bell"></i>${unreadNotifications > 0 ? `<span class="notification-dot">${unreadNotifications}</span>` : ''}</button>
+                        <span style="color:#9CA3AF;font-size:0.875rem;">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                    </div>
+                </header>
+                <main style="padding:1.5rem;">${renderPage()}</main>
+            </div>
+            ${showModal ? renderModal() : ''}`;
+        }
+
+        function renderNavItem(page, label, icon) {

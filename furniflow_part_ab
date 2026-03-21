@@ -1,0 +1,120 @@
+            ],
+            leads: [
+                { id: 'l1', customerName: 'Robert Anderson', phone: '+91 98765 11111', address: '123 Oak Street, Springfield', productCategory: 'Sofa', leadValue: 45000, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: '2024-03-20', remarks: 'Interested in leather sofa', status: 'interested', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l2', customerName: 'Jennifer Martinez', phone: '+91 98765 22222', address: '456 Maple Ave, Chicago', productCategory: 'Dining', leadValue: 35000, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: new Date().toISOString().split('T')[0], remarks: 'Looking for 6-seater', status: 'lead', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', leadValue: 55000, leadDate: '2024-03-10', nextFollowUp: null, remarks: 'Converted - Payment received', status: 'converted', paymentConfirmed: true, dispatchDate: '2024-03-25', createdBy: 'u2', isSiteLead: false, locked: true },
+            ],
+            services: [
+                { id: 's1', customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', serviceType: 'Paid', serviceValue: 2500, requestDate: new Date().toISOString().split('T')[0], attendDate: null, status: 'pending', remarks: 'Office furniture repair', createdBy: 'u3' },
+                { id: 's2', customerName: 'XYZ Home', phone: '+91 98765 88888', address: '200 Residential Ave', serviceType: 'FOC', serviceValue: 0, requestDate: '2024-03-10', attendDate: '2024-03-15', status: 'completed', remarks: 'Warranty repair', createdBy: 'u3' },
+            ],
+            claims: [
+                { id: 'c1', serviceId: 's1', customerName: 'ABC Corp', phone: '+91 98765 99999', bookingDate: '2024-03-10', partNumber: 'LEG-001', reason: 'Broken table leg', dueDate: '2024-03-25', status: 'pending', createdBy: 'u3' },
+            ],
+            jobs: [
+                { id: 'j1', leadId: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', jobType: 'delivery', paymentStatus: 'paid', status: 'assigned', assignedTo: 'u4', createdAt: new Date().toISOString().split('T')[0], scheduledDate: new Date().toISOString().split('T')[0], acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false },
+                { id: 'j2', leadId: null, customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', productCategory: 'Office Table', jobType: 'installation', paymentStatus: 'pending', status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], scheduledDate: null, acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false },
+            ],
+            trips: [
+                { id: 't1', userId: 'u6', date: new Date().toISOString().split('T')[0], startTime: '09:00', endTime: null, totalDistance: 0, status: 'active', visits: ['sv1'] }
+            ],
+            siteVisits: [
+                { id: 'sv1', tripId: 't1', customerName: 'Green Valley Society', phone: '+91 98765 77777', address: 'Green Valley Society, Block A', visitDate: new Date().toISOString().split('T')[0], visitTime: '10:30', visitType: 'Society Visit', payment: 0, photos: '', remarks: 'Met society secretary', gpsLat: '', gpsLng: '', createdBy: 'u6', locked: false },
+            ],
+            notifications: [
+                { id: 'n1', userId: 'u3', type: 'alert', title: 'Location Reached', message: 'Field agent reached location for David Thompson', read: false, createdAt: new Date().toISOString() },
+                { id: 'n2', userId: 'all_sales', type: 'flash', title: 'Daily Reminder', message: "Add Today's Leads!", read: false, createdAt: new Date().toISOString(), isFlash: true },
+            ],
+            activityLogs: [],
+            currentUser: null
+        };
+
+        let currentPage = 'dashboard';
+        let showModal = null;
+        let editingItem = null;
+        let secondaryItem = null;
+        let dateFilter = new Date().toISOString().split('T')[0];
+        let categoryFilter = '';
+        let jobFilter = 'all';
+        let serviceTab = 'services';
+        let calendarDate = new Date();
+        let showFlashAlert = true;
+        let duplicateWarning = null;
+        let offlineData = [];
+
+        function generateId() { return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatCurrency(amount) { return '₹' + parseInt(amount || 0).toLocaleString('en-IN'); }
+        
+        function isOverdue(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateStr); target.setHours(0,0,0,0);
+            return target < today;
+        }
+
+        function isOverdue15Days(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date();
+            const target = new Date(dateStr);
+            const diffTime = today - target;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 15;
+        }
+        
+        function checkDuplicatePhone(phone, excludeId = null) {
+            return store.leads.find(l => l.phone === phone && l.id !== excludeId);
+        }
+
+        function getServiceById(id) { return store.services.find(s => s.id === id); }
+        
+        function logActivity(action, details) {
+            store.activityLogs.push({
+                id: generateId(),
+                userId: store.currentUser?.id,
+                userName: store.currentUser?.name,
+                role: store.currentUser?.role,
+                action,
+                details,
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        function createNotification(userId, type, title, message, isFlash = false) {
+            store.notifications.push({
+                id: generateId(), userId, type, title, message, read: false, createdAt: new Date().toISOString(), isFlash
+            });
+            render();
+        }
+
+        function getAllNotifications() {
+            const user = store.currentUser;
+            if (!user) return [];
+            return store.notifications.filter(n => 
+                n.userId === user.id || 
+                n.userId === 'all_' + user.role || 
+                n.userId === 'all'
+            );
+        }
+
+        function syncOfflineData() {
+            if (offlineData.length > 0) {
+                offlineData.forEach(data => {
+                    if (data.type === 'siteVisit') store.siteVisits.push(data.data);
+                    if (data.type === 'lead') store.leads.push(data.data);
+                });
+                offlineData = [];
+                localStorage.setItem('furniflow_offline', JSON.stringify(offlineData));
+            }

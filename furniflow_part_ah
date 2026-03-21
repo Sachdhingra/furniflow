@@ -1,0 +1,98 @@
+        
+        function acceptJob(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'accepted';
+            job.acceptedAt = new Date().toISOString();
+            job.travelStartAt = new Date().toISOString();
+            job.gpsTracking = true;
+            logActivity('Accept & Start', job.customerName);
+            render();
+        }
+        
+        function startTravel(id) { const job = store.jobs.find(j => j.id === id); job.status = 'in_progress'; job.travelStartAt = new Date().toISOString(); logActivity('Start Travel', job.customerName); render(); }
+        function reachedLocation(id) { const job = store.jobs.find(j => j.id === id); job.status = 'reached'; job.reachedAt = new Date().toISOString(); createNotification('all_service', 'alert', 'Location Reached', `${job.customerName} location reached by field agent`); logActivity('Reached Location', job.customerName); render(); }
+        function completeJob(id) { editingItem = id; showModal = 'completeJob'; render(); }
+        
+        function confirmCompleteJob() {
+            const status = document.getElementById('completionStatus').value;
+            const images = document.getElementById('completeImages').value;
+            const remarks = document.getElementById('completeRemarks').value;
+            const incompleteReason = document.getElementById('incompleteReason').value;
+            
+            if (!images) { alert('Image upload is mandatory for job completion'); return; }
+            if (status === 'incomplete' && !incompleteReason) { alert('Please provide reason for incomplete'); return; }
+            
+            const job = store.jobs.find(j => j.id === editingItem);
+            job.status = status;
+            job.completedAt = new Date().toISOString();
+            job.images = images;
+            job.remarks = remarks;
+            job.incompleteReason = incompleteReason || '';
+            job.gpsTracking = false;
+            
+            logActivity(status === 'completed' ? 'Complete Job' : 'Incomplete Job', job.customerName);
+            closeModal();
+        }
+
+        // SITE VISITS
+        function startTrip() {
+            store.trips.push({ id: generateId(), userId: store.currentUser.id, date: new Date().toISOString().split('T')[0], startTime: new Date().toTimeString().slice(0,5), endTime: null, totalDistance: 0, status: 'active', visits: [] });
+            logActivity('Start Trip', 'New trip started');
+            render();
+        }
+        
+        function endTrip() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            if (trip) { trip.status = 'completed'; trip.endTime = new Date().toTimeString().slice(0,5); }
+            logActivity('End Trip', 'Trip ended');
+            render();
+        }
+        
+        function openSiteVisitModal() { editingItem = null; showModal = 'siteVisit'; render(); }
+        function editSiteVisit(id) { editingItem = id; showModal = 'siteVisit'; render(); }
+        
+        function saveSiteVisit() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            const data = { tripId: trip?.id, customerName: document.getElementById('siteCustomer').value, phone: document.getElementById('sitePhone').value, address: document.getElementById('siteAddress').value, visitDate: new Date().toISOString().split('T')[0], visitTime: document.getElementById('siteTime').value, visitType: document.getElementById('siteType').value, payment: parseInt(document.getElementById('sitePayment').value) || 0, photos: document.getElementById('sitePhotos').value, remarks: document.getElementById('siteRemarks').value, gpsLat: document.getElementById('siteGpsLat').value, gpsLng: document.getElementById('siteGpsLng').value, createdBy: store.currentUser.id, locked: false };
+            if (!data.customerName) { alert('Customer name required'); return; }
+            if (!data.photos) { alert('Photos are mandatory'); return; }
+            
+            if (editingItem) { store.siteVisits[store.siteVisits.findIndex(sv => sv.id === editingItem)] = { ...store.siteVisits.find(sv => sv.id === editingItem), ...data }; }
+            else { store.siteVisits.push({ id: generateId(), ...data }); if (trip) trip.visits.push(store.siteVisits[store.siteVisits.length-1].id); }
+            logActivity('Site Visit', data.customerName);
+            closeModal();
+        }
+        
+        function convertToLead(id) {
+            const sv = store.siteVisits.find(x => x.id === id);
+            const lead = { id: generateId(), customerName: sv.customerName, phone: sv.phone, address: sv.address, productCategory: 'Others', leadValue: 0, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: null, remarks: `Converted from site visit: ${sv.remarks}`, status: 'lead', createdBy: store.currentUser.id, isSiteLead: true, locked: true };
+            store.leads.push(lead);
+            sv.locked = true;
+            logActivity('Convert to Lead', sv.customerName);
+            alert('Site visit converted to lead!');
+            render();
+        }
+
+        // USERS
+        function openUserModal() { editingItem = null; showModal = 'user'; render(); }
+        function editUser(id) { editingItem = id; showModal = 'user'; render(); }
+        function saveUser() {
+            const data = { name: document.getElementById('userName').value, email: document.getElementById('userEmail').value, phone: document.getElementById('userPhone').value, role: document.getElementById('userRole').value, active: true };
+            const password = document.getElementById('userPassword').value;
+            if (!data.name || !data.email || !data.phone) { alert('Fill required'); return; }
+            if (!editingItem && !password) { alert('Password required'); return; }
+            if (editingItem) { store.users[store.users.findIndex(u => u.id === editingItem)] = { ...store.users.find(u => u.id === editingItem), ...data, password: password || store.users.find(u => u.id === editingItem).password }; }
+            else { store.users.push({ id: generateId(), ...data, password: password || 'changeme' }); }
+            closeModal();
+        }
+        function toggleUserStatus(id) { const user = store.users.find(u => u.id === id); user.active = !user.active; render(); }
+        function deleteUser(id) { if (confirm('Delete user?')) { store.users = store.users.filter(u => u.id !== id); render(); } }
+
+        function closeModal() { showModal = null; editingItem = null; secondaryItem = null; render(); }
+        function showNotifications() { const notifs = getAllNotifications(); notifs.forEach(n => n.read = true); alert(notifs.length > 0 ? notifs.map(n => `${n.title}: ${n.message}`).join('\n\n') : 'No notifications'); render(); }
+        function initFlatpickr() { setTimeout(() => { document.querySelectorAll('input[type="date"]').forEach(el => { if (!el._flatpickr) { el.flatpickr({ dateFormat: 'Y-m-d' }); } }); }, 100); }
+
+        render();
+    </script>
+</body>
+</html>
