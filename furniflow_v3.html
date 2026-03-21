@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurniFlow - Business Management System v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0F0F1A; color: #FFFFFF; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1.25rem; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: linear-gradient(135deg, #E94560, #FF6B6B); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: transparent; border: 1px solid #3A3A5C; color: white; }
+        .btn-secondary:hover { border-color: #E94560; color: #E94560; }
+        .btn-success { background: linear-gradient(135deg, #00D9A5, #00B388); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #F59E0B, #FBBF24); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; }
+        .input { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .input:focus { outline: none; border-color: #E94560; }
+        .input:disabled { opacity: 0.6; cursor: not-allowed; }
+        .input.error { border-color: #EF4444; }
+        .select { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .textarea { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; resize: vertical; }
+        .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .badge-lead { background: #1E3A8A; color: #93C5FD; }
+        .badge-interested { background: #713F12; color: #FCD34D; }
+        .badge-converted { background: #14532D; color: #86EFAC; }
+        .badge-not-interested { background: #374151; color: #9CA3AF; }
+        .badge-lost { background: #7F1D1D; color: #FCA5A5; }
+        .badge-pending { background: #713F12; color: #FCD34D; }
+        .badge-approved { background: #1E3A8A; color: #93C5FD; }
+        .badge-completed { background: #14532D; color: #86EFAC; }
+        .badge-incomplete { background: #7F1D1D; color: #FCA5A5; }
+        .badge-assigned { background: #1E3A8A; color: #93C5FD; }
+        .badge-accepted { background: #4C1D95; color: #C4B5FD; }
+        .badge-in-progress { background: #9F5809; color: #FDE68A; }
+        .badge-reached { background: #0D9488; color: #5EEAD4; }
+        .badge-overdue { background: #DC2626; color: white; }
+        .badge-overdue15 { background: #7F1D1D; color: #FCA5A5; border: 2px solid #EF4444; }
+        .badge-paid { background: #14532D; color: #86EFAC; }
+        .badge-foc { background: #4C1D95; color: #C4B5FD; }
+        .badge-site { background: #0D9488; color: #5EEAD4; }
+        .badge-active { background: #14532D; color: #86EFAC; }
+        .badge-completed-status { background: #14532D; color: #86EFAC; }
+        .sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 16rem; background: #1A1A2E; border-right: 1px solid #3A3A5C; display: flex; flex-direction: column; z-index: 40; overflow-y: auto; }
+        .main-content { margin-left: 16rem; min-height: 100vh; padding-bottom: 5rem; }
+        .header { height: 4rem; background: #1A1A2E; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 30; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 0.5rem; color: #9CA3AF; text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover { background: #2A2A44; color: white; }
+        .nav-item.active { background: rgba(233, 69, 96, 0.1); color: #E94560; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { text-align: left; padding: 0.75rem; font-size: 0.75rem; font-weight: 600; color: #9CA3AF; border-bottom: 1px solid #3A3A5C; text-transform: uppercase; }
+        .table td { padding: 0.75rem; border-bottom: 1px solid #3A3A5C50; font-size: 0.875rem; }
+        .table tr:hover { background: rgba(42, 42, 68, 0.3); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+        .modal { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 1rem; width: 100%; max-width: 40rem; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #3A3A5C; display: flex; gap: 0.75rem; justify-content: flex-end; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #9CA3AF; margin-bottom: 0.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .avatar { width: 2rem; height: 2rem; border-radius: 50%; background: linear-gradient(135deg, #4DA8DA, #00D9A5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; }
+        .logo { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #E94560, #FF6B6B); display: flex; align-items: center; justify-content: center; }
+        .stat-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; padding: 0.25rem; }
+        .calendar-day:hover { background: #2A2A44; }
+        .calendar-day.today { background: #E94560; color: white; }
+        .notification-dot { position: absolute; top: -0.25rem; right: -0.25rem; min-width: 1.25rem; height: 1.25rem; background: #E94560; border-radius: 50%; font-size: 0.625rem; display: flex; align-items: center; justify-content: center; padding: 0 0.25rem; }
+        .flash-alert { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #F59E0B, #FBBF24); color: #000; padding: 1rem 1.5rem; border-radius: 0.75rem; z-index: 100; animation: slideIn 0.3s ease; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); cursor: pointer; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .timeline { position: relative; padding-left: 1.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: #3A3A5C; }
+        .timeline-item { position: relative; padding-bottom: 1rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.25rem; top: 0.25rem; width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #E94560; border: 2px solid #1E1E32; }
+        .timeline-item.completed::before { background: #00D9A5; }
+        .filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+        .filter-bar .input, .filter-bar .select { width: auto; min-width: 140px; }
+        .tab-btn { padding: 0.5rem 1rem; background: transparent; border: 1px solid #3A3A5C; color: #9CA3AF; cursor: pointer; border-radius: 0.5rem; font-size: 0.75rem; }
+        .tab-btn.active { background: #E94560; color: white; border-color: #E94560; }
+        .map-link { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: #1E3A8A; color: #93C5FD; border-radius: 0.375rem; font-size: 0.75rem; text-decoration: none; }
+        .locked-field { background: rgba(233, 69, 96, 0.1); border-color: rgba(233, 69, 96, 0.3); position: relative; }
+        .locked-field::after { content: '\f023'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #E94560; font-size: 0.75rem; }
+        .required-indicator { color: #E94560; }
+        .warning-box { background: rgba(245, 158, 11, 0.1); border: 1px solid #F59E0B; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #F59E0B; font-size: 0.875rem; }
+        .gps-active { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(0, 217, 165, 0.1); border-radius: 0.5rem; font-size: 0.75rem; color: #00D9A5; }
+        .gps-pulse { width: 8px; height: 8px; background: #00D9A5; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .perf-bar { height: 8px; background: #3A3A5C; border-radius: 4px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: linear-gradient(90deg, #E94560, #00D9A5); border-radius: 4px; }
+        .trip-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1rem; margin-bottom: 0.75rem; }
+        .trip-card.active { border-color: #00D9A5; }
+        .offline-indicator { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #F59E0B; color: #000; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; display: none; }
+        .offline-indicator.show { display: block; }
+        @media (max-width: 768px) { .sidebar { width: 4rem; } .main-content { margin-left: 4rem; } .sidebar-text { display: none; } .modal { max-width: 100%; margin: 0.5rem; } .form-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <div id="offlineIndicator" class="offline-indicator"><i class="fas fa-wifi"></i> Working Offline - Data will sync when online</div>
+
+    <script>
+        const PRODUCT_CATEGORIES = ['Sofa', 'Coffee Table', 'Almirah', 'Dining', 'Mattress', 'Bed', 'Kitchen', 'Chair', 'Office Table', 'Others'];
+        const SERVICE_TYPES = ['Paid', 'FOC'];
+        const VISIT_TYPES = ['New House', 'Society Visit', 'Commercial', 'Follow-up'];
+        
+        const store = {
+            users: [
+                { id: 'u1', name: 'John Admin', role: 'admin', email: 'john@furniflow.com', phone: '+91 98765 43210', active: true, password: 'admin123', remarks: '' },
+                { id: 'u2', name: 'Sarah Sales', role: 'sales', email: 'sarah@furniflow.com', phone: '+91 98765 43211', active: true, password: 'sales123', remarks: '' },
+                { id: 'u3', name: 'Mike Service', role: 'service_head', email: 'mike@furniflow.com', phone: '+91 98765 43212', active: true, password: 'service123', remarks: '' },
+                { id: 'u4', name: 'Tom Agent', role: 'field_agent', email: 'tom@furniflow.com', phone: '+91 98765 43213', active: true, password: 'agent123', remarks: '' },
+                { id: 'u5', name: 'Emily Agent', role: 'field_agent', email: 'emily@furniflow.com', phone: '+91 98765 43214', active: true, password: 'agent123', remarks: '' },
+                { id: 'u6', name: 'Raj Site', role: 'site_agent', email: 'raj@furniflow.com', phone: '+91 98765 43215', active: true, password: 'site123', remarks: '' },
+            ],
+            leads: [
+                { id: 'l1', customerName: 'Robert Anderson', phone: '+91 98765 11111', address: '123 Oak Street, Springfield', productCategory: 'Sofa', leadValue: 45000, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: '2024-03-20', remarks: 'Interested in leather sofa', status: 'interested', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l2', customerName: 'Jennifer Martinez', phone: '+91 98765 22222', address: '456 Maple Ave, Chicago', productCategory: 'Dining', leadValue: 35000, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: new Date().toISOString().split('T')[0], remarks: 'Looking for 6-seater', status: 'lead', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', leadValue: 55000, leadDate: '2024-03-10', nextFollowUp: null, remarks: 'Converted - Payment received', status: 'converted', paymentConfirmed: true, dispatchDate: '2024-03-25', createdBy: 'u2', isSiteLead: false, locked: true },
+            ],
+            services: [
+                { id: 's1', customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', serviceType: 'Paid', serviceValue: 2500, requestDate: new Date().toISOString().split('T')[0], attendDate: null, status: 'pending', remarks: 'Office furniture repair', createdBy: 'u3' },
+                { id: 's2', customerName: 'XYZ Home', phone: '+91 98765 88888', address: '200 Residential Ave', serviceType: 'FOC', serviceValue: 0, requestDate: '2024-03-10', attendDate: '2024-03-15', status: 'completed', remarks: 'Warranty repair', createdBy: 'u3' },
+            ],
+            claims: [
+                { id: 'c1', serviceId: 's1', customerName: 'ABC Corp', phone: '+91 98765 99999', bookingDate: '2024-03-10', partNumber: 'LEG-001', reason: 'Broken table leg', dueDate: '2024-03-25', status: 'pending', createdBy: 'u3' },
+            ],
+            jobs: [
+                { id: 'j1', leadId: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', jobType: 'delivery', paymentStatus: 'paid', status: 'assigned', assignedTo: 'u4', createdAt: new Date().toISOString().split('T')[0], scheduledDate: new Date().toISOString().split('T')[0], acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false },
+                { id: 'j2', leadId: null, customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', productCategory: 'Office Table', jobType: 'installation', paymentStatus: 'pending', status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], scheduledDate: null, acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false },
+            ],
+            trips: [
+                { id: 't1', userId: 'u6', date: new Date().toISOString().split('T')[0], startTime: '09:00', endTime: null, totalDistance: 0, status: 'active', visits: ['sv1'] }
+            ],
+            siteVisits: [
+                { id: 'sv1', tripId: 't1', customerName: 'Green Valley Society', phone: '+91 98765 77777', address: 'Green Valley Society, Block A', visitDate: new Date().toISOString().split('T')[0], visitTime: '10:30', visitType: 'Society Visit', payment: 0, photos: '', remarks: 'Met society secretary', gpsLat: '', gpsLng: '', createdBy: 'u6', locked: false },
+            ],
+            notifications: [
+                { id: 'n1', userId: 'u3', type: 'alert', title: 'Location Reached', message: 'Field agent reached location for David Thompson', read: false, createdAt: new Date().toISOString() },
+                { id: 'n2', userId: 'all_sales', type: 'flash', title: 'Daily Reminder', message: "Add Today's Leads!", read: false, createdAt: new Date().toISOString(), isFlash: true },
+            ],
+            activityLogs: [],
+            currentUser: null
+        };
+
+        let currentPage = 'dashboard';
+        let showModal = null;
+        let editingItem = null;
+        let secondaryItem = null;
+        let dateFilter = new Date().toISOString().split('T')[0];
+        let categoryFilter = '';
+        let jobFilter = 'all';
+        let serviceTab = 'services';
+        let calendarDate = new Date();
+        let showFlashAlert = true;
+        let duplicateWarning = null;
+        let offlineData = [];
+
+        function generateId() { return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatCurrency(amount) { return '₹' + parseInt(amount || 0).toLocaleString('en-IN'); }
+        
+        function isOverdue(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateStr); target.setHours(0,0,0,0);
+            return target < today;
+        }
+
+        function isOverdue15Days(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date();
+            const target = new Date(dateStr);
+            const diffTime = today - target;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 15;
+        }
+        
+        function checkDuplicatePhone(phone, excludeId = null) {
+            return store.leads.find(l => l.phone === phone && l.id !== excludeId);
+        }
+
+        function getServiceById(id) { return store.services.find(s => s.id === id); }
+        
+        function logActivity(action, details) {
+            store.activityLogs.push({
+                id: generateId(),
+                userId: store.currentUser?.id,
+                userName: store.currentUser?.name,
+                role: store.currentUser?.role,
+                action,
+                details,
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        function createNotification(userId, type, title, message, isFlash = false) {
+            store.notifications.push({
+                id: generateId(), userId, type, title, message, read: false, createdAt: new Date().toISOString(), isFlash
+            });
+            render();
+        }
+
+        function getAllNotifications() {
+            const user = store.currentUser;
+            if (!user) return [];
+            return store.notifications.filter(n => 
+                n.userId === user.id || 
+                n.userId === 'all_' + user.role || 
+                n.userId === 'all'
+            );
+        }
+
+        function syncOfflineData() {
+            if (offlineData.length > 0) {
+                offlineData.forEach(data => {
+                    if (data.type === 'siteVisit') store.siteVisits.push(data.data);
+                    if (data.type === 'lead') store.leads.push(data.data);
+                });
+                offlineData = [];
+                localStorage.setItem('furniflow_offline', JSON.stringify(offlineData));
+            }
+        }
+
+        function saveOffline(type, data) {
+            offlineData.push({ type, data, timestamp: new Date().toISOString() });
+            localStorage.setItem('furniflow_offline', JSON.stringify(offlineData));
+        }
+
+        function loadOfflineData() {
+            const saved = localStorage.getItem('furniflow_offline');
+            if (saved) offlineData = JSON.parse(saved);
+        }
+
+        function render() {
+            loadOfflineData();
+            const app = document.getElementById('app');
+            if (!store.currentUser) { app.innerHTML = renderLogin(); initFlatpickr(); return; }
+            
+            const flashNotif = showFlashAlert ? store.notifications.find(n => n.isFlash && !n.read && (n.userId === 'all' || n.userId === 'all_' + store.currentUser.role)) : null;
+            app.innerHTML = (flashNotif ? `<div class="flash-alert" onclick="dismissFlash()"><i class="fas fa-bell"></i> ${flashNotif.message}</div>` : '') + renderLayout(renderPage());
+            initFlatpickr();
+            if (flashNotif) { flashNotif.read = true; setTimeout(() => { showFlashAlert = false; render(); }, 10000); }
+        }
+
+        function dismissFlash() { showFlashAlert = false; render(); }
+
+        function renderLogin() {
+            return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);">
+                <div style="max-width:24rem;width:100%;">
+                    <div style="text-align:center;margin-bottom:2rem;">
+                        <div class="logo" style="margin:0 auto 1rem;"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <h1 style="font-size:1.5rem;font-weight:700;color:white;margin-bottom:0.25rem;">FurniFlow</h1>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Business Management System v3</p>
+                    </div>
+                    <div class="card">
+                        <h2 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Sign In</h2>
+                        <div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="input" placeholder="Enter your email"></div>
+                        <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="input" placeholder="Enter your password"></div>
+                        <button onclick="handleLogin()" class="btn btn-primary" style="width:100%;">Sign In</button>
+                        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #3A3A5C;font-size:0.65rem;color:#9CA3AF;text-align:center;line-height:1.8;">
+                            Admin: john@admin123 | Sales: sarah@sales123<br>Service: mike@service123 | Field: tom@agent123<br>Site: raj@site123
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = store.users.find(u => u.email === email && u.password === password && u.active);
+            if (user) { store.currentUser = user; syncOfflineData(); logActivity('Login', 'User logged in'); currentPage = 'dashboard'; render(); }
+            else { alert('Invalid credentials or inactive account'); }
+        }
+
+        function logout() { logActivity('Logout', 'User logged out'); store.currentUser = null; currentPage = 'login'; render(); }
+        function navigate(page) { currentPage = page; render(); }
+
+        function renderPage() {
+            const pages = { 
+                dashboard: renderDashboard, 
+                leads: renderLeads, 
+                services: renderServices,
+                claims: renderClaims,
+                jobs: renderJobs,
+                siteVisits: renderSiteVisits,
+                calendar: renderCalendar, 
+                admin: renderAdmin, 
+                users: renderUserManagement,
+                reports: renderReports
+            };
+            return pages[currentPage]?.() || renderDashboard();
+        }
+
+        function renderLayout() {
+            const user = store.currentUser;
+            const unreadNotifications = getAllNotifications().filter(n => !n.read).length;
+            return `<div class="sidebar">
+                <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <div class="logo"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <span class="sidebar-text" style="color:white;font-weight:700;">FurniFlow</span>
+                    </div>
+                </div>
+                <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
+                    ${renderNavItem('dashboard', 'Dashboard', 'fa-home')}
+                    ${(user.role === 'sales' || user.role === 'admin') ? renderNavItem('leads', 'Leads', 'fa-users') : ''}
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('services', 'Services', 'fa-tools') : ''}
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('claims', 'Claims', 'fa-boxes') : ''}
+                    ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? renderNavItem('jobs', 'Jobs', 'fa-briefcase') : ''}
+                    ${(user.role === 'site_agent' || user.role === 'admin') ? renderNavItem('siteVisits', 'Site Visits', 'fa-map-marker-alt') : ''}
+                    ${renderNavItem('calendar', 'Calendar', 'fa-calendar')}
+                    ${user.role === 'admin' ? renderNavItem('reports', 'Reports', 'fa-chart-pie') : ''}
+                    ${user.role === 'admin' ? renderNavItem('admin', 'Admin', 'fa-chart-bar') : ''}
+                    ${user.role === 'admin' ? renderNavItem('users', 'Users', 'fa-user-cog') : ''}
+                </nav>
+                <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
+                        <div class="avatar">${user.name.charAt(0)}</div>
+                        <div style="flex:1;min-width:0;" class="sidebar-text">
+                            <p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p>
+                            <p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p>
+                        </div>
+                        <button onclick="logout()" style="padding:0.25rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <header class="header">
+                    <h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${currentPage === 'dashboard' ? user.role.replace('_', ' ') + ' Dashboard' : currentPage}</h2>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <button onclick="showNotifications()" style="position:relative;padding:0.5rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><i class="fas fa-bell"></i>${unreadNotifications > 0 ? `<span class="notification-dot">${unreadNotifications}</span>` : ''}</button>
+                        <span style="color:#9CA3AF;font-size:0.875rem;">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                    </div>
+                </header>
+                <main style="padding:1.5rem;">${renderPage()}</main>
+            </div>
+            ${showModal ? renderModal() : ''}`;
+        }
+
+        function renderNavItem(page, label, icon) {
+            const isActive = currentPage === page;
+            return `<a href="#" onclick="navigate('${page}')" class="nav-item ${isActive ? 'active' : ''}"><i class="fas ${icon}"></i><span class="sidebar-text">${label}</span></a>`;
+        }
+
+        function renderDashboard() {
+            const user = store.currentUser;
+            const today = new Date().toISOString().split('T')[0];
+            
+            const myJobs = user.role === 'field_agent' ? store.jobs.filter(j => j.assignedTo === user.id) : [];
+            const pendingFollowUps = store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).length;
+            const pipelineValue = store.leads.filter(l => !['converted','lost','not_interested'].includes(l.status)).reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            const serviceRevenue = store.services.filter(s => s.serviceType === 'Paid').reduce((sum, s) => sum + (parseInt(s.serviceValue) || 0), 0);
+            const overdueJobs = store.jobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && j.status !== 'completed').length;
+            const overdueClaims = store.claims.filter(c => c.dueDate && isOverdue15Days(c.dueDate) && c.status !== 'completed').length;
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Welcome back, ${user.name.split(' ')[0]}</h1><p style="color:#9CA3AF;margin-top:0.25rem;">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p></div>
+                
+                ${(user.role === 'sales' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Leads</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.leads.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pipeline</p><p style="font-size:1.25rem;font-weight:700;color:#60A5FA;">${formatCurrency(pipelineValue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue Follow-ups</p><p style="font-size:1.5rem;font-weight:700;color:${pendingFollowUps > 0 ? '#EF4444' : 'white'};">${pendingFollowUps}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'service_head' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Services</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.services.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(serviceRevenue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${store.services.filter(s => s.status === 'pending').length}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'field_agent') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">My Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${myJobs.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${myJobs.filter(j => !['completed','incomplete'].includes(j.status)).length}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'site_agent') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Today's Visits</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.siteVisits.filter(sv => sv.visitDate === today).length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Site Leads</p><p style="font-size:1.5rem;font-weight:700;color:#5EEAD4;">${store.leads.filter(l => l.isSiteLead).length}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.jobs.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue Jobs</p><p style="font-size:1.5rem;font-weight:700;color:${overdueJobs > 0 ? '#EF4444' : 'white'};">${overdueJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue Claims</p><p style="font-size:1.5rem;font-weight:700;color:${overdueClaims > 0 ? '#EF4444' : 'white'};">${overdueClaims}</p></div>
+                </div>` : ''}
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+                    ${(user.role === 'sales' || user.role === 'admin') ? `<div class="card"><h3 style="font-size:1rem;font-weight:600;color:white;margin-bottom:1rem;">Overdue Follow-ups</h3>
+                        <div style="display:grid;gap:0.5rem;">${store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).slice(0,5).map(l => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${l.productCategory}</p></div><span class="badge badge-overdue">${formatDate(l.nextFollowUp)}</span></div>`).join('') || '<p style="color:#9CA3AF;">No overdue follow-ups</p>'}</div></div>` : ''}
+                    
+                    ${(user.role === 'service_head' || user.role === 'admin') ? `<div class="card"><h3 style="font-size:1rem;font-weight:600;color:white;margin-bottom:1rem;">Pending Services</h3>
+                        <div style="display:grid;gap:0.5rem;">${store.services.filter(s => s.status === 'pending').slice(0,5).map(s => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${s.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${s.serviceType}</p></div><span class="badge badge-pending">Pending</span></div>`).join('') || '<p style="color:#9CA3AF;">No pending services</p>'}</div></div>` : ''}
+                    
+                    ${(user.role === 'field_agent') ? `<div class="card"><h3 style="font-size:1rem;font-weight:600;color:white;margin-bottom:1rem;">My Jobs</h3>
+                        <div style="display:grid;gap:0.5rem;">${myJobs.filter(j => !['completed','incomplete'].includes(j.status)).slice(0,5).map(j => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${j.jobType}</p></div><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></div>`).join('') || '<p style="color:#9CA3AF;">No jobs</p>'}</div></div>` : ''}
+                </div></div>`;
+        }
+
+        function renderLeads() {
+            const user = store.currentUser;
+            let filteredLeads = store.leads.filter(l => { 
+                if (user.role === 'sales') return l.createdBy === user.id; 
+                if (user.role === 'site_agent') return l.isSiteLead; 
+                return true; 
+            });
+            
+            if (dateFilter) filteredLeads = filteredLeads.filter(l => l.leadDate === dateFilter);
+            if (categoryFilter) filteredLeads = filteredLeads.filter(l => l.productCategory === categoryFilter);
+            
+            const pipelineValue = filteredLeads.filter(l => !['converted','lost','not_interested'].includes(l.status)).reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            const convertedValue = filteredLeads.filter(l => l.status === 'converted').reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Leads</h1><p style="color:#9CA3AF;">Manage leads and follow-ups</p></div>
+                    <button onclick="openLeadModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Lead</button>
+                </div>
+                
+                ${duplicateWarning ? `<div class="warning-box"><i class="fas fa-exclamation-triangle"></i> ${duplicateWarning} <button onclick="duplicateWarning=null;render()" style="background:none;border:none;color:white;margin-left:auto;">Dismiss</button></div>` : ''}
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pipeline</p><p style="font-size:1.25rem;font-weight:700;color:#60A5FA;">${formatCurrency(pipelineValue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Converted</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(convertedValue)}</p></div>
+                </div>
+                
+                <div class="filter-bar">
+                    <input type="date" id="leadDateFilter" class="input" style="width:auto;" value="${dateFilter}" onchange="dateFilter=this.value;render()">
+                    <select id="categoryFilter" class="select" style="width:auto;" onchange="categoryFilter=this.value;render()">
+                        <option value="">All Categories</option>${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                    <button onclick="dateFilter=null;categoryFilter=null;render()" class="btn btn-secondary">Clear</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Product</th><th>Value</th><th>Follow-up</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead>
+                        <tbody>${filteredLeads.map(l => `<tr>
+                            <td><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${l.phone}</p></td>
+                            <td>${l.productCategory}</td>
+                            <td style="color:#60A5FA;font-weight:600;">${formatCurrency(l.leadValue)}</td>
+                            <td>${l.nextFollowUp ? `<span class="badge ${isOverdue(l.nextFollowUp) ? 'badge-overdue' : 'badge-pending'}">${isOverdue(l.nextFollowUp) ? 'Overdue' : formatDate(l.nextFollowUp)}</span>` : '-'}</td>
+                            <td><span class="badge badge-${l.status}">${l.status.replace('_', ' ')}</span></td>
+                            <td>${l.isSiteLead ? '<span class="badge badge-site">Site</span>' : '<span class="badge badge-lead">Sales</span>'}</td>
+                            <td><div style="display:flex;gap:0.375rem;"><button onclick="editLead('${l.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>${l.status === 'interested' ? `<button onclick="convertLead('${l.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Convert</button>` : ''}${user.role === 'admin' ? `<button onclick="deleteLead('${l.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}</div></td>
+                        </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#9CA3AF;padding:2rem;">No leads</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderServices() {
+            const user = store.currentUser;
+            const totalRevenue = store.services.filter(s => s.serviceType === 'Paid').reduce((sum, s) => sum + (parseInt(s.serviceValue) || 0), 0);
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Services</h1><p style="color:#9CA3AF;">Service management</p></div>
+                    <button onclick="openServiceModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Service</button>
+                </div>
+                
+                <div class="tab-buttons" style="border:none;gap:0.5rem;">
+                    <button class="tab-btn ${serviceTab === 'services' ? 'active' : ''}" onclick="serviceTab='services';render()">All Services</button>
+                    <button class="tab-btn ${serviceTab === 'pending' ? 'active' : ''}" onclick="serviceTab='pending';render()">Pending</button>
+                    <button class="tab-btn ${serviceTab === 'completed' ? 'active' : ''}" onclick="serviceTab='completed';render()">Completed</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(totalRevenue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${store.services.filter(s => s.status === 'pending').length}</p></div>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Value</th><th>Request Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${store.services.filter(s => serviceTab === 'all' || serviceTab === s.status).map(s => `<tr>
+                            <td><p style="color:white;font-weight:500;">${s.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${s.phone}</p></td>
+                            <td><span class="badge badge-${s.serviceType.toLowerCase()}">${s.serviceType}</span></td>
+                            <td style="color:#60A5FA;font-weight:600;">${formatCurrency(s.serviceValue)}</td>
+                            <td>${formatDate(s.requestDate)}</td>
+                            <td><span class="badge badge-${s.status === 'completed' ? 'completed' : 'pending'}">${s.status}</span></td>
+                            <td><div style="display:flex;gap:0.375rem;">
+                                <button onclick="editService('${s.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                ${s.status === 'pending' ? `<button onclick="completeService('${s.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:2rem;">No services</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderClaims() {
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Claims</h1><p style="color:#9CA3AF;">Parts claim management</p></div>
+                    <button onclick="openClaimModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Claim</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Phone</th><th>Booking Date</th><th>Part No.</th><th>Reason</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${store.claims.map(c => { const service = getServiceById(c.serviceId); return `<tr>
+                            <td><p style="color:white;font-weight:500;">${c.customerName}</p></td>
+                            <td>${c.phone}</td>
+                            <td>${formatDate(c.bookingDate)}</td>
+                            <td style="color:#60A5FA;font-weight:600;">${c.partNumber}</td>
+                            <td>${c.reason}</td>
+                            <td>${c.dueDate ? `<span class="badge ${isOverdue15Days(c.dueDate) ? 'badge-overdue15' : isOverdue(c.dueDate) ? 'badge-overdue' : 'badge-pending'}">${formatDate(c.dueDate)}</span>` : '-'}</td>
+                            <td><span class="badge badge-${c.status === 'completed' ? 'completed' : c.status === 'approved' ? 'approved' : 'pending'}">${c.status}</span></td>
+                            <td><div style="display:flex;gap:0.375rem;">
+                                ${c.status === 'pending' ? `<button onclick="updateClaimStatus('${c.id}', 'approved')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Approve</button>` : ''}
+                                ${c.status === 'approved' ? `<button onclick="updateClaimStatus('${c.id}', 'completed')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`; }).join('') || '<tr><td colspan="8" style="text-align:center;color:#9CA3AF;padding:2rem;">No claims</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderJobs() {
+            const user = store.currentUser;
+            let filteredJobs = store.jobs.filter(j => { 
+                if (user.role === 'field_agent') return j.assignedTo === user.id; 
+                return true; 
+            });
+            
+            if (jobFilter === 'today') filteredJobs = filteredJobs.filter(j => j.scheduledDate === new Date().toISOString().split('T')[0]);
+            else if (jobFilter === 'upcoming') filteredJobs = filteredJobs.filter(j => j.scheduledDate && !isOverdue(j.scheduledDate) && j.scheduledDate > new Date().toISOString().split('T')[0]);
+            else if (jobFilter === 'overdue') filteredJobs = filteredJobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && !['completed','incomplete'].includes(j.status));
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Jobs</h1><p style="color:#9CA3AF;">Service job management</p></div>
+                    ${(user.role === 'service_head' || user.role === 'admin') ? `<button onclick="openJobModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Job</button>` : ''}
+                </div>
+                
+                <div class="filter-bar">
+                    <button class="tab-btn ${jobFilter === 'all' ? 'active' : ''}" onclick="jobFilter='all';render()">All</button>
+                    <button class="tab-btn ${jobFilter === 'today' ? 'active' : ''}" onclick="jobFilter='today';render()">Today's Jobs</button>
+                    <button class="tab-btn ${jobFilter === 'upcoming' ? 'active' : ''}" onclick="jobFilter='upcoming';render()">Upcoming</button>
+                    <button class="tab-btn ${jobFilter === 'overdue' ? 'active' : ''}" onclick="jobFilter='overdue';render()">Overdue</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Assigned</th><th>Actions</th></tr></thead>
+                        <tbody>${filteredJobs.map(j => `<tr>
+                            <td><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${j.phone}</p>${j.status !== 'completed' && j.status !== 'incomplete' ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.address)}" target="_blank" class="map-link" style="margin-top:0.25rem;"><i class="fas fa-map-marker-alt"></i> Map</a>` : ''}</td>
+                            <td><span class="badge badge-${j.jobType === 'delivery' ? 'converted' : j.jobType === 'installation' ? 'interested' : 'assigned'}">${j.jobType}</span></td>
+                            <td>${j.scheduledDate ? `<span class="badge ${isOverdue(j.scheduledDate) && !['completed','incomplete'].includes(j.status) ? 'badge-overdue' : ''}">${formatDate(j.scheduledDate)}</span>` : '-'}</td>
+                            <td><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></td>
+                            <td>${j.assignedTo ? store.users.find(u => u.id === j.assignedTo)?.name : '-'}</td>
+                            <td><div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+                                ${(user.role === 'service_head' || user.role === 'admin') && !j.assignedTo ? `<button onclick="assignJob('${j.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Assign</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'assigned' ? `<button onclick="acceptJob('${j.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Accept & Start</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'accepted' ? `<button onclick="startTravel('${j.id}')" class="btn btn-warning" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Start Travel</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'in_progress' ? `<button onclick="reachedLocation('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Reached</button>` : ''}
+                                ${user.role === 'field_agent' && j.status === 'reached' ? `<button onclick="completeJob('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                            </div></td>
+                        </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:2rem;">No jobs</td></tr>'}</tbody></table>
+                </div>
+                
+                ${filteredJobs.filter(j => !['completed','incomplete','created'].includes(j.status)).map(j => `<div class="card" style="margin-top:1rem;"><h4 style="color:white;font-weight:600;margin-bottom:0.75rem;">${j.customerName} - Timeline</h4><div class="timeline"><div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Created</p><p style="color:white;">${formatDateTime(j.createdAt)}</p></div>${j.acceptedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Accepted/Started</p><p style="color:#00D9A5;">${formatDateTime(j.acceptedAt)}</p></div>` : ''}${j.travelStartAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Travel Started</p><p style="color:#FBBF24;">${formatDateTime(j.travelStartAt)}</p></div>` : ''}${j.reachedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Reached</p><p style="color:#00D9A5;">${formatDateTime(j.reachedAt)}</p></div>` : ''}${j.completedAt ? `<div class="timeline-item completed"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="color:#86EFAC;">${formatDateTime(j.completedAt)}</p></div>` : ''}</div></div>`).join('')}</div>`;
+        }
+
+        function renderSiteVisits() {
+            const user = store.currentUser;
+            const today = new Date().toISOString().split('T')[0];
+            const myTrips = store.trips.filter(t => t.userId === user.id);
+            const activeTrip = myTrips.find(t => t.status === 'active');
+            
+            let filteredVisits = store.siteVisits.filter(sv => { 
+                if (user.role === 'site_agent') return sv.createdBy === user.id; 
+                return true; 
+            });
+            if (dateFilter) filteredVisits = filteredVisits.filter(sv => sv.visitDate === dateFilter);
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Site Visits</h1><p style="color:#9CA3AF;">Field visit management</p></div>
+                    <div style="display:flex;gap:0.5rem;">
+                        ${!activeTrip ? `<button onclick="startTrip()" class="btn btn-primary"><i class="fas fa-play"></i> Start Trip</button>` : `<button onclick="endTrip()" class="btn btn-danger"><i class="fas fa-stop"></i> End Trip</button>`}
+                    </div>
+                </div>
+                
+                ${activeTrip ? `<div class="trip-card active"><div style="display:flex;align-items:center;justify-content:space-between;"><div><p style="color:#00D9A5;font-weight:600;">Trip Active</p><p style="color:#9CA3AF;font-size:0.75rem;">Started: ${activeTrip.startTime}</p></div><div class="gps-active"><span class="gps-pulse"></span> GPS Tracking</div></div></div>` : ''}
+                
+                <div class="filter-bar">
+                    <input type="date" id="visitDateFilter" class="input" style="width:auto;" value="${dateFilter}" onchange="dateFilter=this.value;render()">
+                    <button onclick="dateFilter=null;render()" class="btn btn-secondary">Clear</button>
+                </div>
+                
+                ${activeTrip ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Visits Today</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.siteVisits.filter(sv => sv.tripId === activeTrip.id).length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Distance</p><p style="font-size:1.25rem;font-weight:700;color:#5EEAD4;">${activeTrip.totalDistance} km</p></div>
+                </div>` : ''}
+                
+                <div style="display:flex;justify-content:flex-end;"><button onclick="openSiteVisitModal()" class="btn btn-primary" ${!activeTrip ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}><i class="fas fa-plus"></i> Add Visit</button></div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Date/Time</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${filteredVisits.map(sv => `<tr>
+                            <td><p style="color:white;font-weight:500;">${sv.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${sv.address.substring(0,30)}...</p>${sv.gpsLat ? `<a href="https://www.google.com/maps/search/?api=1&query=${sv.gpsLat},${sv.gpsLng}" target="_blank" class="map-link" style="margin-top:0.25rem;"><i class="fas fa-map-marker-alt"></i></a>` : ''}</td>
+                            <td><span class="badge badge-site">${sv.visitType}</span></td>
+                            <td>${formatDate(sv.visitDate)} ${sv.visitTime ? `<span style="color:#9CA3AF;font-size:0.7rem;">${sv.visitTime}</span>` : ''}</td>
+                            <td>${sv.locked ? '<span class="badge badge-completed">Locked</span>' : '<span class="badge badge-pending">In Progress</span>'}</td>
+                            <td><div style="display:flex;gap:0.375rem;">
+                                <button onclick="editSiteVisit('${sv.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;" ${sv.locked ? 'disabled style="opacity:0.5"' : ''}><i class="fas fa-edit"></i></button>
+                                ${!sv.locked && sv.photos ? `<button onclick="convertToLead('${sv.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Convert to Lead</button>` : ''}
+                            </div></td>
+                        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#9CA3AF;padding:2rem;">No visits</td></tr>'}</tbody></table>
+                </div></div>`;
+        }
+
+        function renderCalendar() {
+            const user = store.currentUser;
+            const year = calendarDate.getFullYear(), month = calendarDate.getMonth(), firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate(), today = new Date();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const events = [];
+            
+            store.leads.forEach(l => { if (l.nextFollowUp) { const d = new Date(l.nextFollowUp); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: l.nextFollowUp, type: 'lead', title: l.customerName }); } });
+            store.jobs.forEach(j => { if (j.scheduledDate) { const d = new Date(j.scheduledDate); if (d.getMonth() === month && d.getFullYear() === year && (user.role === 'admin' || user.role === 'service_head' || j.assignedTo === user.id)) events.push({ date: j.scheduledDate, type: 'job', title: j.customerName }); } });
+            store.siteVisits.forEach(sv => { const d = new Date(sv.visitDate); if (d.getMonth() === month && d.getFullYear() === year && (user.role === 'admin' || sv.createdBy === user.id)) events.push({ date: sv.visitDate, type: 'site', title: sv.customerName }); });
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Calendar</h1></div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()-1);render()" class="btn btn-secondary">&lt; Prev</button>
+                        <h2 style="color:white;font-weight:600;">${monthNames[month]} ${year}</h2>
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()+1);render()" class="btn btn-secondary">Next &gt;</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.25rem;margin-bottom:0.5rem;">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div style="text-align:center;font-size:0.7rem;color:#9CA3AF;padding:0.5rem;font-weight:600;">${d}</div>`).join('')}</div>
+                    <div class="calendar-grid">${Array(firstDay).fill(null).map(() => '<div></div>').join('')}${Array(daysInMonth).fill(null).map((_, i) => { const day = i + 1; const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; const hasLead = events.some(e => e.date === dateStr && e.type === 'lead'); const hasJob = events.some(e => e.date === dateStr && e.type === 'job'); const hasSite = events.some(e => e.date === dateStr && e.type === 'site'); const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year; return `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}')" style="${hasLead || hasJob || hasSite ? 'background:rgba(233,69,96,0.15);' : ''}"><span>${day}</span>${hasLead ? '<span style="width:0.375rem;height:0.375rem;background:#FCD34D;border-radius:50%;margin-top:2px;"></span>' : ''}${hasJob ? '<span style="width:0.375rem;height:0.375rem;background:#93C5FD;border-radius:50%;margin-top:2px;"></span>' : ''}${hasSite ? '<span style="width:0.375rem;height:0.375rem;background:#5EEAD4;border-radius:50%;margin-top:2px;"></span>' : ''}</div>`; }).join('')}</div>
+                </div>
+                <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Events</h3><div id="calendarEvents" style="color:#9CA3AF;text-align:center;padding:1rem;">Click a date</div></div></div>`;
+        }
+
+        function selectDate(dateStr) {
+            const user = store.currentUser;
+            const events = [];
+            store.leads.forEach(l => { if (l.nextFollowUp === dateStr) events.push({ type: 'lead', title: l.customerName, detail: 'Follow-up' }); });
+            store.jobs.forEach(j => { if (j.scheduledDate === dateStr && (user.role === 'admin' || user.role === 'service_head' || j.assignedTo === user.id)) events.push({ type: 'job', title: j.customerName, detail: `${j.jobType} - ${j.status}` }); });
+            store.siteVisits.forEach(sv => { if (sv.visitDate === dateStr && (user.role === 'admin' || sv.createdBy === user.id)) events.push({ type: 'site', title: sv.customerName, detail: sv.visitType }); });
+            document.getElementById('calendarEvents').innerHTML = events.length > 0 ? events.map(e => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;margin-bottom:0.5rem;"><span class="badge badge-${e.type === 'lead' ? 'interested' : e.type === 'job' ? 'assigned' : 'site'}">${e.type}</span><div><p style="color:white;font-weight:500;">${e.title}</p><p style="color:#9CA3AF;font-size:0.75rem;">${e.detail}</p></div></div>`).join('') : '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No events</p>';
+        }
+
+        function renderAdmin() {
+            const overdueJobs = store.jobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && !['completed','incomplete'].includes(j.status)).length;
+            const overdueFollowUps = store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).length;
+            const overdueClaims = store.claims.filter(c => c.dueDate && isOverdue15Days(c.dueDate) && c.status !== 'completed').length;
+            const conversionRate = store.leads.length > 0 ? Math.round((store.leads.filter(l => l.status === 'converted').length / store.leads.length) * 100) : 0;
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Admin Dashboard</h1></div>
+                
+                ${(overdueJobs > 0 || overdueFollowUps > 0 || overdueClaims > 0) ? `<div style="background:rgba(220,38,38,0.1);border:1px solid #DC2626;border-radius:0.75rem;padding:1rem;"><h3 style="color:#EF4444;font-weight:600;margin-bottom:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Overdue Alerts</h3><div style="display:flex;gap:2rem;flex-wrap:wrap;">${overdueJobs > 0 ? `<span style="color:#EF4444;">${overdueJobs} Jobs</span>` : ''}${overdueFollowUps > 0 ? `<span style="color:#EF4444;">${overdueFollowUps} Follow-ups</span>` : ''}${overdueClaims > 0 ? `<span style="color:#EF4444;">${overdueClaims} Claims (>15 days)</span>` : ''}</div></div>` : ''}
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Leads</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.leads.length}</p><div class="perf-bar" style="margin-top:0.5rem;"><div class="perf-bar-fill" style="width:${conversionRate}%;"></div></div><p style="font-size:0.7rem;color:#9CA3AF;margin-top:0.25rem;">${conversionRate}% converted</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.jobs.length}</p><p style="font-size:0.7rem;color:#86EFAC;">${store.jobs.filter(j => j.status === 'completed').length} completed</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Field Agents</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.users.filter(u => u.role === 'field_agent').length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Site Agents</p><p style="font-size:1.5rem;font-weight:700;color:white;">${store.users.filter(u => u.role === 'site_agent').length}</p></div>
+                </div>
+                
+                <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Activity Log</h3><div style="max-height:300px;overflow-y:auto;">${store.activityLogs.slice().reverse().slice(0,30).map(log => `<div style="padding:0.5rem;background:#0F0F1A;border-radius:0.25rem;font-size:0.75rem;margin-bottom:0.25rem;"><span style="color:#9CA3AF;">${formatDateTime(log.createdAt)}</span> <span style="color:#E94560;">[${log.role}]</span> <span style="color:white;">${log.action}</span></div>`).join('') || '<p style="color:#9CA3AF;">No activity</p>'}</div></div></div>`;
+        }
+
+        function renderReports() {
+            const salesPerf = store.leads.filter(l => l.createdBy).reduce((acc, l) => { acc.total++; if (l.status === 'converted') acc.converted++; return acc; }, { total: 0, converted: 0 });
+            const servicePerf = store.services.reduce((acc, s) => { acc.total++; if (s.status === 'completed') acc.completed++; return acc; }, { total: 0, completed: 0 });
+            const fieldPerf = store.users.filter(u => u.role === 'field_agent').map(u => ({ name: u.name, jobs: store.jobs.filter(j => j.assignedTo === u.id).length, completed: store.jobs.filter(j => j.assignedTo === u.id && j.status === 'completed').length }));
+            
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Reports</h1></div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;">
+                    <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Sales Performance</h3>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Total Leads: ${salesPerf.total}</p>
+                        <p style="color:#86EFAC;font-size:0.875rem;">Converted: ${salesPerf.converted}</p>
+                        <div class="perf-bar" style="margin-top:0.5rem;"><div class="perf-bar-fill" style="width:${salesPerf.total ? (salesPerf.converted/salesPerf.total*100) : 0}%;"></div></div>
+                    </div>
+                    
+                    <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Service Performance</h3>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Total: ${servicePerf.total}</p>
+                        <p style="color:#86EFAC;font-size:0.875rem;">Completed: ${servicePerf.completed}</p>
+                        <div class="perf-bar" style="margin-top:0.5rem;"><div class="perf-bar-fill" style="width:${servicePerf.total ? (servicePerf.completed/servicePerf.total*100) : 0}%;"></div></div>
+                    </div>
+                </div>
+                
+                <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Field Agent Performance</h3>
+                    <table class="table"><thead><tr><th>Agent</th><th>Total Jobs</th><th>Completed</th><th>Rate</th></tr></thead>
+                        <tbody>${fieldPerf.map(f => `<tr><td>${f.name}</td><td>${f.jobs}</td><td>${f.completed}</td><td>${f.jobs ? Math.round(f.completed/f.jobs*100) : 0}%</td></tr>`).join('')}</tbody></table>
+                </div>
+                
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                    <button onclick="exportData('sales')" class="btn btn-primary"><i class="fas fa-download"></i> Export Sales CSV</button>
+                    <button onclick="exportData('service')" class="btn btn-primary"><i class="fas fa-download"></i> Export Service CSV</button>
+                    <button onclick="document.getElementById('importFile').click()" class="btn btn-secondary"><i class="fas fa-upload"></i> Import CSV</button>
+                    <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importData(this)">
+                </div></div>`;
+        }
+
+        function exportData(type) {
+            let csv = '';
+            if (type === 'sales') {
+                csv = 'ID,Customer,Phone,Product,Value,Date,Status\n';
+                store.leads.forEach(l => csv += `${l.id},${l.customerName},${l.phone},${l.productCategory},${l.leadValue},${l.leadDate},${l.status}\n`);
+            } else if (type === 'service') {
+                csv = 'ID,Customer,Phone,Type,Value,Request Date,Status\n';
+                store.services.forEach(s => csv += `${s.id},${s.customerName},${s.phone},${s.serviceType},${s.serviceValue},${s.requestDate},${s.status}\n`);
+            }
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_data.csv`;
+            a.click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                alert(`Import functionality ready. ${lines.length} rows detected.`);
+            };
+            reader.readAsText(file);
+        }
+
+        function renderUserManagement() { return `<div style="display:grid;gap:1.5rem;"><div style="display:flex;align-items:center;justify-content:space-between;"><h1 style="font-size:1.5rem;font-weight:700;color:white;">Users</h1><button onclick="openUserModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add User</button></div><div class="card" style="padding:0;"><table class="table"><thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>${store.users.map(u => `<tr><td><div style="display:flex;align-items:center;gap:0.75rem;"><div class="avatar">${u.name.charAt(0)}</div><div><p style="color:white;font-weight:500;">${u.name}</p><p style="color:#9CA3AF;font-size:0.7rem;">${u.email}</p></div></div></td><td><span class="badge badge-${u.role === 'admin' ? 'lost' : u.role === 'sales' ? 'lead' : u.role === 'service_head' ? 'interested' : u.role === 'field_agent' ? 'assigned' : 'site'}">${u.role.replace('_', ' ')}</span></td><td>${u.phone}</td><td><span class="badge ${u.active ? 'badge-active' : 'badge-pending'}">${u.active ? 'Active' : 'Inactive'}</span></td><td><div style="display:flex;gap:0.375rem;"><button onclick="editUser('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button><button onclick="toggleUserStatus('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">${u.active ? 'Deact' : 'Act'}</button>${u.id !== store.currentUser.id ? `<button onclick="deleteUser('${u.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}</div></td></tr>`).join('')}</tbody></table></div></div>`; }
+
+        function renderModal() { if (!showModal) return ''; let content = '', title = ''; switch(showModal) { case 'lead': title = editingItem ? 'Edit Lead' : 'Add Lead'; content = renderLeadForm(); break; case 'convert': title = 'Convert Lead'; content = renderConvertForm(); break; case 'service': title = editingItem ? 'Edit Service' : 'Add Service'; content = renderServiceForm(); break; case 'claim': title = 'Add Claim'; content = renderClaimForm(); break; case 'job': title = 'Add Job'; content = renderJobForm(); break; case 'assign': title = 'Assign Job'; content = renderAssignForm(); break; case 'completeJob': title = 'Complete Job'; content = renderCompleteJobForm(); break; case 'siteVisit': title = editingItem ? 'Edit Visit' : 'Add Visit'; content = renderSiteVisitForm(); break; case 'user': title = editingItem ? 'Edit User' : 'Add User'; content = renderUserForm(); break; } return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3 style="color:white;font-weight:600;">${title}</h3><button onclick="closeModal()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:1.25rem;">&times;</button></div><div class="modal-body">${content}</div></div></div>`; }
+
+        function renderLeadForm() { const l = editingItem ? store.leads.find(x => x.id === editingItem) : {}; const isLocked = l.locked; const duplicate = !editingItem ? checkDuplicatePhone(document.getElementById('leadPhone')?.value || '') : null; return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label><input type="text" id="leadName" class="input ${isLocked ? 'locked-field' : ''}" value="${l.customerName || ''}" ${isLocked ? 'disabled' : ''}></div><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="leadPhone" class="input ${isLocked ? 'locked-field' : ''}" value="${l.phone || ''}" ${isLocked ? 'disabled' : ''} onchange="checkDuplicate(this.value)">${isLocked ? '<p style="color:#9CA3AF;font-size:0.7rem;margin-top:0.25rem;"><i class="fas fa-lock"></i> Locked</p>' : ''}</div></div><div class="form-group"><label class="form-label">Address</label><textarea id="leadAddress" class="textarea" rows="2">${l.address || ''}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Product Category</label><select id="leadProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${l.productCategory === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Lead Value (INR)</label><input type="number" id="leadValue" class="input" value="${l.leadValue || ''}"></div></div><div class="form-group"><label class="form-label">Status</label><select id="leadStatus" class="select" onchange="toggleFollowUpField()"><option value="lead" ${l.status === 'lead' ? 'selected' : ''}>Lead</option><option value="interested" ${l.status === 'interested' ? 'selected' : ''}>Interested</option><option value="converted" ${l.status === 'converted' ? 'selected' : ''}>Converted</option><option value="not_interested" ${l.status === 'not_interested' ? 'selected' : ''}>Not Interested</option><option value="lost" ${l.status === 'lost' ? 'selected' : ''}>Lost</option></select></div><div class="form-group" id="followUpGroup" style="display:${l.status === 'interested' ? 'block' : 'none'}"><label class="form-label">Follow-up Date <span class="required-indicator">*</span></label><input type="date" id="leadFollowUp" class="input" value="${l.nextFollowUp || ''}"></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="leadRemarks" class="textarea" rows="2">${l.remarks || ''}</textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveLead()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Lead</button></div>`; }
+
+        function checkDuplicate(phone) { const dup = checkDuplicatePhone(phone); if (dup) { duplicateWarning = `Warning: Phone ${phone} already exists for lead "${dup.customerName}". Click Save anyway to override.`; render(); } else { duplicateWarning = null; } }
+
+        function renderConvertForm() { const l = store.leads.find(x => x.id === editingItem); return `<p style="color:#9CA3AF;margin-bottom:1rem;">Convert: <strong style="color:white;">${l?.customerName}</strong> (${formatCurrency(l?.leadValue)})</p><div class="form-group"><label class="form-label">Payment Received?</label><select id="convertPayment" class="select"><option value="yes">Yes</option><option value="no">No</option></select></div><div class="form-group"><label class="form-label">Dispatch Date <span class="required-indicator">*</span></label><input type="date" id="convertDate" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmConversion()" class="btn btn-primary">Convert</button></div>`; }
+
+        function renderServiceForm() { return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label><input type="text" id="serviceCustomer" class="input"></div><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="servicePhone" class="input"></div></div><div class="form-group"><label class="form-label">Address</label><textarea id="serviceAddress" class="textarea" rows="2"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Service Type <span class="required-indicator">*</span></label><select id="serviceType" class="select" onchange="toggleServiceValue()"><option value="Paid">Paid</option><option value="FOC">FOC (Free)</option></select></div><div class="form-group" id="serviceValueGroup"><label class="form-label">Value (INR)</label><input type="number" id="serviceValue" class="input"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Request Date</label><input type="date" id="serviceRequestDate" class="input" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><label class="form-label">Attend Date</label><input type="date" id="serviceAttendDate" class="input"></div></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="serviceRemarks" class="textarea" rows="2"></textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveService()" class="btn btn-primary">Create Service</button></div>`; }
+
+        function renderClaimForm() { const services = store.services.filter(s => s.status !== 'completed'); return `<div class="form-group"><label class="form-label">Service <span class="required-indicator">*</span></label><select id="claimService" class="select" onchange="loadClaimServiceDetails()">${services.map(s => `<option value="${s.id}">${s.customerName}</option>`).join('')}</select></div><div class="form-row"><div class="form-group"><label class="form-label">Customer Name</label><input type="text" id="claimCustomer" class="input" readonly></div><div class="form-group"><label class="form-label">Phone</label><input type="text" id="claimPhone" class="input" readonly></div></div><div class="form-row"><div class="form-group"><label class="form-label">Booking Date</label><input type="date" id="claimBookingDate" class="input"></div><div class="form-group"><label class="form-label">Part Number <span class="required-indicator">*</span></label><input type="text" id="claimPart" class="input"></div></div><div class="form-group"><label class="form-label">Reason <span class="required-indicator">*</span></label><textarea id="claimReason" class="textarea" rows="2"></textarea></div><div class="form-group"><label class="form-label">Due Date</label><input type="date" id="claimDueDate" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveClaim()" class="btn btn-primary">Create Claim</button></div>`; }
+
+        function loadClaimServiceDetails() { const sid = document.getElementById('claimService').value; const s = getServiceById(sid); if (s) { document.getElementById('claimCustomer').value = s.customerName; document.getElementById('claimPhone').value = s.phone; document.getElementById('claimBookingDate').value = s.requestDate; } }
+
+        function renderJobForm() { return `<div class="form-row"><div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="jobCustomer" class="input"></div><div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="jobPhone" class="input"></div></div><div class="form-group"><label class="form-label">Address *</label><textarea id="jobAddress" class="textarea" rows="2"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Job Type</label><select id="jobType" class="select"><option value="delivery">Delivery</option><option value="installation">Installation</option><option value="service">Service/Repair</option></select></div><div class="form-group"><label class="form-label">Product</label><select id="jobProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('')}</select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="jobScheduled" class="input"></div><div class="form-group"><label class="form-label">Payment Status</label><select id="jobPayment" class="select"><option value="paid">Paid</option><option value="pending">Pending</option></select></div></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveJob()" class="btn btn-primary">Create Job</button></div>`; }
+
+        function renderAssignForm() { const j = store.jobs.find(x => x.id === editingItem); const agents = store.users.filter(u => u.role === 'field_agent' && u.active); return `<p style="color:#9CA3AF;margin-bottom:1rem;">Assign: <strong style="color:white;">${j?.customerName}</strong></p><div class="form-group"><label class="form-label">Assign to</label><select id="assignAgent" class="select"><option value="">Select Agent</option>${agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="assignDate" class="input" value="${j?.scheduledDate || ''}"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmAssign()" class="btn btn-primary">Assign</button></div>`; }
+
+        function renderCompleteJobForm() { return `<div class="form-group"><label class="form-label">Completion Status <span class="required-indicator">*</span></label><select id="completionStatus" class="select" onchange="toggleIncompleteReason()"><option value="completed">Completed</option><option value="incomplete">Incomplete</option></select></div><div class="form-group" id="incompleteReasonGroup" style="display:none;"><label class="form-label">Reason for Incomplete <span class="required-indicator">*</span></label><textarea id="incompleteReason" class="textarea" rows="3"></textarea></div><div class="form-group"><label class="form-label">Site Images (URLs) <span class="required-indicator">*</span></label><input type="text" id="completeImages" class="input" placeholder="image1.jpg, image2.jpg"><p style="color:#EF4444;font-size:0.7rem;margin-top:0.25rem;">* Image upload is mandatory</p></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="completeRemarks" class="textarea" rows="3"></textarea></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="confirmCompleteJob()" class="btn btn-success">Submit</button></div>`; }
+
+        function toggleIncompleteReason() { const status = document.getElementById('completionStatus').value; document.getElementById('incompleteReasonGroup').style.display = status === 'incomplete' ? 'block' : 'none'; }
+
+        function renderSiteVisitForm() { const sv = editingItem ? store.siteVisits.find(x => x.id === editingItem) : {}; const isLocked = sv.locked; return `<div class="form-row"><div class="form-group"><label class="form-label">Customer/Site Name <span class="required-indicator">*</span></label><input type="text" id="siteCustomer" class="input ${isLocked ? 'locked-field' : ''}" value="${sv.customerName || ''}" ${isLocked ? 'disabled' : ''}></div><div class="form-group"><label class="form-label">Phone</label><input type="tel" id="sitePhone" class="input ${isLocked ? 'locked-field' : ''}" value="${sv.phone || ''}" ${isLocked ? 'disabled' : ''}></div></div><div class="form-group"><label class="form-label">Address</label><textarea id="siteAddress" class="textarea" rows="2">${sv.address || ''}</textarea></div><div class="form-group" style="display:flex;gap:0.5rem;align-items:center;"><button type="button" onclick="captureGPS()" class="btn btn-secondary"><i class="fas fa-map-marker-alt"></i> Capture GPS</button><span id="gpsStatus" style="color:#9CA3AF;font-size:0.75rem;"></span></div><div class="form-row"><div class="form-group"><label class="form-label">Visit Type</label><select id="siteType" class="select">${VISIT_TYPES.map(t => `<option value="${t}" ${sv.visitType === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Visit Time</label><input type="time" id="siteTime" class="input" value="${sv.visitTime || new Date().toTimeString().slice(0,5)}"></div></div><div class="form-group"><label class="form-label">Payment</label><input type="number" id="sitePayment" class="input" value="${sv.payment || ''}"></div><div class="form-group"><label class="form-label">Photos (URLs) <span class="required-indicator">*</span></label><input type="text" id="sitePhotos" class="input" value="${sv.photos || ''}" placeholder="photo1.jpg, photo2.jpg"></div><div class="form-group"><label class="form-label">Remarks</label><textarea id="siteRemarks" class="textarea" rows="2">${sv.remarks || ''}</textarea></div><input type="hidden" id="siteGpsLat" value="${sv.gpsLat || ''}"><input type="hidden" id="siteGpsLng" value="${sv.gpsLng || ''}"><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveSiteVisit()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Visit</button></div>`; }
+
+        function captureGPS() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { document.getElementById('siteGpsLat').value = pos.coords.latitude; document.getElementById('siteGpsLng').value = pos.coords.longitude; document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-check-circle" style="color:#00D9A5;"></i> GPS Captured'; }, () => { alert('GPS capture failed'); }); } else { alert('GPS not supported'); } }
+
+        function renderUserForm() { const u = editingItem ? store.users.find(x => x.id === editingItem) : {}; return `<div class="form-row"><div class="form-group"><label class="form-label">Name <span class="required-indicator">*</span></label><input type="text" id="userName" class="input" value="${u.name || ''}"></div><div class="form-group"><label class="form-label">Email <span class="required-indicator">*</span></label><input type="email" id="userEmail" class="input" value="${u.email || ''}"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="userPhone" class="input" value="${u.phone || ''}"></div><div class="form-group"><label class="form-label">Role <span class="required-indicator">*</span></label><select id="userRole" class="select"><option value="sales" ${u.role === 'sales' ? 'selected' : ''}>Sales Staff</option><option value="service_head" ${u.role === 'service_head' ? 'selected' : ''}>Service Head</option><option value="field_agent" ${u.role === 'field_agent' ? 'selected' : ''}>Field Agent</option><option value="site_agent" ${u.role === 'site_agent' ? 'selected' : ''}>Site Agent</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option></select></div></div><div class="form-group"><label class="form-label">Password ${editingItem ? '(blank to keep)' : '*'}</label><input type="password" id="userPassword" class="input"></div><div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;"><button onclick="closeModal()" class="btn btn-secondary">Cancel</button><button onclick="saveUser()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} User</button></div>`; }
+
+        function toggleFollowUpField() { const status = document.getElementById('leadStatus')?.value; const group = document.getElementById('followUpGroup'); if (group) group.style.display = status === 'interested' ? 'block' : 'none'; }
+        function toggleServiceValue() { const type = document.getElementById('serviceType').value; document.getElementById('serviceValueGroup').style.display = type === 'Paid' ? 'block' : 'none'; }
+
+        // LEAD FUNCTIONS
+        function openLeadModal() { editingItem = null; showModal = 'lead'; duplicateWarning = null; render(); }
+        function editLead(id) { editingItem = id; showModal = 'lead'; duplicateWarning = null; render(); }
+        function deleteLead(id) { if (confirm('Delete?')) { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', id); render(); } }
+        function convertLead(id) { editingItem = id; showModal = 'convert'; render(); }
+
+        function saveLead() {
+            const name = document.getElementById('leadName').value.trim();
+            const phone = document.getElementById('leadPhone').value.trim();
+            const address = document.getElementById('leadAddress').value.trim();
+            if (!name || !phone || !address) { alert('Fill required fields'); return; }
+            const status = document.getElementById('leadStatus').value;
+            const nextFollowUp = document.getElementById('leadFollowUp').value || null;
+            if (status === 'interested' && !nextFollowUp) { alert('Follow-up date required'); return; }
+            
+            const isNew = !editingItem;
+            const data = { customerName: name, phone, address, productCategory: document.getElementById('leadProduct').value, leadValue: parseInt(document.getElementById('leadValue').value) || 0, status, nextFollowUp, remarks: document.getElementById('leadRemarks').value, leadDate: isNew ? new Date().toISOString().split('T')[0] : store.leads.find(l => l.id === editingItem).leadDate, createdBy: isNew ? store.currentUser.id : store.leads.find(l => l.id === editingItem).createdBy, isSiteLead: isNew ? store.currentUser.role === 'site_agent' : store.leads.find(l => l.id === editingItem).isSiteLead, locked: true };
+            if (editingItem) { store.leads[store.leads.findIndex(l => l.id === editingItem)] = { ...store.leads.find(l => l.id === editingItem), ...data }; logActivity('Update Lead', name); }
+            else { store.leads.push({ id: generateId(), ...data }); logActivity('Create Lead', name); }
+            duplicateWarning = null;
+            closeModal();
+        }
+
+        function confirmConversion() {
+            const payment = document.getElementById('convertPayment').value;
+            const dispatchDate = document.getElementById('convertDate').value;
+            if (!dispatchDate) { alert('Select date'); return; }
+            const lead = store.leads.find(l => l.id === editingItem);
+            store.leads.find(l => l.id === editingItem).status = 'converted';
+            store.leads.find(l => l.id === editingItem).paymentConfirmed = payment === 'yes';
+            store.leads.find(l => l.id === editingItem).dispatchDate = dispatchDate;
+            store.jobs.push({ id: generateId(), leadId: editingItem, customerName: lead.customerName, phone: lead.phone, address: lead.address, productCategory: lead.productCategory, jobType: 'delivery', paymentStatus: payment === 'yes' ? 'paid' : 'pending', status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], scheduledDate: dispatchDate, acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false });
+            createNotification('all_service', 'alert', 'New Job', `Job for ${lead.customerName}`);
+            logActivity('Convert Lead', lead.customerName);
+            closeModal();
+        }
+
+        // SERVICE FUNCTIONS
+        function openServiceModal() { editingItem = null; showModal = 'service'; render(); }
+        function editService(id) { editingItem = id; showModal = 'service'; render(); }
+        function saveService() {
+            const data = { customerName: document.getElementById('serviceCustomer').value, phone: document.getElementById('servicePhone').value, address: document.getElementById('serviceAddress').value, serviceType: document.getElementById('serviceType').value, serviceValue: document.getElementById('serviceType').value === 'FOC' ? 0 : parseInt(document.getElementById('serviceValue').value) || 0, requestDate: document.getElementById('serviceRequestDate').value, attendDate: document.getElementById('serviceAttendDate').value || null, remarks: document.getElementById('serviceRemarks').value, status: 'pending', createdBy: store.currentUser.id };
+            if (!data.customerName || !data.phone) { alert('Fill required'); return; }
+            store.services.push({ id: generateId(), ...data });
+            logActivity('Create Service', data.customerName);
+            closeModal();
+        }
+        function completeService(id) { const s = store.services.find(x => x.id === id); s.status = 'completed'; s.attendDate = new Date().toISOString().split('T')[0]; logActivity('Complete Service', s.customerName); render(); }
+
+        // CLAIMS
+        function openClaimModal() { editingItem = null; showModal = 'claim'; render(); }
+        function saveClaim() {
+            store.claims.push({ id: generateId(), serviceId: document.getElementById('claimService').value, customerName: document.getElementById('claimCustomer').value, phone: document.getElementById('claimPhone').value, bookingDate: document.getElementById('claimBookingDate').value, partNumber: document.getElementById('claimPart').value, reason: document.getElementById('claimReason').value, dueDate: document.getElementById('claimDueDate').value || null, status: 'pending', createdBy: store.currentUser.id });
+            logActivity('Create Claim', document.getElementById('claimPart').value);
+            closeModal();
+        }
+        function updateClaimStatus(id, status) { const c = store.claims.find(x => x.id === id); c.status = status; logActivity('Update Claim', `${c.partNumber} -> ${status}`); render(); }
+
+        // JOBS
+        function openJobModal() { editingItem = null; showModal = 'job'; render(); }
+        function assignJob(id) { editingItem = id; showModal = 'assign'; render(); }
+        function saveJob() {
+            store.jobs.push({ id: generateId(), customerName: document.getElementById('jobCustomer').value, phone: document.getElementById('jobPhone').value, address: document.getElementById('jobAddress').value, jobType: document.getElementById('jobType').value, productCategory: document.getElementById('jobProduct').value, scheduledDate: document.getElementById('jobScheduled').value || null, paymentStatus: document.getElementById('jobPayment').value, status: 'created', assignedTo: null, createdAt: new Date().toISOString().split('T')[0], acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', incompleteReason: '', gpsTracking: false });
+            logActivity('Create Job', document.getElementById('jobCustomer').value);
+            closeModal();
+        }
+        function confirmAssign() { const job = store.jobs.find(j => j.id === editingItem); job.assignedTo = document.getElementById('assignAgent').value; job.status = 'assigned'; if (document.getElementById('assignDate').value) job.scheduledDate = document.getElementById('assignDate').value; createNotification(job.assignedTo, 'info', 'Job Assigned', job.customerName); logActivity('Assign Job', job.customerName); closeModal(); }
+        
+        function acceptJob(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'accepted';
+            job.acceptedAt = new Date().toISOString();
+            job.travelStartAt = new Date().toISOString();
+            job.gpsTracking = true;
+            logActivity('Accept & Start', job.customerName);
+            render();
+        }
+        
+        function startTravel(id) { const job = store.jobs.find(j => j.id === id); job.status = 'in_progress'; job.travelStartAt = new Date().toISOString(); logActivity('Start Travel', job.customerName); render(); }
+        function reachedLocation(id) { const job = store.jobs.find(j => j.id === id); job.status = 'reached'; job.reachedAt = new Date().toISOString(); createNotification('all_service', 'alert', 'Location Reached', `${job.customerName} location reached by field agent`); logActivity('Reached Location', job.customerName); render(); }
+        function completeJob(id) { editingItem = id; showModal = 'completeJob'; render(); }
+        
+        function confirmCompleteJob() {
+            const status = document.getElementById('completionStatus').value;
+            const images = document.getElementById('completeImages').value;
+            const remarks = document.getElementById('completeRemarks').value;
+            const incompleteReason = document.getElementById('incompleteReason').value;
+            
+            if (!images) { alert('Image upload is mandatory for job completion'); return; }
+            if (status === 'incomplete' && !incompleteReason) { alert('Please provide reason for incomplete'); return; }
+            
+            const job = store.jobs.find(j => j.id === editingItem);
+            job.status = status;
+            job.completedAt = new Date().toISOString();
+            job.images = images;
+            job.remarks = remarks;
+            job.incompleteReason = incompleteReason || '';
+            job.gpsTracking = false;
+            
+            logActivity(status === 'completed' ? 'Complete Job' : 'Incomplete Job', job.customerName);
+            closeModal();
+        }
+
+        // SITE VISITS
+        function startTrip() {
+            store.trips.push({ id: generateId(), userId: store.currentUser.id, date: new Date().toISOString().split('T')[0], startTime: new Date().toTimeString().slice(0,5), endTime: null, totalDistance: 0, status: 'active', visits: [] });
+            logActivity('Start Trip', 'New trip started');
+            render();
+        }
+        
+        function endTrip() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            if (trip) { trip.status = 'completed'; trip.endTime = new Date().toTimeString().slice(0,5); }
+            logActivity('End Trip', 'Trip ended');
+            render();
+        }
+        
+        function openSiteVisitModal() { editingItem = null; showModal = 'siteVisit'; render(); }
+        function editSiteVisit(id) { editingItem = id; showModal = 'siteVisit'; render(); }
+        
+        function saveSiteVisit() {
+            const trip = store.trips.find(t => t.userId === store.currentUser.id && t.status === 'active');
+            const data = { tripId: trip?.id, customerName: document.getElementById('siteCustomer').value, phone: document.getElementById('sitePhone').value, address: document.getElementById('siteAddress').value, visitDate: new Date().toISOString().split('T')[0], visitTime: document.getElementById('siteTime').value, visitType: document.getElementById('siteType').value, payment: parseInt(document.getElementById('sitePayment').value) || 0, photos: document.getElementById('sitePhotos').value, remarks: document.getElementById('siteRemarks').value, gpsLat: document.getElementById('siteGpsLat').value, gpsLng: document.getElementById('siteGpsLng').value, createdBy: store.currentUser.id, locked: false };
+            if (!data.customerName) { alert('Customer name required'); return; }
+            if (!data.photos) { alert('Photos are mandatory'); return; }
+            
+            if (editingItem) { store.siteVisits[store.siteVisits.findIndex(sv => sv.id === editingItem)] = { ...store.siteVisits.find(sv => sv.id === editingItem), ...data }; }
+            else { store.siteVisits.push({ id: generateId(), ...data }); if (trip) trip.visits.push(store.siteVisits[store.siteVisits.length-1].id); }
+            logActivity('Site Visit', data.customerName);
+            closeModal();
+        }
+        
+        function convertToLead(id) {
+            const sv = store.siteVisits.find(x => x.id === id);
+            const lead = { id: generateId(), customerName: sv.customerName, phone: sv.phone, address: sv.address, productCategory: 'Others', leadValue: 0, leadDate: new Date().toISOString().split('T')[0], nextFollowUp: null, remarks: `Converted from site visit: ${sv.remarks}`, status: 'lead', createdBy: store.currentUser.id, isSiteLead: true, locked: true };
+            store.leads.push(lead);
+            sv.locked = true;
+            logActivity('Convert to Lead', sv.customerName);
+            alert('Site visit converted to lead!');
+            render();
+        }
+
+        // USERS
+        function openUserModal() { editingItem = null; showModal = 'user'; render(); }
+        function editUser(id) { editingItem = id; showModal = 'user'; render(); }
+        function saveUser() {
+            const data = { name: document.getElementById('userName').value, email: document.getElementById('userEmail').value, phone: document.getElementById('userPhone').value, role: document.getElementById('userRole').value, active: true };
+            const password = document.getElementById('userPassword').value;
+            if (!data.name || !data.email || !data.phone) { alert('Fill required'); return; }
+            if (!editingItem && !password) { alert('Password required'); return; }
+            if (editingItem) { store.users[store.users.findIndex(u => u.id === editingItem)] = { ...store.users.find(u => u.id === editingItem), ...data, password: password || store.users.find(u => u.id === editingItem).password }; }
+            else { store.users.push({ id: generateId(), ...data, password: password || 'changeme' }); }
+            closeModal();
+        }
+        function toggleUserStatus(id) { const user = store.users.find(u => u.id === id); user.active = !user.active; render(); }
+        function deleteUser(id) { if (confirm('Delete user?')) { store.users = store.users.filter(u => u.id !== id); render(); } }
+
+        function closeModal() { showModal = null; editingItem = null; secondaryItem = null; render(); }
+        function showNotifications() { const notifs = getAllNotifications(); notifs.forEach(n => n.read = true); alert(notifs.length > 0 ? notifs.map(n => `${n.title}: ${n.message}`).join('\n\n') : 'No notifications'); render(); }
+        function initFlatpickr() { setTimeout(() => { document.querySelectorAll('input[type="date"]').forEach(el => { if (!el._flatpickr) { el.flatpickr({ dateFormat: 'Y-m-d' }); } }); }, 100); }
+
+        render();
+    </script>
+</body>
+</html>
