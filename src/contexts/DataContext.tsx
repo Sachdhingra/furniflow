@@ -1,94 +1,223 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Customer, Job, Notification, CustomerStatus, JobStatus, JobType, JobSource } from '@/types';
-import { mockCustomers, mockJobs, mockNotifications, mockUsers } from '@/lib/data';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { Customer, Job, Notification, CustomerStatus, JobStatus } from '@/types';
+import { getInitialData, getUserNotifications } from '@/app/actions/data';
+import { createCustomer, updateCustomer as dbUpdateCustomer, deleteCustomer as dbDeleteCustomer, createJob, updateJob as dbUpdateJob, deleteJob as dbDeleteJob, createNotification, markNotificationRead as dbMarkNotificationRead } from '@/app/actions/db';
+import { mockUsers } from '@/lib/data';
+
+interface DbUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  active: boolean;
+  createdAt: Date | null;
+}
+
+interface DbCustomer {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  product: string;
+  inquiryDate: Date | null;
+  expectedClosingDate: Date | null;
+  notes: string | null;
+  status: string;
+  followUpDate: Date | null;
+  createdBy: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
+
+interface DbJob {
+  id: string;
+  customerId: string | null;
+  customerName: string;
+  customerPhone: string;
+  address: string;
+  product: string;
+  type: string;
+  status: string;
+  source: string;
+  scheduledDate: Date | null;
+  assignedTo: string | null;
+  rescheduleReason: string | null;
+  images: string | null;
+  remarks: string | null;
+  completedAt: Date | null;
+  createdBy: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
 
 interface DataContextType {
   customers: Customer[];
   jobs: Job[];
   notifications: Notification[];
   users: typeof mockUsers;
+  loading: boolean;
   
-  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateCustomer: (id: string, updates: Partial<Customer>) => void;
-  deleteCustomer: (id: string) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateCustomer: (id: string, updates: Partial<Customer>) => Promise<void>;
+  deleteCustomer: (id: string) => Promise<void>;
   
-  addJob: (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateJob: (id: string, updates: Partial<Job>) => void;
-  deleteJob: (id: string) => void;
+  addJob: (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
   
-  addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
-  markNotificationRead: (id: string) => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => Promise<void>;
+  markNotificationRead: (id: string) => Promise<void>;
   clearNotifications: () => void;
   
   getJobsByStatus: (status: JobStatus) => Job[];
   getCustomersByStatus: (status: CustomerStatus) => Customer[];
   getNotificationsForUser: (userId: string) => Notification[];
+  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+function convertDbCustomer(c: DbCustomer): Customer {
+  return {
+    id: c.id,
+    name: c.name,
+    phone: c.phone,
+    address: c.address,
+    product: c.product,
+    inquiryDate: c.inquiryDate ? new Date(c.inquiryDate) : new Date(),
+    expectedClosingDate: c.expectedClosingDate ? new Date(c.expectedClosingDate) : null,
+    notes: c.notes || '',
+    status: c.status as CustomerStatus,
+    followUpDate: c.followUpDate ? new Date(c.followUpDate) : null,
+    createdBy: c.createdBy,
+    createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+    updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date(),
+  };
+}
+
+function convertDbJob(j: DbJob): Job {
+  return {
+    id: j.id,
+    customerId: j.customerId || '',
+    customerName: j.customerName,
+    customerPhone: j.customerPhone,
+    address: j.address,
+    product: j.product,
+    type: j.type as Job['type'],
+    status: j.status as Job['status'],
+    source: j.source as Job['source'],
+    scheduledDate: j.scheduledDate ? new Date(j.scheduledDate) : null,
+    assignedTo: j.assignedTo,
+    rescheduleReason: j.rescheduleReason,
+    images: j.images ? j.images.split(',').filter(Boolean) : [],
+    remarks: j.remarks || '',
+    completedAt: j.completedAt ? new Date(j.completedAt) : null,
+    createdBy: j.createdBy,
+    createdAt: j.createdAt ? new Date(j.createdAt) : new Date(),
+    updatedAt: j.updatedAt ? new Date(j.updatedAt) : new Date(),
+  };
+}
+
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [jobs, setJobs] = useState<Job[]>(mockJobs);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  const addCustomer = useCallback((customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCustomer: Customer = {
+  const refreshData = useCallback(async () => {
+    try {
+      const data = await getInitialData();
+      setCustomers(data.customers.map(convertDbCustomer));
+      setJobs(data.jobs.map(convertDbJob));
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshData().finally(() => setLoading(false));
+  }, [refreshData]);
+
+  const addCustomer = useCallback(async (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const id = generateId();
+    await createCustomer({
+      id,
       ...customer,
-      id: generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setCustomers(prev => [...prev, newCustomer]);
-  }, []);
+    });
+    await refreshData();
+  }, [refreshData]);
 
-  const updateCustomer = useCallback((id: string, updates: Partial<Customer>) => {
-    setCustomers(prev => prev.map(c => 
-      c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c
-    ));
-  }, []);
+  const updateCustomer = useCallback(async (id: string, updates: Partial<Customer>) => {
+    await dbUpdateCustomer(id, {
+      name: updates.name,
+      phone: updates.phone,
+      address: updates.address,
+      product: updates.product,
+      inquiryDate: updates.inquiryDate,
+      expectedClosingDate: updates.expectedClosingDate,
+      notes: updates.notes,
+      status: updates.status,
+      followUpDate: updates.followUpDate,
+    });
+    await refreshData();
+  }, [refreshData]);
 
-  const deleteCustomer = useCallback((id: string) => {
-    setCustomers(prev => prev.filter(c => c.id !== id));
-  }, []);
+  const deleteCustomer = useCallback(async (id: string) => {
+    await dbDeleteCustomer(id);
+    await refreshData();
+  }, [refreshData]);
 
-  const addJob = useCallback((job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newJob: Job = {
+  const addJob = useCallback(async (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const id = generateId();
+    await createJob({
+      id,
       ...job,
-      id: generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setJobs(prev => [...prev, newJob]);
-  }, []);
+    });
+    await refreshData();
+  }, [refreshData]);
 
-  const updateJob = useCallback((id: string, updates: Partial<Job>) => {
-    setJobs(prev => prev.map(j => 
-      j.id === id ? { ...j, ...updates, updatedAt: new Date() } : j
-    ));
-  }, []);
+  const updateJob = useCallback(async (id: string, updates: Partial<Job>) => {
+    await dbUpdateJob(id, {
+      customerId: updates.customerId,
+      customerName: updates.customerName,
+      customerPhone: updates.customerPhone,
+      address: updates.address,
+      product: updates.product,
+      type: updates.type,
+      status: updates.status,
+      source: updates.source,
+      scheduledDate: updates.scheduledDate,
+      assignedTo: updates.assignedTo,
+      rescheduleReason: updates.rescheduleReason,
+      images: Array.isArray(updates.images) ? updates.images.join(',') : updates.images,
+      remarks: updates.remarks,
+      completedAt: updates.completedAt,
+    });
+    await refreshData();
+  }, [refreshData]);
 
-  const deleteJob = useCallback((id: string) => {
-    setJobs(prev => prev.filter(j => j.id !== id));
-  }, []);
+  const deleteJob = useCallback(async (id: string) => {
+    await dbDeleteJob(id);
+    await refreshData();
+  }, [refreshData]);
 
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'createdAt'>) => {
-    const newNotification: Notification = {
+  const addNotification = useCallback(async (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+    const id = generateId();
+    await createNotification({
+      id,
       ...notification,
-      id: generateId(),
-      createdAt: new Date(),
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-  }, []);
+    });
+    await refreshData();
+  }, [refreshData]);
 
-  const markNotificationRead = useCallback((id: string) => {
-    setNotifications(prev => prev.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
+  const markNotificationRead = useCallback(async (id: string) => {
+    await dbMarkNotificationRead(id);
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   }, []);
 
   const clearNotifications = useCallback(() => {
@@ -113,6 +242,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       jobs,
       notifications,
       users: mockUsers,
+      loading,
       addCustomer,
       updateCustomer,
       deleteCustomer,
@@ -125,6 +255,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getJobsByStatus,
       getCustomersByStatus,
       getNotificationsForUser,
+      refreshData,
     }}>
       {children}
     </DataContext.Provider>
