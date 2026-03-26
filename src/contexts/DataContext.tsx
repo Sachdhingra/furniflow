@@ -27,7 +27,7 @@ interface DbCustomer {
   notes: string | null;
   status: string;
   followUpDate: Date | null;
-  createdBy: string;
+  createdBy: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 }
@@ -48,7 +48,7 @@ interface DbJob {
   images: string | null;
   remarks: string | null;
   completedAt: Date | null;
-  createdBy: string;
+  createdBy: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 }
@@ -92,7 +92,7 @@ function convertDbCustomer(c: DbCustomer): Customer {
     notes: c.notes || '',
     status: c.status as CustomerStatus,
     followUpDate: c.followUpDate ? new Date(c.followUpDate) : null,
-    createdBy: c.createdBy,
+    createdBy: c.createdBy || '',
     createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
     updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date(),
   };
@@ -115,7 +115,7 @@ function convertDbJob(j: DbJob): Job {
     images: j.images ? j.images.split(',').filter(Boolean) : [],
     remarks: j.remarks || '',
     completedAt: j.completedAt ? new Date(j.completedAt) : null,
-    createdBy: j.createdBy,
+    createdBy: j.createdBy || '',
     createdAt: j.createdAt ? new Date(j.createdAt) : new Date(),
     updatedAt: j.updatedAt ? new Date(j.updatedAt) : new Date(),
   };
@@ -125,7 +125,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const generateId = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -139,9 +138,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const [initialized, setInitialized] = useState(false);
+
   useEffect(() => {
-    refreshData().finally(() => setLoading(false));
-  }, [refreshData]);
+    if (!initialized) {
+      refreshData().then(() => setInitialized(true)); // eslint-disable-line react-hooks/set-state-in-effect
+    }
+  }, [refreshData, initialized]);
+
+  const loading = !initialized;
 
   const addCustomer = useCallback(async (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = generateId();

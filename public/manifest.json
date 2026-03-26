@@ -1,0 +1,21 @@
+{
+  "name": "FurniFlow",
+  "short_name": "FurniFlow",
+  "description": "Furniture company business management application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F0F1A",
+  "theme_color": "#E94560",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

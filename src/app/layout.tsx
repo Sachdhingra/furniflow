@@ -1,11 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#E94560',
+};
+
 export const metadata: Metadata = {
   title: "FurniFlow - Business Management",
   description: "Furniture company business management application",
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FurniFlow',
+  },
 };
 
 export default function RootLayout({
