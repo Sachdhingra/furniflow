@@ -11,8 +11,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "FurniFlow - Business Management",
-  description: "Furniture business management PWA mobile app",
+  title: "FurniFlow - Furniture Business Management",
+  description: "Complete furniture business management with PWA mobile support",
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
