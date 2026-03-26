@@ -26,6 +26,8 @@ bun build          # Production build
 bun start          # Start production server
 bun lint           # Run ESLint
 bun typecheck      # Run TypeScript type checking
+bun db:generate    # Generate database migrations
+bun db:migrate     # Run database migrations
 ```
 
 ## Project Configuration
@@ -59,7 +61,9 @@ bun typecheck      # Run TypeScript type checking
 {
   "next": "^16.1.3", // Framework
   "react": "^19.2.3", // UI library
-  "react-dom": "^19.2.3" // React DOM
+  "react-dom": "^19.2.3", // React DOM
+  "@kilocode/app-builder-db": "github:Kilo-Org/app-builder-db#main", // Database
+  "drizzle-orm": "^0.45.1" // ORM
 }
 ```
 
@@ -74,7 +78,8 @@ bun typecheck      # Run TypeScript type checking
   "@tailwindcss/postcss": "^4.1.17",
   "tailwindcss": "^4.1.17",
   "eslint": "^9.39.1",
-  "eslint-config-next": "^16.0.0"
+  "eslint-config-next": "^16.0.0",
+  "drizzle-kit": "^0.31.10" // Database migrations
 }
 ```
 
@@ -85,6 +90,7 @@ bun typecheck      # Run TypeScript type checking
 ├── .gitignore              # Git ignore rules
 ├── package.json            # Dependencies and scripts
 ├── bun.lock                # Bun lockfile
+├── drizzle.config.ts       # Drizzle ORM config
 ├── next.config.ts          # Next.js configuration
 ├── tsconfig.json           # TypeScript configuration
 ├── postcss.config.mjs      # PostCSS (Tailwind) config
@@ -92,11 +98,16 @@ bun typecheck      # Run TypeScript type checking
 ├── public/                 # Static assets
 │   └── .gitkeep
 └── src/                    # Source code
-    └── app/                # Next.js App Router
-        ├── layout.tsx      # Root layout
-        ├── page.tsx        # Home page
-        ├── globals.css     # Global styles
-        └── favicon.ico     # Site icon
+    ├── app/                # Next.js App Router
+    │   ├── layout.tsx      # Root layout
+    │   ├── page.tsx        # Home page
+    │   ├── globals.css     # Global styles
+    │   └── favicon.ico     # Site icon
+    └── db/                 # Database
+        ├── index.ts        # Database client
+        ├── schema.ts       # Table definitions
+        ├── migrate.ts      # Migration script
+        └── migrations/     # SQL migrations
 ```
 
 ## Technical Constraints
