@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "FurniFlow - Business Management",
-  description: "Furniture company business management - Mobile PWA app",
+  description: "Furniture business management PWA mobile app",
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
