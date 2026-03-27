@@ -1,0 +1,45 @@
+{
+  "appName": "FurniFlow",
+  "version": "3.0",
+  "exportedAt": "2024-03-21",
+  "users": [
+    { "id": "u1", "name": "John Admin", "role": "admin", "email": "john@furniflow.com", "phone": "+91 98765 43210", "active": true, "password": "admin123", "remarks": "" },
+    { "id": "u2", "name": "Sarah Sales", "role": "sales", "email": "sarah@furniflow.com", "phone": "+91 98765 43211", "active": true, "password": "sales123", "remarks": "" },
+    { "id": "u3", "name": "Mike Service", "role": "service_head", "email": "mike@furniflow.com", "phone": "+91 98765 43212", "active": true, "password": "service123", "remarks": "" },
+    { "id": "u4", "name": "Tom Agent", "role": "field_agent", "email": "tom@furniflow.com", "phone": "+91 98765 43213", "active": true, "password": "agent123", "remarks": "" },
+    { "id": "u5", "name": "Emily Agent", "role": "field_agent", "email": "emily@furniflow.com", "phone": "+91 98765 43214", "active": true, "password": "agent123", "remarks": "" },
+    { "id": "u6", "name": "Raj Site", "role": "site_agent", "email": "raj@furniflow.com", "phone": "+91 98765 43215", "active": true, "password": "site123", "remarks": "" }
+  ],
+  "leads": [
+    { "id": "l1", "customerName": "Robert Anderson", "phone": "+91 98765 11111", "address": "123 Oak Street, Springfield", "productCategory": "Sofa", "leadValue": 45000, "leadDate": "2024-03-15", "nextFollowUp": "2024-03-20", "remarks": "Interested in leather sofa", "status": "interested", "createdBy": "u2", "isSiteLead": false, "locked": true },
+    { "id": "l2", "customerName": "Jennifer Martinez", "phone": "+91 98765 22222", "address": "456 Maple Ave, Chicago", "productCategory": "Dining", "leadValue": 35000, "leadDate": "2024-03-18", "nextFollowUp": "2024-03-21", "remarks": "Looking for 6-seater", "status": "lead", "createdBy": "u2", "isSiteLead": false, "locked": true },
+    { "id": "l3", "customerName": "David Thompson", "phone": "+91 98765 33333", "address": "789 Pine Road, Naperville", "productCategory": "Bed", "leadValue": 55000, "leadDate": "2024-03-10", "nextFollowUp": null, "remarks": "Converted - Payment received", "status": "converted", "paymentConfirmed": true, "dispatchDate": "2024-03-25", "createdBy": "u2", "isSiteLead": false, "locked": true }
+  ],
+  "services": [
+    { "id": "s1", "customerName": "ABC Corp", "phone": "+91 98765 99999", "address": "100 Business Park, Chicago", "serviceType": "Paid", "serviceValue": 2500, "requestDate": "2024-03-15", "attendDate": null, "status": "pending", "remarks": "Office furniture repair", "createdBy": "u3" },
+    { "id": "s2", "customerName": "XYZ Home", "phone": "+91 98765 88888", "address": "200 Residential Ave", "serviceType": "FOC", "serviceValue": 0, "requestDate": "2024-03-10", "attendDate": "2024-03-15", "status": "completed", "remarks": "Warranty repair", "createdBy": "u3" }
+  ],
+  "claims": [
+    { "id": "c1", "serviceId": "s1", "customerName": "ABC Corp", "phone": "+91 98765 99999", "bookingDate": "2024-03-10", "partNumber": "LEG-001", "reason": "Broken table leg", "dueDate": "2024-03-25", "status": "pending", "createdBy": "u3" }
+  ],
+  "jobs": [
+    { "id": "j1", "leadId": "l3", "customerName": "David Thompson", "phone": "+91 98765 33333", "address": "789 Pine Road, Naperville", "productCategory": "Bed", "jobType": "delivery", "paymentStatus": "paid", "status": "assigned", "assignedTo": "u4", "createdAt": "2024-03-15", "scheduledDate": "2024-03-21", "acceptedAt": null, "travelStartAt": null, "reachedAt": null, "completedAt": null, "images": "", "remarks": "", "incompleteReason": "", "gpsTracking": false },
+    { "id": "j2", "leadId": null, "customerName": "ABC Corp", "phone": "+91 98765 99999", "address": "100 Business Park, Chicago", "productCategory": "Office Table", "jobType": "installation", "paymentStatus": "pending", "status": "created", "assignedTo": null, "createdAt": "2024-03-15", "scheduledDate": null, "acceptedAt": null, "travelStartAt": null, "reachedAt": null, "completedAt": null, "images": "", "remarks": "", "incompleteReason": "", "gpsTracking": false }
+  ],
+  "trips": [
+    { "id": "t1", "userId": "u6", "date": "2024-03-21", "startTime": "09:00", "endTime": null, "totalDistance": 0, "status": "active", "visits": ["sv1"] }
+  ],
+  "siteVisits": [
+    { "id": "sv1", "tripId": "t1", "customerName": "Green Valley Society", "phone": "+91 98765 77777", "address": "Green Valley Society, Block A", "visitDate": "2024-03-21", "visitTime": "10:30", "visitType": "Society Visit", "payment": 0, "photos": "", "remarks": "Met society secretary", "gpsLat": "", "gpsLng": "", "createdBy": "u6", "locked": false }
+  ],
+  "notifications": [
+    { "id": "n1", "userId": "u3", "type": "alert", "title": "Location Reached", "message": "Field agent reached location for David Thompson", "read": false, "createdAt": "2024-03-21T10:00:00Z" },
+    { "id": "n2", "userId": "all_sales", "type": "flash", "title": "Daily Reminder", "message": "Add Today's Leads!", "read": false, "createdAt": "2024-03-21T08:00:00Z", "isFlash": true }
+  ],
+  "activityLogs": [],
+  "constants": {
+    "productCategories": ["Sofa", "Coffee Table", "Almirah", "Dining", "Mattress", "Bed", "Kitchen", "Chair", "Office Table", "Others"],
+    "serviceTypes": ["Paid", "FOC"],
+    "visitTypes": ["New House", "Society Visit", "Commercial", "Follow-up"]
+  }
+}

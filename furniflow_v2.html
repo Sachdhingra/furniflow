@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurniFlow - Business Management System v2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0F0F1A; color: #FFFFFF; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1.25rem; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: linear-gradient(135deg, #E94560, #FF6B6B); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: transparent; border: 1px solid #3A3A5C; color: white; }
+        .btn-secondary:hover { border-color: #E94560; color: #E94560; }
+        .btn-success { background: linear-gradient(135deg, #00D9A5, #00B388); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #F59E0B, #FBBF24); color: white; }
+        .input { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .input:focus { outline: none; border-color: #E94560; }
+        .input:disabled { opacity: 0.6; cursor: not-allowed; }
+        .select { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; }
+        .textarea { width: 100%; padding: 0.625rem 0.875rem; background: #0F0F1A; border: 1px solid #3A3A5C; border-radius: 0.5rem; color: white; resize: vertical; }
+        .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .badge-lead { background: #1E3A8A; color: #93C5FD; }
+        .badge-interested { background: #713F12; color: #FCD34D; }
+        .badge-converted { background: #14532D; color: #86EFAC; }
+        .badge-not-interested { background: #374151; color: #9CA3AF; }
+        .badge-lost { background: #7F1D1D; color: #FCA5A5; }
+        .badge-pending { background: #713F12; color: #FCD34D; }
+        .badge-assigned { background: #1E3A8A; color: #93C5FD; }
+        .badge-accepted { background: #4C1D95; color: #C4B5FD; }
+        .badge-in-progress { background: #9F5809; color: #FDE68A; }
+        .badge-completed { background: #14532D; color: #86EFAC; }
+        .badge-rescheduled { background: #BE185D; color: #FBCFE8; }
+        .badge-overdue { background: #DC2626; color: white; }
+        .badge-paid { background: #14532D; color: #86EFAC; }
+        .badge-foc { background: #4C1D95; color: #C4B5FD; }
+        .badge-pending-pay { background: #713F12; color: #FCD34D; }
+        .badge-site { background: #0D9488; color: #5EEAD4; }
+        .sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 16rem; background: #1A1A2E; border-right: 1px solid #3A3A5C; display: flex; flex-direction: column; z-index: 40; overflow-y: auto; }
+        .main-content { margin-left: 16rem; min-height: 100vh; padding-bottom: 5rem; }
+        .header { height: 4rem; background: #1A1A2E; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 30; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 0.5rem; color: #9CA3AF; text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover { background: #2A2A44; color: white; }
+        .nav-item.active { background: rgba(233, 69, 96, 0.1); color: #E94560; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { text-align: left; padding: 0.75rem; font-size: 0.75rem; font-weight: 600; color: #9CA3AF; border-bottom: 1px solid #3A3A5C; text-transform: uppercase; }
+        .table td { padding: 0.75rem; border-bottom: 1px solid #3A3A5C50; font-size: 0.875rem; }
+        .table tr:hover { background: rgba(42, 42, 68, 0.3); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+        .modal { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 1rem; width: 100%; max-width: 36rem; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid #3A3A5C; display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #3A3A5C; display: flex; gap: 0.75rem; justify-content: flex-end; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #9CA3AF; margin-bottom: 0.5rem; }
+        .form-label .required { color: #E94560; }
+        .avatar { width: 2rem; height: 2rem; border-radius: 50%; background: linear-gradient(135deg, #4DA8DA, #00D9A5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; }
+        .logo { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #E94560, #FF6B6B); display: flex; align-items: center; justify-content: center; }
+        .stat-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1rem; }
+        .job-card { background: #1E1E32; border: 1px solid #3A3A5C; border-radius: 0.75rem; padding: 1rem; }
+        .job-card:hover { border-color: #E94560; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; }
+        .calendar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; padding: 0.25rem; }
+        .calendar-day:hover { background: #2A2A44; }
+        .calendar-day.today { background: #E94560; color: white; }
+        .calendar-day.has-event { background: rgba(233, 69, 96, 0.2); }
+        .calendar-day .event-dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; background: #E94560; margin-top: 0.125rem; }
+        .notification-dot { position: absolute; top: -0.25rem; right: -0.25rem; min-width: 1.25rem; height: 1.25rem; background: #E94560; border-radius: 50%; font-size: 0.625rem; display: flex; align-items: center; justify-content: center; padding: 0 0.25rem; }
+        .flash-alert { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #F59E0B, #FBBF24); color: #000; padding: 1rem 1.5rem; border-radius: 0.75rem; z-index: 100; animation: slideIn 0.3s ease; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .gps-indicator { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(0, 217, 165, 0.1); border-radius: 0.5rem; font-size: 0.75rem; color: #00D9A5; }
+        .gps-indicator.inactive { background: rgba(107, 114, 128, 0.1); color: #9CA3AF; }
+        .timeline { position: relative; padding-left: 1.5rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: #3A3A5C; }
+        .timeline-item { position: relative; padding-bottom: 1rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.25rem; top: 0.25rem; width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #E94560; border: 2px solid #1E1E32; }
+        .filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+        .filter-bar .input, .filter-bar .select { width: auto; min-width: 150px; }
+        .tab-buttons { display: flex; gap: 0.5rem; border-bottom: 1px solid #3A3A5C; margin-bottom: 1rem; }
+        .tab-btn { padding: 0.75rem 1rem; background: none; border: none; color: #9CA3AF; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+        .tab-btn.active { color: #E94560; border-bottom-color: #E94560; }
+        .map-link { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: #1E3A8A; color: #93C5FD; border-radius: 0.375rem; font-size: 0.75rem; text-decoration: none; }
+        .map-link:hover { background: #1E40AF; }
+        .locked-field { background: rgba(233, 69, 96, 0.1); border-color: rgba(233, 69, 96, 0.3); }
+        .locked-field::after { content: '\f023'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #E94560; font-size: 0.75rem; }
+        .required-indicator { color: #E94560; }
+        .error-text { color: #EF4444; font-size: 0.75rem; margin-top: 0.25rem; }
+        .empty-state { text-align: center; padding: 2rem; color: #9CA3AF; }
+        @media (max-width: 768px) {
+            .sidebar { width: 4rem; }
+            .main-content { margin-left: 4rem; }
+            .sidebar-text { display: none; }
+            .hide-mobile { display: none; }
+            .modal { max-width: 100%; margin: 0.5rem; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-bar .input, .filter-bar .select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        const PRODUCT_CATEGORIES = ['Sofa', 'Coffee Table', 'Almirah', 'Dining', 'Mattress', 'Bed', 'Kitchen', 'Chair', 'Office Table', 'Others'];
+        const SERVICE_TYPES = ['Paid', 'FOC'];
+        const VISIT_TYPES = ['New House', 'Society Visit'];
+        
+        const store = {
+            users: [
+                { id: 'u1', name: 'John Admin', role: 'admin', email: 'john@furniflow.com', phone: '+91 98765 43210', active: true, password: 'admin123' },
+                { id: 'u2', name: 'Sarah Sales', role: 'sales', email: 'sarah@furniflow.com', phone: '+91 98765 43211', active: true, password: 'sales123' },
+                { id: 'u3', name: 'Mike Service', role: 'service_head', email: 'mike@furniflow.com', phone: '+91 98765 43212', active: true, password: 'service123' },
+                { id: 'u4', name: 'Tom Agent', role: 'field_agent', email: 'tom@furniflow.com', phone: '+91 98765 43213', active: true, password: 'agent123' },
+                { id: 'u5', name: 'Emily Agent', role: 'field_agent', email: 'emily@furniflow.com', phone: '+91 98765 43214', active: true, password: 'agent123' },
+                { id: 'u6', name: 'Raj Site', role: 'site_agent', email: 'raj@furniflow.com', phone: '+91 98765 43215', active: true, password: 'site123' },
+            ],
+            leads: [
+                { id: 'l1', customerName: 'Robert Anderson', phone: '+91 98765 11111', address: '123 Oak Street, Springfield', productCategory: 'Sofa', leadValue: 45000, leadDate: '2024-03-15', nextFollowUp: '2024-03-20', remarks: 'Interested in leather sofa', status: 'interested', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l2', customerName: 'Jennifer Martinez', phone: '+91 98765 22222', address: '456 Maple Ave, Chicago', productCategory: 'Dining', leadValue: 35000, leadDate: '2024-03-18', nextFollowUp: '2024-03-22', remarks: 'Looking for 6-seater', status: 'lead', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', leadValue: 55000, leadDate: '2024-03-10', nextFollowUp: null, remarks: 'Converted - Payment received', status: 'converted', paymentConfirmed: true, dispatchDate: '2024-03-25', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l4', customerName: 'Lisa Garcia', phone: '+91 98765 44444', address: '321 Elm Street, Aurora', productCategory: 'Office Table', leadValue: 25000, leadDate: '2024-03-12', nextFollowUp: '2024-03-19', remarks: 'Not interested in current pricing', status: 'not_interested', createdBy: 'u2', isSiteLead: false, locked: true },
+                { id: 'l5', customerName: 'Michael Chen', phone: '+91 98765 55555', address: '654 Cedar Lane, Joliet', productCategory: 'Mattress', leadValue: 18000, leadDate: '2024-03-08', nextFollowUp: null, remarks: 'Lost to competitor', status: 'lost', createdBy: 'u6', isSiteLead: true, locked: true },
+            ],
+            services: [
+                { id: 's1', customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', serviceType: 'Paid', serviceValue: 2500, requestDate: '2024-03-18', attendDate: '2024-03-22', status: 'pending', remarks: 'Office furniture repair', createdBy: 'u3' },
+                { id: 's2', customerName: 'XYZ Home', phone: '+91 98765 88888', address: '200 Residential Ave', serviceType: 'FOC', serviceValue: 0, requestDate: '2024-03-10', attendDate: '2024-03-15', status: 'completed', remarks: 'Warranty repair', createdBy: 'u3' },
+            ],
+            claims: [
+                { id: 'c1', serviceId: 's1', partNumber: 'LEG-001', reason: 'Broken table leg', dueDate: '2024-03-25', status: 'pending', createdBy: 'u3' },
+            ],
+            jobs: [
+                { id: 'j1', leadId: 'l3', customerName: 'David Thompson', phone: '+91 98765 33333', address: '789 Pine Road, Naperville', productCategory: 'Bed', jobType: 'delivery', paymentStatus: 'paid', status: 'assigned', assignedTo: 'u4', createdAt: '2024-03-15', scheduledDate: '2024-03-25', acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', gpsTracking: false },
+                { id: 'j2', leadId: null, customerName: 'ABC Corp', phone: '+91 98765 99999', address: '100 Business Park, Chicago', productCategory: 'Office Table', jobType: 'installation', paymentStatus: 'pending', status: 'created', assignedTo: null, createdAt: '2024-03-18', scheduledDate: '2024-03-22', acceptedAt: null, travelStartAt: null, reachedAt: null, completedAt: null, images: '', remarks: '', gpsTracking: false },
+                { id: 'j3', leadId: null, customerName: 'XYZ Home', phone: '+91 98765 88888', address: '200 Residential Ave, Naperville', productCategory: 'Sofa', jobType: 'service', paymentStatus: 'paid', status: 'completed', assignedTo: 'u5', createdAt: '2024-03-10', scheduledDate: '2024-03-15', acceptedAt: '2024-03-15T09:00:00', travelStartAt: '2024-03-15T09:15:00', reachedAt: '2024-03-15T09:45:00', completedAt: '2024-03-15T11:30:00', images: 'site1.jpg,site2.jpg', remarks: 'Fixed successfully', gpsTracking: true },
+            ],
+            siteVisits: [
+                { id: 'sv1', customerName: 'New Society Visit', phone: '+91 98765 77777', address: 'Green Valley Society', visitDate: '2024-03-19', visitType: 'Society Visit', payment: 0, photos: '', remarks: 'Met society secretary', createdBy: 'u6' },
+            ],
+            notifications: [
+                { id: 'n1', userId: 'u2', type: 'info', title: 'Lead Converted', message: 'David Thompson converted to dispatch', read: false, createdAt: '2024-03-15T10:00:00', isFlash: false },
+                { id: 'n2', userId: 'u3', type: 'alert', title: 'New Job Assigned', message: 'New delivery job for David Thompson', read: false, createdAt: '2024-03-15T10:05:00', isFlash: false },
+                { id: 'n3', userId: 'u3', type: 'alert', title: 'Location Reached', message: 'Field agent reached location for XYZ Home', read: false, createdAt: '2024-03-15T09:45:00', isFlash: false },
+                { id: 'n4', userId: 'all_sales', type: 'flash', title: 'Daily Reminder', message: 'Add Today\'s Leads!', read: false, createdAt: new Date().toISOString(), isFlash: true },
+            ],
+            activityLogs: [],
+            currentUser: null
+        };
+
+        let currentPage = 'dashboard';
+        let showModal = null;
+        let editingItem = null;
+        let dateFilter = new Date().toISOString().split('T')[0];
+        let categoryFilter = '';
+        let calendarDate = new Date();
+        let showFlashAlert = true;
+        let gpsInterval = null;
+
+        function generateId() { return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatCurrency(amount) {
+            return '₹' + parseInt(amount || 0).toLocaleString('en-IN');
+        }
+        
+        function isOverdue(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateStr); target.setHours(0,0,0,0);
+            return target < today;
+        }
+        
+        function isToday(dateStr) {
+            if (!dateStr) return false;
+            return dateStr === new Date().toISOString().split('T')[0];
+        }
+        
+        function checkDuplicatePhone(phone, excludeId = null) {
+            return store.leads.some(l => l.phone === phone && l.id !== excludeId);
+        }
+        
+        function logActivity(action, details) {
+            store.activityLogs.push({
+                id: generateId(),
+                userId: store.currentUser?.id,
+                userName: store.currentUser?.name,
+                role: store.currentUser?.role,
+                action,
+                details,
+                createdAt: new Date().toISOString()
+            });
+        }
+
+        function createNotification(userId, type, title, message, isFlash = false) {
+            store.notifications.push({
+                id: generateId(),
+                userId,
+                type,
+                title,
+                message,
+                read: false,
+                createdAt: new Date().toISOString(),
+                isFlash
+            });
+            render();
+        }
+
+        function getAllNotifications() {
+            return store.notifications.filter(n => n.userId === store.currentUser?.id || n.userId === 'all_sales' && store.currentUser?.role === 'sales' || n.userId === 'all_service' && store.currentUser?.role === 'service_head' || n.userId === 'all_field' && store.currentUser?.role === 'field_agent' || n.userId === 'all_site' && store.currentUser?.role === 'site_agent' || n.userId === 'all');
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            if (!store.currentUser) {
+                app.innerHTML = renderLogin();
+                initFlatpickr();
+                return;
+            }
+            
+            const flashNotif = showFlashAlert ? store.notifications.find(n => n.isFlash && !n.read && (n.userId === 'all' || n.userId === 'all_' + store.currentUser.role || (store.currentUser.role === 'admin'))) : null;
+            
+            app.innerHTML = (flashNotif ? `<div class="flash-alert" onclick="dismissFlash()">
+                <i class="fas fa-bell"></i> ${flashNotif.message}
+            </div>` : '') + renderLayout(renderPage());
+            initFlatpickr();
+            
+            if (flashNotif) {
+                flashNotif.read = true;
+                setTimeout(() => { showFlashAlert = false; render(); }, 10000);
+            }
+        }
+
+        function dismissFlash() {
+            showFlashAlert = false;
+            render();
+        }
+
+        function renderLogin() {
+            return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:linear-gradient(135deg,#0F0F1A,#1A1A2E);">
+                <div style="max-width:24rem;width:100%;">
+                    <div style="text-align:center;margin-bottom:2rem;">
+                        <div class="logo" style="margin:0 auto 1rem;"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <h1 style="font-size:1.5rem;font-weight:700;color:white;margin-bottom:0.25rem;">FurniFlow</h1>
+                        <p style="color:#9CA3AF;font-size:0.875rem;">Business Management System v2</p>
+                    </div>
+                    <div class="card">
+                        <h2 style="font-size:1.125rem;font-weight:600;color:white;margin-bottom:1rem;">Sign In</h2>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="loginEmail" class="input" placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="loginPassword" class="input" placeholder="Enter your password">
+                        </div>
+                        <button onclick="handleLogin()" class="btn btn-primary" style="width:100%;">Sign In</button>
+                        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #3A3A5C;">
+                            <p style="font-size:0.7rem;color:#6B7280;text-align:center;margin-bottom:0.5rem;">DEMO CREDENTIALS</p>
+                            <div style="font-size:0.65rem;color:#9CA3AF;text-align:center;line-height:1.6;">
+                                Sales: sarah@sales123 | Service: mike@service123<br>
+                                Field: tom@agent123 | Site: raj@site123<br>
+                                Admin: john@admin123
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const user = store.users.find(u => u.email === email && u.password === password && u.active);
+            if (user) {
+                store.currentUser = user;
+                logActivity('Login', 'User logged in');
+                currentPage = 'dashboard';
+                render();
+            } else {
+                alert('Invalid credentials or inactive account');
+            }
+        }
+
+        function logout() {
+            if (gpsInterval) clearInterval(gpsInterval);
+            logActivity('Logout', 'User logged out');
+            store.currentUser = null;
+            currentPage = 'login';
+            render();
+        }
+
+        function navigate(page) { currentPage = page; render(); }
+
+        function renderPage() {
+            const pages = { 
+                dashboard: renderDashboard, 
+                leads: renderLeads, 
+                services: renderServices,
+                claims: renderClaims,
+                jobs: renderJobs,
+                siteVisits: renderSiteVisits,
+                calendar: renderCalendar, 
+                admin: renderAdmin, 
+                users: renderUserManagement 
+            };
+            return pages[currentPage]?.() || renderDashboard();
+        }
+
+        function renderLayout(content) {
+            const user = store.currentUser;
+            const unreadNotifications = getAllNotifications().filter(n => !n.read).length;
+            
+            return `<div class="sidebar">
+                <div style="padding:1rem;border-bottom:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <div class="logo"><svg style="width:1.5rem;height:1.5rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                        <span class="sidebar-text" style="color:white;font-weight:700;">FurniFlow</span>
+                    </div>
+                </div>
+                <nav style="flex:1;padding:0.75rem;display:grid;gap:0.25rem;">
+                    ${renderNavItem('dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6')}
+                    
+                    ${(user.role === 'sales' || user.role === 'admin') ? renderNavItem('leads', 'Leads', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z') : ''}
+                    
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('services', 'Services', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z') : ''}
+                    
+                    ${(user.role === 'service_head' || user.role === 'admin') ? renderNavItem('claims', 'Claims', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01') : ''}
+                    
+                    ${(user.role === 'service_head' || user.role === 'field_agent' || user.role === 'admin') ? renderNavItem('jobs', 'Jobs', 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4') : ''}
+                    
+                    ${(user.role === 'site_agent' || user.role === 'admin') ? renderNavItem('siteVisits', 'Site Visits', 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z') : ''}
+                    
+                    ${renderNavItem('calendar', 'Calendar', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z')}
+                    
+                    ${user.role === 'admin' ? renderNavItem('admin', 'Admin', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z') : ''}
+                    
+                    ${user.role === 'admin' ? renderNavItem('users', 'Users', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z') : ''}
+                </nav>
+                <div style="padding:0.75rem;border-top:1px solid #3A3A5C;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:#0F0F1A;border-radius:0.5rem;">
+                        <div class="avatar">${user.name.charAt(0)}</div>
+                        <div style="flex:1;min-width:0;" class="sidebar-text">
+                            <p style="font-size:0.875rem;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</p>
+                            <p style="font-size:0.75rem;color:#9CA3AF;text-transform:capitalize;">${user.role.replace('_', ' ')}</p>
+                        </div>
+                        <button onclick="logout()" style="padding:0.25rem;background:none;border:none;color:#9CA3AF;cursor:pointer;"><svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg></button>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <header class="header">
+                    <h2 style="color:white;font-size:1.125rem;font-weight:600;text-transform:capitalize;">${currentPage === 'dashboard' ? user.role.replace('_', ' ') + ' Dashboard' : currentPage}</h2>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <button onclick="showNotifications()" style="position:relative;padding:0.5rem;background:none;border:none;color:#9CA3AF;cursor:pointer;">
+                            <i class="fas fa-bell"></i>
+                            ${unreadNotifications > 0 ? `<span class="notification-dot">${unreadNotifications}</span>` : ''}
+                        </button>
+                        <span style="color:#9CA3AF;font-size:0.875rem;">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                    </div>
+                </header>
+                <main style="padding:1.5rem;">${content}</main>
+            </div>
+            ${showModal ? renderModal() : ''}`;
+        }
+
+        function renderNavItem(page, label, icon) {
+            const isActive = currentPage === page;
+            return `<a href="#" onclick="navigate('${page}')" class="nav-item ${isActive ? 'active' : ''}">
+                <i class="fas fa-${icon.includes('M3') ? 'home' : icon.includes('M17') ? 'users' : icon.includes('M10') ? 'tools' : icon.includes('M19') ? 'briefcase' : icon.includes('M8') ? 'calendar' : icon.includes('M9') ? 'chart-bar' : icon.includes('M12') ? 'user-cog' : 'map'}"></i>
+                <span class="sidebar-text">${label}</span>
+            </a>`;
+        }
+
+        function renderDashboard() {
+            const user = store.currentUser;
+            const today = new Date().toISOString().split('T')[0];
+            
+            const totalLeads = store.leads.length;
+            const activeLeads = store.leads.filter(l => !['converted','lost','not_interested'].includes(l.status));
+            const pipelineValue = activeLeads.reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            const convertedValue = store.leads.filter(l => l.status === 'converted').reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            const pendingFollowUps = store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).length;
+            
+            const totalServices = store.services.length;
+            const serviceRevenue = store.services.filter(s => s.serviceType === 'Paid').reduce((sum, s) => sum + (parseInt(s.serviceValue) || 0), 0);
+            const completedServices = store.services.filter(s => s.status === 'completed').length;
+            
+            const totalJobs = store.jobs.length;
+            const jobsInProgress = store.jobs.filter(j => j.status === 'in_progress').length;
+            const completedJobs = store.jobs.filter(j => j.status === 'completed').length;
+            const overdueJobs = store.jobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && j.status !== 'completed').length;
+            
+            const siteVisits = store.siteVisits.filter(sv => sv.visitDate === today).length;
+            
+            const myJobs = user.role === 'field_agent' ? store.jobs.filter(j => j.assignedTo === user.id) : [];
+            const pendingJobs = user.role === 'field_agent' ? myJobs.filter(j => !['completed'].includes(j.status)).length : 0;
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Welcome back, ${user.name.split(' ')[0]}</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Here's your overview</p></div>
+                
+                ${(user.role === 'sales' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Leads</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pipeline Value</p><p style="font-size:1.25rem;font-weight:700;color:#60A5FA;">${formatCurrency(pipelineValue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Converted Value</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(convertedValue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue Follow-ups</p><p style="font-size:1.5rem;font-weight:700;color:${pendingFollowUps > 0 ? '#FCD34D' : 'white'};">${pendingFollowUps}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'service_head' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Services</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalServices}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Service Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(serviceRevenue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${completedServices}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${totalServices - completedServices}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'field_agent' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">My Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${myJobs.length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${pendingJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">In Progress</p><p style="font-size:1.5rem;font-weight:700;color:#FDE68A;">${myJobs.filter(j => j.status === 'in_progress').length}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${myJobs.filter(j => j.status === 'completed').length}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'site_agent' || user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Today's Visits</p><p style="font-size:1.5rem;font-weight:700;color:white;">${siteVisits}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Site Leads</p><p style="font-size:1.5rem;font-weight:700;color:#5EEAD4;">${store.leads.filter(l => l.isSiteLead).length}</p></div>
+                </div>` : ''}
+                
+                ${(user.role === 'admin') ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Jobs In Progress</p><p style="font-size:1.5rem;font-weight:700;color:#FDE68A;">${jobsInProgress}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${completedJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Overdue</p><p style="font-size:1.5rem;font-weight:700;color:#DC2626;">${overdueJobs}</p></div>
+                </div>` : ''}
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+                    ${(user.role === 'sales' || user.role === 'admin') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1rem;font-weight:600;color:white;">Overdue Follow-ups</h3>
+                            <button onclick="navigate('leads')" style="font-size:0.75rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).slice(0,5).map(l => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${l.productCategory} | ${formatCurrency(l.leadValue)}</p></div><span class="badge badge-overdue">${formatDate(l.nextFollowUp)}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;font-size:0.875rem;">No overdue follow-ups</p>'}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${(user.role === 'service_head' || user.role === 'admin') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1rem;font-weight:600;color:white;">Pending Services</h3>
+                            <button onclick="navigate('services')" style="font-size:0.75rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${store.services.filter(s => s.status === 'pending').slice(0,5).map(s => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${s.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${s.serviceType} | ${formatCurrency(s.serviceValue)}</p></div><span class="badge badge-pending">Pending</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;font-size:0.875rem;">No pending services</p>'}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${(user.role === 'field_agent') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1rem;font-weight:600;color:white;">My Assigned Jobs</h3>
+                            <button onclick="navigate('jobs')" style="font-size:0.75rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${myJobs.filter(j => j.status !== 'completed').slice(0,5).map(j => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${j.jobType} - ${j.productCategory}</p></div><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;font-size:0.875rem;">No assigned jobs</p>'}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${(user.role === 'site_agent') ? `<div class="card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                            <h3 style="font-size:1rem;font-weight:600;color:white;">Today's Site Visits</h3>
+                            <button onclick="navigate('siteVisits')" style="font-size:0.75rem;color:#E94560;background:none;border:none;cursor:pointer;">View All</button>
+                        </div>
+                        <div style="display:grid;gap:0.5rem;">
+                            ${store.siteVisits.filter(sv => sv.visitDate === today).slice(0,5).map(sv => `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;"><div><p style="color:white;font-weight:500;">${sv.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${sv.visitType}</p></div><span class="badge badge-site">${formatDate(sv.visitDate)}</span></div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;font-size:0.875rem;">No visits today</p>'}
+                        </div>
+                    </div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function renderLeads() {
+            const user = store.currentUser;
+            let filteredLeads = store.leads.filter(l => {
+                if (user.role === 'sales') return l.createdBy === user.id;
+                if (user.role === 'site_agent') return l.isSiteLead;
+                return true;
+            });
+
+            if (dateFilter) filteredLeads = filteredLeads.filter(l => l.leadDate === dateFilter);
+            if (categoryFilter) filteredLeads = filteredLeads.filter(l => l.productCategory === categoryFilter);
+
+            const pipelineValue = filteredLeads.filter(l => !['converted','lost','not_interested'].includes(l.status)).reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+            const convertedValue = filteredLeads.filter(l => l.status === 'converted').reduce((sum, l) => sum + (parseInt(l.leadValue) || 0), 0);
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Leads Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage your sales leads and follow-ups</p></div>
+                    <button onclick="openLeadModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Lead</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pipeline Value</p><p style="font-size:1.25rem;font-weight:700;color:#60A5FA;">${formatCurrency(pipelineValue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Converted Value</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(convertedValue)}</p></div>
+                </div>
+                
+                <div class="filter-bar">
+                    <input type="date" id="leadDateFilter" class="input" style="width:auto;" value="${dateFilter}" onchange="dateFilter=this.value;render()">
+                    <select id="categoryFilter" class="select" style="width:auto;" onchange="categoryFilter=this.value;render()">
+                        <option value="">All Categories</option>
+                        ${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                    <button onclick="dateFilter=null;categoryFilter=null;render()" class="btn btn-secondary">Clear Filters</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>Customer</th><th>Product</th><th>Value</th><th>Follow-up</th><th>Status</th><th>Source</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${filteredLeads.map(l => `<tr>
+                                <td><p style="color:white;font-weight:500;">${l.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${l.phone}</p><p style="color:#6B7280;font-size:0.7rem;">${l.address.substring(0,30)}${l.address.length > 30 ? '...' : ''}</p></td>
+                                <td>${l.productCategory}</td>
+                                <td style="color:#60A5FA;font-weight:600;">${formatCurrency(l.leadValue)}</td>
+                                <td>${l.nextFollowUp ? `<span class="badge ${isOverdue(l.nextFollowUp) ? 'badge-overdue' : 'badge-pending'}">${isOverdue(l.nextFollowUp) ? 'Overdue' : formatDate(l.nextFollowUp)}</span>` : '-'}</td>
+                                <td><span class="badge badge-${l.status}">${l.status.replace('_', ' ')}</span></td>
+                                <td>${l.isSiteLead ? '<span class="badge badge-site">Site</span>' : '<span class="badge badge-lead">Sales</span>'}</td>
+                                <td><div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+                                    <button onclick="editLead('${l.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                    ${l.status === 'interested' ? `<button onclick="convertLead('${l.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Convert</button>` : ''}
+                                    ${user.role === 'admin' ? `<button onclick="deleteLead('${l.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#9CA3AF;padding:2rem;">No leads found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderServices() {
+            const user = store.currentUser;
+            const filteredServices = store.services.filter(s => {
+                if (user.role === 'service_head') return true;
+                return user.role === 'admin';
+            });
+
+            const totalRevenue = filteredServices.filter(s => s.serviceType === 'Paid').reduce((sum, s) => sum + (parseInt(s.serviceValue) || 0), 0);
+            const pendingServices = filteredServices.filter(s => s.status === 'pending').length;
+            const completedServices = filteredServices.filter(s => s.status === 'completed').length;
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Service Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Track service requests and revenue</p></div>
+                    <button onclick="openServiceModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Service</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(totalRevenue)}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Pending</p><p style="font-size:1.5rem;font-weight:700;color:#FCD34D;">${pendingServices}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${completedServices}</p></div>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>Customer</th><th>Type</th><th>Value</th><th>Request Date</th><th>Attend Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${filteredServices.map(s => `<tr>
+                                <td><p style="color:white;font-weight:500;">${s.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${s.phone}</p></td>
+                                <td><span class="badge badge-${s.serviceType.toLowerCase()}">${s.serviceType}</span></td>
+                                <td style="color:#60A5FA;font-weight:600;">${formatCurrency(s.serviceValue)}</td>
+                                <td>${formatDate(s.requestDate)}</td>
+                                <td>${s.attendDate ? formatDate(s.attendDate) : '-'}</td>
+                                <td><span class="badge badge-${s.status === 'completed' ? 'completed' : 'pending'}">${s.status}</span></td>
+                                <td><div style="display:flex;gap:0.375rem;">
+                                    <button onclick="editService('${s.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                    ${s.status === 'pending' ? `<button onclick="completeService('${s.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                                    ${user.role === 'admin' ? `<button onclick="deleteService('${s.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#9CA3AF;padding:2rem;">No services found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderClaims() {
+            const user = store.currentUser;
+            if (user.role !== 'service_head' && user.role !== 'admin') return '<div class="empty-state">Access Denied</div>';
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Claims Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Track parts claims and resolutions</p></div>
+                    <button onclick="openClaimModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Claim</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>Part Number</th><th>Service</th><th>Reason</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${store.claims.map(c => `<tr>
+                                <td style="color:#60A5FA;font-weight:600;">${c.partNumber}</td>
+                                <td>${store.services.find(s => s.id === c.serviceId)?.customerName || '-'}</td>
+                                <td>${c.reason}</td>
+                                <td>${c.dueDate ? `<span class="badge ${isOverdue(c.dueDate) ? 'badge-overdue' : 'badge-pending'}">${formatDate(c.dueDate)}</span>` : '-'}</td>
+                                <td><span class="badge badge-${c.status === 'resolved' ? 'completed' : 'pending'}">${c.status}</span></td>
+                                <td><div style="display:flex;gap:0.375rem;">
+                                    ${c.status === 'pending' ? `<button onclick="resolveClaim('${c.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Resolve</button>` : ''}
+                                    <button onclick="deleteClaim('${c.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:2rem;">No claims found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderJobs() {
+            const user = store.currentUser;
+            let filteredJobs = store.jobs.filter(j => {
+                if (user.role === 'field_agent') return j.assignedTo === user.id;
+                return true;
+            });
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Job Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Track and manage service jobs</p></div>
+                    ${(user.role === 'service_head' || user.role === 'admin') ? `<button onclick="openJobModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Job</button>` : ''}
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>Customer</th><th>Type</th><th>Product</th><th>Scheduled</th><th>Status</th><th>Assigned To</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${filteredJobs.map(j => `<tr>
+                                <td><p style="color:white;font-weight:500;">${j.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${j.phone}</p><p style="color:#6B7280;font-size:0.7rem;">${j.address.substring(0,25)}...</p>
+                                ${j.status !== 'completed' && j.status !== 'created' ? `<div style="margin-top:0.25rem;"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.address)}" target="_blank" class="map-link"><i class="fas fa-map-marker-alt"></i> Map</a></div>` : ''}
+                                </td>
+                                <td><span class="badge badge-${j.jobType === 'delivery' ? 'converted' : j.jobType === 'installation' ? 'interested' : 'assigned'}">${j.jobType}</span></td>
+                                <td>${j.productCategory}</td>
+                                <td>${j.scheduledDate ? `<span class="badge ${isOverdue(j.scheduledDate) && j.status !== 'completed' ? 'badge-overdue' : ''}">${formatDate(j.scheduledDate)}</span>` : '-'}</td>
+                                <td><span class="badge badge-${j.status}">${j.status.replace('_', ' ')}</span></td>
+                                <td>${j.assignedTo ? store.users.find(u => u.id === j.assignedTo)?.name || '-' : '<span style="color:#9CA3AF;">Unassigned</span>'}</td>
+                                <td><div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+                                    ${(user.role === 'service_head' || user.role === 'admin') && !j.assignedTo ? `<button onclick="assignJob('${j.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Assign</button>` : ''}
+                                    ${(user.role === 'service_head' || user.role === 'admin') && j.assignedTo ? `<button onclick="assignJob('${j.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-user"></i></button>` : ''}
+                                    ${user.role === 'field_agent' && j.status === 'assigned' ? `<button onclick="acceptJob('${j.id}')" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Accept</button>` : ''}
+                                    ${user.role === 'field_agent' && j.status === 'accepted' ? `<button onclick="startTravel('${j.id}')" class="btn btn-warning" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Start Travel</button>` : ''}
+                                    ${user.role === 'field_agent' && j.status === 'in_progress' ? `<button onclick="reachedLocation('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Reached</button>` : ''}
+                                    ${user.role === 'field_agent' && j.status === 'reached' ? `<button onclick="completeJob('${j.id}')" class="btn btn-success" style="padding:0.25rem 0.5rem;font-size:0.7rem;">Complete</button>` : ''}
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#9CA3AF;padding:2rem;">No jobs found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+                
+                ${filteredJobs.filter(j => j.status !== 'completed').map(j => j.status !== 'created' && j.status !== 'assigned' ? renderJobTimeline(j) : '').join('')}
+            </div>`;
+        }
+
+        function renderJobTimeline(job) {
+            return `<div class="card" style="margin-top:1rem;">
+                <h4 style="color:white;font-weight:600;margin-bottom:0.75rem;">${job.customerName} - Timeline</h4>
+                <div class="timeline">
+                    <div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Job Created</p><p style="color:white;font-size:0.875rem;">${formatDateTime(job.createdAt)}</p></div>
+                    ${job.acceptedAt ? `<div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Job Accepted</p><p style="color:#C4B5FD;font-size:0.875rem;">${formatDateTime(job.acceptedAt)}</p></div>` : ''}
+                    ${job.travelStartAt ? `<div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Travel Started</p><p style="color:#FBBF24;font-size:0.875rem;">${formatDateTime(job.travelStartAt)}</p></div>` : ''}
+                    ${job.reachedAt ? `<div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Reached Location</p><p style="color:#00D9A5;font-size:0.875rem;">${formatDateTime(job.reachedAt)}</p></div>` : ''}
+                    ${job.completedAt ? `<div class="timeline-item"><p style="color:#9CA3AF;font-size:0.75rem;">Job Completed</p><p style="color:#86EFAC;font-size:0.875rem;">${formatDateTime(job.completedAt)}</p></div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function renderSiteVisits() {
+            const user = store.currentUser;
+            const filteredVisits = store.siteVisits.filter(sv => {
+                if (user.role === 'site_agent') return sv.createdBy === user.id;
+                return true;
+            });
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Site Visits</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Track field visits and lead generation</p></div>
+                    <button onclick="openSiteVisitModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add Visit</button>
+                </div>
+                
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>Customer</th><th>Type</th><th>Date</th><th>Payment</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${filteredVisits.map(sv => `<tr>
+                                <td><p style="color:white;font-weight:500;">${sv.customerName}</p><p style="color:#9CA3AF;font-size:0.7rem;">${sv.phone}</p><p style="color:#6B7280;font-size:0.7rem;">${sv.address.substring(0,30)}...</p></td>
+                                <td><span class="badge badge-site">${sv.visitType}</span></td>
+                                <td>${formatDate(sv.visitDate)}</td>
+                                <td style="color:#60A5FA;font-weight:600;">${formatCurrency(sv.payment)}</td>
+                                <td><div style="display:flex;gap:0.375rem;">
+                                    <button onclick="editSiteVisit('${sv.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                    ${sv.photos ? `<button onclick="alert('Photos: ${sv.photos}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-image"></i></button>` : ''}
+                                </div></td>
+                            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#9CA3AF;padding:2rem;">No site visits found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderCalendar() {
+            const user = store.currentUser;
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const events = [];
+            store.leads.forEach(l => { if (l.nextFollowUp) { const d = new Date(l.nextFollowUp); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: l.nextFollowUp, type: 'lead', title: l.customerName }); } });
+            store.jobs.forEach(j => { if (j.scheduledDate) { const d = new Date(j.scheduledDate); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: j.scheduledDate, type: 'job', title: j.customerName }); } });
+            store.services.forEach(s => { if (s.attendDate) { const d = new Date(s.attendDate); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: s.attendDate, type: 'service', title: s.customerName }); } });
+            store.siteVisits.forEach(sv => { const d = new Date(sv.visitDate); if (d.getMonth() === month && d.getFullYear() === year) events.push({ date: sv.visitDate, type: 'site', title: sv.customerName }); });
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Calendar</h1><p style="color:#9CA3AF;margin-top:0.25rem;">View schedule across all modules</p></div>
+                
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()-1);render()" class="btn btn-secondary">&lt; Prev</button>
+                        <h2 style="color:white;font-weight:600;">${monthNames[month]} ${year}</h2>
+                        <button onclick="calendarDate.setMonth(calendarDate.getMonth()+1);render()" class="btn btn-secondary">Next &gt;</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.25rem;margin-bottom:0.5rem;">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div style="text-align:center;font-size:0.7rem;color:#9CA3AF;padding:0.5rem;font-weight:600;">${d}</div>`).join('')}</div>
+                    <div class="calendar-grid">
+                        ${Array(firstDay).fill(null).map(() => '<div></div>').join('')}
+                        ${Array(daysInMonth).fill(null).map((_, i) => { 
+                            const day = i + 1; 
+                            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; 
+                            const dayEvents = events.filter(e => e.date === dateStr);
+                            const hasLead = dayEvents.some(e => e.type === 'lead');
+                            const hasJob = dayEvents.some(e => e.type === 'job');
+                            const hasService = dayEvents.some(e => e.type === 'service');
+                            const hasSite = dayEvents.some(e => e.type === 'site');
+                            const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year; 
+                            return `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}')" style="${hasLead || hasJob || hasService || hasSite ? 'background:rgba(233,69,96,0.15);' : ''}">
+                                <span>${day}</span>
+                                ${hasLead ? '<span class="event-dot" style="background:#FCD34D;"></span>' : ''}
+                                ${hasJob ? '<span class="event-dot" style="background:#93C5FD;"></span>' : ''}
+                                ${hasService ? '<span class="event-dot" style="background:#86EFAC;"></span>' : ''}
+                                ${hasSite ? '<span class="event-dot" style="background:#5EEAD4;"></span>' : ''}
+                            </div>`; 
+                        }).join('')}
+                    </div>
+                    <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+                        <span style="font-size:0.7rem;display:flex;align-items:center;gap:0.25rem;"><span style="width:0.5rem;height:0.5rem;background:#FCD34D;border-radius:50%;"></span> Follow-up</span>
+                        <span style="font-size:0.7rem;display:flex;align-items:center;gap:0.25rem;"><span style="width:0.5rem;height:0.5rem;background:#93C5FD;border-radius:50%;"></span> Job</span>
+                        <span style="font-size:0.7rem;display:flex;align-items:center;gap:0.25rem;"><span style="width:0.5rem;height:0.5rem;background:#86EFAC;border-radius:50;"></span> Service</span>
+                        <span style="font-size:0.7rem;display:flex;align-items:center;gap:0.25rem;"><span style="width:0.5rem;height:0.5rem;background:#5EEAD4;border-radius:50%;"></span> Site Visit</span>
+                    </div>
+                </div>
+                
+                <div class="card"><h3 style="color:white;font-weight:600;margin-bottom:1rem;">Events on Selected Date</h3><div id="calendarEvents" style="display:grid;gap:0.5rem;"><p style="color:#9CA3AF;text-align:center;padding:1rem;">Click on a date to see events</p></div></div>
+            </div>`;
+        }
+
+        function selectDate(dateStr) {
+            const events = [];
+            store.leads.forEach(l => { if (l.nextFollowUp === dateStr) events.push({ type: 'lead', title: l.customerName, detail: `Follow-up: ${l.productCategory}` }); });
+            store.jobs.forEach(j => { if (j.scheduledDate === dateStr) events.push({ type: 'job', title: j.customerName, detail: `${j.jobType} - ${j.status}` }); });
+            store.services.forEach(s => { if (s.attendDate === dateStr) events.push({ type: 'service', title: s.customerName, detail: `${s.serviceType} - ${s.status}` }); });
+            store.siteVisits.forEach(sv => { if (sv.visitDate === dateStr) events.push({ type: 'site', title: sv.customerName, detail: sv.visitType }); });
+            
+            const eventsDiv = document.getElementById('calendarEvents');
+            if (events.length > 0) { 
+                eventsDiv.innerHTML = events.map(e => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#0F0F1A;border-radius:0.5rem;">
+                    <span class="badge badge-${e.type === 'lead' ? 'interested' : e.type === 'job' ? 'assigned' : e.type === 'service' ? 'completed' : 'site'}">${e.type}</span>
+                    <div><p style="color:white;font-weight:500;">${e.title}</p><p style="color:#9CA3AF;font-size:0.75rem;">${e.detail}</p></div>
+                </div>`).join(''); 
+            }
+            else { eventsDiv.innerHTML = '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No events on this date</p>'; }
+        }
+
+        function renderAdmin() {
+            const totalLeads = store.leads.length, convertedLeads = store.leads.filter(l => l.status === 'converted').length;
+            const totalJobs = store.jobs.length, jobsInProgress = store.jobs.filter(j => j.status === 'in_progress').length, completedJobs = store.jobs.filter(j => j.status === 'completed').length;
+            const totalServices = store.services.length, serviceRevenue = store.services.filter(s => s.serviceType === 'Paid').reduce((sum, s) => sum + (parseInt(s.serviceValue) || 0), 0);
+            const siteLeads = store.leads.filter(l => l.isSiteLead).length;
+            const overdueJobs = store.jobs.filter(j => j.scheduledDate && isOverdue(j.scheduledDate) && j.status !== 'completed').length;
+            const overdueFollowUps = store.leads.filter(l => l.nextFollowUp && isOverdue(l.nextFollowUp) && !['converted','lost','not_interested'].includes(l.status)).length;
+
+            return `<div style="display:grid;gap:1.5rem;">
+                <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">Admin Dashboard</h1><p style="color:#9CA3AF;margin-top:0.25rem;">System overview and metrics</p></div>
+                
+                ${overdueJobs > 0 || overdueFollowUps > 0 ? `<div style="background:rgba(220,38,38,0.1);border:1px solid #DC2626;border-radius:0.75rem;padding:1rem;">
+                    <h3 style="color:#EF4444;font-weight:600;margin-bottom:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Overdue Alerts</h3>
+                    <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+                        ${overdueJobs > 0 ? `<span style="color:#EF4444;">${overdueJobs} Overdue Jobs</span>` : ''}
+                        ${overdueFollowUps > 0 ? `<span style="color:#EF4444;">${overdueFollowUps} Overdue Follow-ups</span>` : ''}
+                    </div>
+                </div>` : ''}
+                
+                <div><h2 style="color:white;font-weight:600;margin-bottom:0.75rem;">Sales Overview</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Leads</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Converted</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${convertedLeads}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Site Leads</p><p style="font-size:1.5rem;font-weight:700;color:#5EEAD4;">${siteLeads}</p></div>
+                </div></div>
+                
+                <div><h2 style="color:white;font-weight:600;margin-bottom:0.75rem;">Service Overview</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Services</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalServices}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Revenue</p><p style="font-size:1.25rem;font-weight:700;color:#86EFAC;">${formatCurrency(serviceRevenue)}</p></div>
+                </div></div>
+                
+                <div><h2 style="color:white;font-weight:600;margin-bottom:0.75rem;">Jobs Overview</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Total Jobs</p><p style="font-size:1.5rem;font-weight:700;color:white;">${totalJobs}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">In Progress</p><p style="font-size:1.5rem;font-weight:700;color:#FDE68A;">${jobsInProgress}</p></div>
+                    <div class="stat-card"><p style="color:#9CA3AF;font-size:0.75rem;">Completed</p><p style="font-size:1.5rem;font-weight:700;color:#86EFAC;">${completedJobs}</p></div>
+                </div></div>
+                
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><h3 style="color:white;font-weight:600;">Activity Log</h3></div>
+                    <div style="display:grid;gap:0.5rem;max-height:300px;overflow-y:auto;">
+                        ${store.activityLogs.slice().reverse().slice(0,30).map(log => `<div style="padding:0.5rem;background:#0F0F1A;border-radius:0.25rem;font-size:0.75rem;">
+                            <span style="color:#9CA3AF;">${formatDateTime(log.createdAt)}</span> 
+                            <span style="color:#E94560;">[${log.role}]</span> 
+                            <span style="color:#60A5FA;">${log.userName}:</span> 
+                            <span style="color:white;">${log.action}</span> 
+                            <span style="color:#9CA3AF;">- ${log.details}</span>
+                        </div>`).join('') || '<p style="color:#9CA3AF;text-align:center;padding:1rem;">No activity yet</p>'}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderUserManagement() {
+            return `<div style="display:grid;gap:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div><h1 style="font-size:1.5rem;font-weight:700;color:white;">User Management</h1><p style="color:#9CA3AF;margin-top:0.25rem;">Manage team members and roles</p></div>
+                    <button onclick="openUserModal()" class="btn btn-primary"><i class="fas fa-plus"></i> Add User</button>
+                </div>
+                <div class="card" style="padding:0;overflow-x:auto;">
+                    <table class="table">
+                        <thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${store.users.map(u => `<tr>
+                                <td><div style="display:flex;align-items:center;gap:0.75rem;"><div class="avatar">${u.name.charAt(0)}</div><div><p style="color:white;font-weight:500;">${u.name}</p><p style="color:#9CA3AF;font-size:0.7rem;">${u.email}</p></div></div></td>
+                                <td><span class="badge badge-${u.role === 'admin' ? 'lost' : u.role === 'sales' ? 'lead' : u.role === 'service_head' ? 'interested' : u.role === 'field_agent' ? 'assigned' : 'site'}">${u.role.replace('_', ' ')}</span></td>
+                                <td>${u.phone}</td>
+                                <td><span class="badge ${u.active ? 'badge-converted' : 'badge-not-interested'}">${u.active ? 'Active' : 'Inactive'}</span></td>
+                                <td><div style="display:flex;gap:0.375rem;">
+                                    <button onclick="editUser('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;"><i class="fas fa-edit"></i></button>
+                                    <button onclick="toggleUserStatus('${u.id}')" class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;">${u.active ? 'Deact' : 'Act'}</button>
+                                    ${u.id !== store.currentUser.id ? `<button onclick="deleteUser('${u.id}')" style="padding:0.25rem 0.5rem;font-size:0.7rem;background:#DC2626;color:white;border:none;border-radius:0.25rem;cursor:pointer;"><i class="fas fa-trash"></i></button>` : ''}
+                                </div></td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderModal() {
+            if (!showModal) return '';
+            let content = '', title = '';
+            switch(showModal) {
+                case 'lead': title = editingItem ? 'Edit Lead' : 'Add New Lead'; content = renderLeadForm(); break;
+                case 'convert': title = 'Convert Lead'; content = renderConvertForm(); break;
+                case 'service': title = editingItem ? 'Edit Service' : 'Add Service'; content = renderServiceForm(); break;
+                case 'claim': title = 'Add Claim'; content = renderClaimForm(); break;
+                case 'job': title = editingItem ? 'Edit Job' : 'Add Job'; content = renderJobForm(); break;
+                case 'assign': title = 'Assign Job'; content = renderAssignForm(); break;
+                case 'completeJob': title = 'Complete Job'; content = renderCompleteJobForm(); break;
+                case 'siteVisit': title = editingItem ? 'Edit Site Visit' : 'Add Site Visit'; content = renderSiteVisitForm(); break;
+                case 'user': title = editingItem ? 'Edit User' : 'Add User'; content = renderUserForm(); break;
+                default: return '';
+            }
+            return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-header"><h3 style="color:white;font-weight:600;">${title}</h3><button onclick="closeModal()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:1.25rem;">&times;</button></div><div class="modal-body">${content}</div></div></div>`;
+        }
+
+        function renderLeadForm() {
+            const l = editingItem ? store.leads.find(x => x.id === editingItem) : {};
+            const isLocked = l.locked;
+            const isSiteAgent = store.currentUser.role === 'site_agent';
+            
+            return `<div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label>
+                <div style="position:relative;">
+                    <input type="text" id="leadName" class="input ${isLocked ? 'locked-field' : ''}" value="${l.customerName || ''}" ${isLocked ? 'disabled' : ''} placeholder="Enter customer name">
+                </div>
+            </div>
+                <div class="form-group"><label class="form-label">Phone Number <span class="required-indicator">*</span></label>
+                    <input type="tel" id="leadPhone" class="input ${isLocked ? 'locked-field' : ''}" value="${l.phone || ''}" ${isLocked ? 'disabled' : ''} placeholder="Enter phone number">
+                    ${isLocked ? '<p style="color:#9CA3AF;font-size:0.7rem;margin-top:0.25rem;"><i class="fas fa-lock"></i> Phone number is locked after save</p>' : ''}
+                </div>
+                <div class="form-group"><label class="form-label">Address</label><textarea id="leadAddress" class="textarea" rows="2" placeholder="Enter address">${l.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Product Category</label>
+                    <select id="leadProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${l.productCategory === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+                </div>
+                <div class="form-group"><label class="form-label">Lead Value (INR)</label><input type="number" id="leadValue" class="input" value="${l.leadValue || ''}" placeholder="Enter lead value"></div>
+                <div class="form-group"><label class="form-label">Status</label>
+                    <select id="leadStatus" class="select" onchange="toggleFollowUpField()">
+                        <option value="lead" ${l.status === 'lead' ? 'selected' : ''}>Lead</option>
+                        <option value="interested" ${l.status === 'interested' ? 'selected' : ''}>Interested</option>
+                        <option value="converted" ${l.status === 'converted' ? 'selected' : ''}>Converted</option>
+                        <option value="not_interested" ${l.status === 'not_interested' ? 'selected' : ''}>Not Interested</option>
+                        <option value="lost" ${l.status === 'lost' ? 'selected' : ''}>Lost</option>
+                    </select>
+                </div>
+                <div class="form-group" id="followUpGroup" style="display:${l.status === 'interested' ? 'block' : 'none'}"><label class="form-label">Next Follow-up Date <span class="required-indicator">*</span></label><input type="date" id="leadFollowUp" class="input" value="${l.nextFollowUp || ''}"></div>
+                <div class="form-group"><label class="form-label">Remarks</label><textarea id="leadRemarks" class="textarea" rows="2" placeholder="Any remarks">${l.remarks || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveLead()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Lead</button>
+                </div>`;
+        }
+
+        function renderConvertForm() {
+            const l = store.leads.find(x => x.id === editingItem);
+            return `<p style="color:#9CA3AF;margin-bottom:1rem;">Convert lead for <strong style="color:white;">${l?.customerName}</strong> (${formatCurrency(l?.leadValue)})</p>
+                <div class="form-group"><label class="form-label">Payment Received? <span class="required-indicator">*</span></label>
+                    <select id="convertPayment" class="select"><option value="yes">Yes</option><option value="no">No</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Dispatch Date <span class="required-indicator">*</span></label><input type="date" id="convertDate" class="input"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="confirmConversion()" class="btn btn-primary">Convert & Create Dispatch</button>
+                </div>`;
+        }
+
+        function renderServiceForm() {
+            const s = editingItem ? store.services.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Customer Name <span class="required-indicator">*</span></label><input type="text" id="serviceCustomer" class="input" value="${s.customerName || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="servicePhone" class="input" value="${s.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Address</label><textarea id="serviceAddress" class="textarea" rows="2">${s.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Service Type <span class="required-indicator">*</span></label>
+                    <select id="serviceType" class="select" onchange="toggleServiceValue()">
+                        <option value="Paid" ${s.serviceType === 'Paid' ? 'selected' : ''}>Paid</option>
+                        <option value="FOC" ${s.serviceType === 'FOC' ? 'selected' : ''}>FOC (Free of Cost)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="serviceValueGroup" style="display:${s.serviceType === 'Paid' ? 'block' : 'none'}"><label class="form-label">Service Value (INR) <span class="required-indicator">*</span></label><input type="number" id="serviceValue" class="input" value="${s.serviceValue || ''}"></div>
+                <div class="form-group"><label class="form-label">Request Date</label><input type="date" id="serviceRequestDate" class="input" value="${s.requestDate || new Date().toISOString().split('T')[0]}"></div>
+                <div class="form-group"><label class="form-label">Scheduled Attend Date</label><input type="date" id="serviceAttendDate" class="input" value="${s.attendDate || ''}"></div>
+                <div class="form-group"><label class="form-label">Remarks</label><textarea id="serviceRemarks" class="textarea" rows="2">${s.remarks || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveService()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Service</button>
+                </div>`;
+        }
+
+        function toggleServiceValue() {
+            const type = document.getElementById('serviceType').value;
+            document.getElementById('serviceValueGroup').style.display = type === 'Paid' ? 'block' : 'none';
+        }
+
+        function renderClaimForm() {
+            const services = store.services.filter(s => s.status !== 'completed');
+            return `<div class="form-group"><label class="form-label">Service <span class="required-indicator">*</span></label>
+                <select id="claimService" class="select">${services.map(s => `<option value="${s.id}">${s.customerName}</option>`).join('')}</select>
+            </div>
+                <div class="form-group"><label class="form-label">Part Number <span class="required-indicator">*</span></label><input type="text" id="claimPart" class="input" placeholder="e.g., LEG-001"></div>
+                <div class="form-group"><label class="form-label">Reason for Part Required <span class="required-indicator">*</span></label><textarea id="claimReason" class="textarea" rows="2" placeholder="Describe why part is needed"></textarea></div>
+                <div class="form-group"><label class="form-label">Due Date</label><input type="date" id="claimDueDate" class="input"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveClaim()" class="btn btn-primary">Create Claim</button>
+                </div>`;
+        }
+
+        function renderJobForm() {
+            const j = editingItem ? store.jobs.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="jobCustomer" class="input" value="${j.customerName || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="jobPhone" class="input" value="${j.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Address *</label><textarea id="jobAddress" class="textarea" rows="2">${j.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Job Type *</label>
+                    <select id="jobType" class="select">
+                        <option value="delivery" ${j.jobType === 'delivery' ? 'selected' : ''}>Delivery</option>
+                        <option value="installation" ${j.jobType === 'installation' ? 'selected' : ''}>Installation</option>
+                        <option value="service" ${j.jobType === 'service' ? 'selected' : ''}>Service/Repair</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Product Category</label>
+                    <select id="jobProduct" class="select">${PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${j.productCategory === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+                </div>
+                <div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="jobScheduled" class="input" value="${j.scheduledDate || ''}"></div>
+                <div class="form-group"><label class="form-label">Payment Status</label>
+                    <select id="jobPayment" class="select">
+                        <option value="paid" ${j.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option>
+                        <option value="pending" ${j.paymentStatus === 'pending' ? 'selected' : ''}>Pending</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Notes</label><textarea id="jobNotes" class="textarea" rows="2">${j.notes || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveJob()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Job</button>
+                </div>`;
+        }
+
+        function renderAssignForm() {
+            const j = store.jobs.find(x => x.id === editingItem);
+            const agents = store.users.filter(u => u.role === 'field_agent' && u.active);
+            return `<p style="color:#9CA3AF;margin-bottom:1rem;">Assign job for <strong style="color:white;">${j?.customerName}</strong></p>
+                <div class="form-group"><label class="form-label">Assign to Field Agent</label>
+                    <select id="assignAgent" class="select"><option value="">Select Agent</option>${agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}</select>
+                </div>
+                <div class="form-group"><label class="form-label">Scheduled Date</label><input type="date" id="assignDate" class="input" value="${j?.scheduledDate || ''}"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="confirmAssign()" class="btn btn-primary">Assign Job</button>
+                </div>`;
+        }
+
+        function renderCompleteJobForm() {
+            return `<p style="color:#9CA3AF;margin-bottom:1rem;">Complete the job</p>
+                <div class="form-group"><label class="form-label">Site Images (URLs, comma separated) <span class="required-indicator">*</span></label><input type="text" id="completeImages" class="input" placeholder="image1.jpg, image2.jpg"></div>
+                <div class="form-group"><label class="form-label">Completion Remarks <span class="required-indicator">*</span></label><textarea id="completeRemarks" class="textarea" rows="3" placeholder="Describe the work done..."></textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="confirmCompleteJob()" class="btn btn-success">Mark Completed</button>
+                </div>`;
+        }
+
+        function renderSiteVisitForm() {
+            const sv = editingItem ? store.siteVisits.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Customer / Site Name <span class="required-indicator">*</span></label><input type="text" id="siteCustomer" class="input" value="${sv.customerName || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="sitePhone" class="input" value="${sv.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Address</label><textarea id="siteAddress" class="textarea" rows="2">${sv.address || ''}</textarea></div>
+                <div class="form-group"><label class="form-label">Visit Type <span class="required-indicator">*</span></label>
+                    <select id="siteType" class="select">${VISIT_TYPES.map(t => `<option value="${t}" ${sv.visitType === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                </div>
+                <div class="form-group"><label class="form-label">Visit Payment (INR)</label><input type="number" id="sitePayment" class="input" value="${sv.payment || ''}" placeholder="0"></div>
+                <div class="form-group"><label class="form-label">Photos (URLs, comma separated)</label><input type="text" id="sitePhotos" class="input" value="${sv.photos || ''}" placeholder="photo1.jpg, photo2.jpg"></div>
+                <div class="form-group"><label class="form-label">Remarks</label><textarea id="siteRemarks" class="textarea" rows="2">${sv.remarks || ''}</textarea></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveSiteVisit()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} Visit</button>
+                </div>`;
+        }
+
+        function renderUserForm() {
+            const u = editingItem ? store.users.find(x => x.id === editingItem) : {};
+            return `<div class="form-group"><label class="form-label">Name <span class="required-indicator">*</span></label><input type="text" id="userName" class="input" value="${u.name || ''}"></div>
+                <div class="form-group"><label class="form-label">Email <span class="required-indicator">*</span></label><input type="email" id="userEmail" class="input" value="${u.email || ''}"></div>
+                <div class="form-group"><label class="form-label">Phone <span class="required-indicator">*</span></label><input type="tel" id="userPhone" class="input" value="${u.phone || ''}"></div>
+                <div class="form-group"><label class="form-label">Role <span class="required-indicator">*</span></label>
+                    <select id="userRole" class="select">
+                        <option value="sales" ${u.role === 'sales' ? 'selected' : ''}>Sales Staff</option>
+                        <option value="service_head" ${u.role === 'service_head' ? 'selected' : ''}>Service Head</option>
+                        <option value="field_agent" ${u.role === 'field_agent' ? 'selected' : ''}>Field Agent</option>
+                        <option value="site_agent" ${u.role === 'site_agent' ? 'selected' : ''}>Site Agent</option>
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">Password ${editingItem ? '(leave blank to keep)' : '*'}</label><input type="password" id="userPassword" class="input" placeholder="${editingItem ? '••••••••' : ''}"></div>
+                <div class="modal-footer" style="padding:0;margin-top:1.5rem;border:none;">
+                    <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button onclick="saveUser()" class="btn btn-primary">${editingItem ? 'Update' : 'Create'} User</button>
+                </div>`;
+        }
+
+        // Lead functions
+        function openLeadModal() { editingItem = null; showModal = 'lead'; render(); }
+        function editLead(id) { editingItem = id; showModal = 'lead'; render(); }
+        function deleteLead(id) { if (confirm('Delete this lead?')) { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', `Deleted lead ${id}`); render(); } }
+        function convertLead(id) { editingItem = id; showModal = 'convert'; render(); }
+        function toggleFollowUpField() { const status = document.getElementById('leadStatus')?.value; const group = document.getElementById('followUpGroup'); if (group) group.style.display = status === 'interested' ? 'block' : 'none'; }
+
+        function saveLead() {
+            const name = document.getElementById('leadName').value.trim();
+            const phone = document.getElementById('leadPhone').value.trim();
+            const address = document.getElementById('leadAddress').value.trim();
+            const productCategory = document.getElementById('leadProduct').value;
+            const leadValue = document.getElementById('leadValue').value;
+            const status = document.getElementById('leadStatus').value;
+            const nextFollowUp = document.getElementById('leadFollowUp').value || null;
+            const remarks = document.getElementById('leadRemarks').value;
+            
+            if (!name || !phone || !address) { alert('Please fill required fields (Name, Phone, Address)'); return; }
+            
+            if (!editingItem && checkDuplicatePhone(phone)) { alert('A lead with this phone number already exists!'); return; }
+            
+            if (status === 'interested' && !nextFollowUp) { alert('Follow-up date is required for interested leads'); return; }
+            
+            const isNew = !editingItem;
+            const data = { 
+                customerName: name, 
+                phone, 
+                address, 
+                productCategory, 
+                leadValue: parseInt(leadValue) || 0,
+                status, 
+                nextFollowUp, 
+                remarks, 
+                leadDate: isNew ? new Date().toISOString().split('T')[0] : store.leads.find(l => l.id === editingItem).leadDate,
+                createdBy: isNew ? store.currentUser.id : store.leads.find(l => l.id === editingItem).createdBy,
+                isSiteLead: isNew ? store.currentUser.role === 'site_agent' : store.leads.find(l => l.id === editingItem).isSiteLead,
+                locked: true
+            };
+            
+            if (editingItem) { 
+                const idx = store.leads.findIndex(l => l.id === editingItem);
+                store.leads[idx] = { ...store.leads[idx], ...data }; 
+                logActivity('Update Lead', `Updated lead for ${name}`);
+            }
+            else { 
+                store.leads.push({ id: generateId(), ...data }); 
+                logActivity('Create Lead', `Created lead for ${name}`);
+            }
+            closeModal();
+        }
+
+        function confirmConversion() {
+            const payment = document.getElementById('convertPayment').value;
+            const dispatchDate = document.getElementById('convertDate').value;
+            if (!dispatchDate) { alert('Please select dispatch date'); return; }
+            
+            const lead = store.leads.find(l => l.id === editingItem);
+            store.leads.find(l => l.id === editingItem).status = 'converted';
+            store.leads.find(l => l.id === editingItem).paymentConfirmed = payment === 'yes';
+            store.leads.find(l => l.id === editingItem).dispatchDate = dispatchDate;
+            
+            store.jobs.push({ 
+                id: generateId(), 
+                leadId: editingItem, 
+                customerName: lead.customerName, 
+                phone: lead.phone, 
+                address: lead.address, 
+                productCategory: lead.productCategory, 
+                jobType: 'delivery', 
+                partsRequired: '', 
+                notes: '', 
+                paymentStatus: payment === 'yes' ? 'paid' : 'pending', 
+                status: 'created', 
+                assignedTo: null, 
+                createdAt: new Date().toISOString().split('T')[0], 
+                scheduledDate: dispatchDate, 
+                acceptedAt: null, 
+                travelStartAt: null, 
+                reachedAt: null,
+                completedAt: null, 
+                images: '', 
+                remarks: '', 
+                gpsTracking: false 
+            });
+            
+            createNotification('all_service', 'alert', 'New Dispatch Job', `New delivery job for ${lead.customerName} on ${dispatchDate}`);
+            logActivity('Convert Lead', `Converted ${lead.customerName} to dispatch`);
+            closeModal();
+        }
+
+        // Service functions
+        function openServiceModal() { editingItem = null; showModal = 'service'; render(); }
+        function editService(id) { editingItem = id; showModal = 'service'; render(); }
+        function deleteService(id) { if (confirm('Delete this service?')) { store.services = store.services.filter(s => s.id !== id); logActivity('Delete Service', `Deleted service ${id}`); render(); } }
+        function completeService(id) { 
+            const service = store.services.find(s => s.id === id);
+            service.status = 'completed';
+            service.attendDate = new Date().toISOString().split('T')[0];
+            logActivity('Complete Service', `Completed service for ${service.customerName}`);
+            render();
+        }
+
+        function saveService() {
+            const data = { 
+                customerName: document.getElementById('serviceCustomer').value,
+                phone: document.getElementById('servicePhone').value,
+                address: document.getElementById('serviceAddress').value,
+                serviceType: document.getElementById('serviceType').value,
+                serviceValue: document.getElementById('serviceType').value === 'FOC' ? 0 : parseInt(document.getElementById('serviceValue').value) || 0,
+                requestDate: document.getElementById('serviceRequestDate').value,
+                attendDate: document.getElementById('serviceAttendDate').value || null,
+                remarks: document.getElementById('serviceRemarks').value,
+                status: 'pending',
+                createdBy: store.currentUser.id
+            };
+            
+            if (!data.customerName || !data.phone) { alert('Please fill required fields'); return; }
+            if (data.serviceType === 'Paid' && !data.serviceValue) { alert('Please enter service value'); return; }
+            
+            if (editingItem) { 
+                const idx = store.services.findIndex(s => s.id === editingItem);
+                store.services[idx] = { ...store.services[idx], ...data };
+                logActivity('Update Service', `Updated service for ${data.customerName}`);
+            }
+            else { 
+                store.services.push({ id: generateId(), ...data });
+                logActivity('Create Service', `Created service for ${data.customerName}`);
+            }
+            closeModal();
+        }
+
+        // Claims functions
+        function openClaimModal() { editingItem = null; showModal = 'claim'; render(); }
+        function saveClaim() {
+            const data = {
+                serviceId: document.getElementById('claimService').value,
+                partNumber: document.getElementById('claimPart').value,
+                reason: document.getElementById('claimReason').value,
+                dueDate: document.getElementById('claimDueDate').value || null,
+                status: 'pending',
+                createdBy: store.currentUser.id
+            };
+            
+            if (!data.partNumber || !data.reason) { alert('Please fill required fields'); return; }
+            
+            store.claims.push({ id: generateId(), ...data });
+            logActivity('Create Claim', `Created claim for part ${data.partNumber}`);
+            closeModal();
+        }
+        
+        function resolveClaim(id) {
+            const claim = store.claims.find(c => c.id === id);
+            claim.status = 'resolved';
+            logActivity('Resolve Claim', `Resolved claim for ${claim.partNumber}`);
+            render();
+        }
+        
+        function deleteClaim(id) { if (confirm('Delete this claim?')) { store.claims = store.claims.filter(c => c.id !== id); render(); } }
+
+        // Job functions
+        function openJobModal() { editingItem = null; showModal = 'job'; render(); }
+        function assignJob(id) { editingItem = id; showModal = 'assign'; render(); }
+        
+        function saveJob() {
+            const data = { 
+                customerName: document.getElementById('jobCustomer').value,
+                phone: document.getElementById('jobPhone').value,
+                address: document.getElementById('jobAddress').value,
+                jobType: document.getElementById('jobType').value,
+                productCategory: document.getElementById('jobProduct').value,
+                scheduledDate: document.getElementById('jobScheduled').value || null,
+                paymentStatus: document.getElementById('jobPayment').value,
+                notes: document.getElementById('jobNotes').value,
+                partsRequired: '', 
+                status: 'created', 
+                assignedTo: null, 
+                createdAt: editingItem ? store.jobs.find(j => j.id === editingItem).createdAt : new Date().toISOString().split('T')[0], 
+                acceptedAt: null, 
+                travelStartAt: null, 
+                reachedAt: null,
+                completedAt: null, 
+                images: '', 
+                remarks: '', 
+                gpsTracking: false,
+                leadId: null
+            };
+            
+            if (!data.customerName || !data.phone || !data.address) { alert('Please fill required fields'); return; }
+            
+            if (editingItem) { 
+                const idx = store.jobs.findIndex(j => j.id === editingItem);
+                store.jobs[idx] = { ...store.jobs[idx], ...data };
+                logActivity('Update Job', `Updated job for ${data.customerName}`);
+            }
+            else { 
+                store.jobs.push({ id: generateId(), ...data });
+                logActivity('Create Job', `Created job for ${data.customerName}`);
+            }
+            closeModal();
+        }
+
+        function confirmAssign() {
+            const agentId = document.getElementById('assignAgent').value;
+            const date = document.getElementById('assignDate').value;
+            const job = store.jobs.find(j => j.id === editingItem);
+            
+            if (!agentId) { alert('Please select an agent'); return; }
+            
+            job.assignedTo = agentId;
+            job.status = 'assigned';
+            if (date) job.scheduledDate = date;
+            
+            createNotification(agentId, 'info', 'Job Assigned', `New job assigned: ${job.customerName}`);
+            logActivity('Assign Job', `Assigned job to ${store.users.find(u => u.id === agentId).name}`);
+            closeModal();
+        }
+
+        function acceptJob(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'accepted';
+            job.acceptedAt = new Date().toISOString();
+            job.gpsTracking = true;
+            logActivity('Accept Job', `Accepted job for ${job.customerName}`);
+            render();
+        }
+
+        function startTravel(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'in_progress';
+            job.travelStartAt = new Date().toISOString();
+            logActivity('Start Travel', `Started travel for ${job.customerName}`);
+            render();
+        }
+
+        function reachedLocation(id) {
+            const job = store.jobs.find(j => j.id === id);
+            job.status = 'reached';
+            job.reachedAt = new Date().toISOString();
+            
+            createNotification('all_service', 'alert', 'Location Reached', `Field agent reached location for ${job.customerName}`);
+            logActivity('Reach Location', `Reached location for ${job.customerName}`);
+            render();
+        }
+
+        function completeJob(id) { editingItem = id; showModal = 'completeJob'; render(); }
+
+        function confirmCompleteJob() {
+            const images = document.getElementById('completeImages').value;
+            const remarks = document.getElementById('completeRemarks').value;
+            
+            if (!images || !remarks) { alert('Please upload images and add remarks'); return; }
+            
+            const job = store.jobs.find(j => j.id === editingItem);
+            job.status = 'completed';
+            job.completedAt = new Date().toISOString();
+            job.images = images;
+            job.remarks = remarks;
+            job.gpsTracking = false;
+            
+            if (job.leadId) {
+                createNotification(store.leads.find(l => l.id === job.leadId)?.createdBy, 'success', 'Job Completed', `Job for ${job.customerName} completed`);
+            }
+            logActivity('Complete Job', `Completed job for ${job.customerName}`);
+            closeModal();
+        }
+
+        // Site Visit functions
+        function openSiteVisitModal() { editingItem = null; showModal = 'siteVisit'; render(); }
+        function editSiteVisit(id) { editingItem = id; showModal = 'siteVisit'; render(); }
+        
+        function saveSiteVisit() {
+            const data = {
+                customerName: document.getElementById('siteCustomer').value,
+                phone: document.getElementById('sitePhone').value,
+                address: document.getElementById('siteAddress').value,
+                visitType: document.getElementById('siteType').value,
+                payment: parseInt(document.getElementById('sitePayment').value) || 0,
+                photos: document.getElementById('sitePhotos').value,
+                remarks: document.getElementById('siteRemarks').value,
+                visitDate: new Date().toISOString().split('T')[0],
+                createdBy: store.currentUser.id
+            };
+            
+            if (!data.customerName) { alert('Please enter customer name'); return; }
+            
+            if (editingItem) {
+                const idx = store.siteVisits.findIndex(sv => sv.id === editingItem);
+                store.siteVisits[idx] = { ...store.siteVisits[idx], ...data };
+                logActivity('Update Visit', `Updated site visit for ${data.customerName}`);
+            }
+            else {
+                store.siteVisits.push({ id: generateId(), ...data });
+                logActivity('Create Visit', `Created site visit for ${data.customerName}`);
+            }
+            closeModal();
+        }
+
+        // User functions
+        function openUserModal() { editingItem = null; showModal = 'user'; render(); }
+        function editUser(id) { editingItem = id; showModal = 'user'; render(); }
+        
+        function saveUser() {
+            const data = { 
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                phone: document.getElementById('userPhone').value,
+                role: document.getElementById('userRole').value,
+                active: true
+            };
+            const password = document.getElementById('userPassword').value;
+            
+            if (!data.name || !data.email || !data.phone) { alert('Please fill required fields'); return; }
+            if (!editingItem && !password) { alert('Password is required for new users'); return; }
+            
+            if (editingItem) { 
+                const idx = store.users.findIndex(u => u.id === editingItem);
+                store.users[idx] = { ...store.users[idx], ...data }; 
+                if (password) store.users[idx].password = password;
+                logActivity('Update User', `Updated user ${data.name}`);
+            }
+            else { 
+                store.users.push({ id: generateId(), ...data, password: password || 'changeme' });
+                logActivity('Create User', `Created user ${data.name}`);
+            }
+            closeModal();
+        }
+
+        function toggleUserStatus(id) { 
+            const user = store.users.find(u => u.id === id); 
+            user.active = !user.active; 
+            logActivity('Toggle Status', `User ${user.name} ${user.active ? 'activated' : 'deactivated'}`); 
+            render(); 
+        }
+        
+        function deleteUser(id) { 
+            if (confirm('Delete this user?')) { 
+                const user = store.users.find(u => u.id === id); 
+                store.users = store.users.filter(u => u.id !== id); 
+                logActivity('Delete User', `Deleted user ${user.name}`); 
+                render(); 
+            } 
+        }
+
+        function closeModal() { showModal = null; editingItem = null; render(); }
+        
+        function showNotifications() { 
+            const notifs = getAllNotifications();
+            notifs.forEach(n => n.read = true);
+            if (notifs.length > 0) {
+                alert(notifs.map(n => `${n.title}: ${n.message}`).join('\n\n'));
+            } else {
+                alert('No notifications');
+            }
+            render();
+        }
+        
+        function initFlatpickr() { 
+            setTimeout(() => { 
+                document.querySelectorAll('input[type="date"]').forEach(el => { 
+                    if (!el._flatpickr) { 
+                        el.flatpickr({ dateFormat: 'Y-m-d' }); 
+                    } 
+                }); 
+            }, 100); 
+        }
+
+        render();
+    </script>
+</body>
+</html>
