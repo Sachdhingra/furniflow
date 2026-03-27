@@ -428,12 +428,16 @@ app.get('/dashboard', authenticate, async (req, res) => {
 app.post('/clear-all', authenticate, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
   try {
-    await supabase.from('leads').delete().neq('id', '');
-    await supabase.from('services').delete().neq('id', '');
-    await supabase.from('jobs').delete().neq('id', '');
-    await supabase.from('claims').delete().neq('id', '');
-    await supabase.from('trips').delete().neq('id', '');
-    await supabase.from('siteVisits').delete().neq('id', '');
+    // Get all records and delete them one by one (Supabase doesn't support delete without filter)
+    const tables = ['leads', 'services', 'jobs', 'claims', 'trips', 'siteVisits'];
+    for (const table of tables) {
+      const { data } = await supabase.from(table).select('id');
+      if (data && data.length > 0) {
+        for (const row of data) {
+          await supabase.from(table).delete().eq('id', row.id);
+        }
+      }
+    }
     res.json({ success: true, message: 'All data cleared' });
   } catch (e) {
     res.status(500).json({ error: e.message });
