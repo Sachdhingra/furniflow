@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.vercel/
+
+# Backup files
+*.tar.gz
+*.bak
+*.orig
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
