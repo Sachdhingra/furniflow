@@ -876,7 +876,7 @@
         // LEAD FUNCTIONS
         function openLeadModal() { editingItem = null; showModal = 'lead'; duplicateWarning = null; render(); }
         function editLead(id) { editingItem = id; showModal = 'lead'; duplicateWarning = null; render(); }
-        function deleteLead(id) { if (confirm('Delete?')) { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', id); render(); } }
+        function deleteLead(id) { if (confirm('Delete?')) { api('/leads/' + id, 'DELETE').then(() => { store.leads = store.leads.filter(l => l.id !== id); logActivity('Delete Lead', id); render(); }).catch(e => alert('Failed to delete: ' + e.message)); } }
         function convertLead(id) { editingItem = id; showModal = 'convert'; render(); }
 
         async function saveLead() {
@@ -1147,7 +1147,7 @@
             closeModal();
         }
         function toggleUserStatus(id) { const user = store.users.find(u => u.id === id); user.active = !user.active; render(); }
-        function deleteUser(id) { if (confirm('Delete user?')) { store.users = store.users.filter(u => u.id !== id); render(); } }
+        function deleteUser(id) { if (confirm('Delete user?')) { api('/users/' + id, 'DELETE').then(() => { store.users = store.users.filter(u => u.id !== id); render(); }).catch(e => alert('Failed to delete: ' + e.message)); } }
 
         function closeModal() { showModal = null; editingItem = null; secondaryItem = null; render(); }
         function showNotifications() { const notifs = getAllNotifications(); notifs.forEach(n => n.read = true); alert(notifs.length > 0 ? notifs.map(n => `${n.title}: ${n.message}`).join('\n\n') : 'No notifications'); render(); }
